@@ -12,6 +12,8 @@ from nltk.corpus import stopwords
 from collections import defaultdict
 from datetime import datetime
 import os
+import nltk
+nltk.download('stopwords')
 
 # --- Configuration and Setup ---
 logging.basicConfig(level=logging.INFO)
