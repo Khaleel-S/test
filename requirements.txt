@@ -1,0 +1,8 @@
+scikit-learn
+joblib
+spacy==3.8.7
+flask
+pandas
+numpy
+gunicorn
+flask-cors
