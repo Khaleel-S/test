@@ -3,1150 +3,470 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Actionable E-commerce Sentiment Dashboard</title>
+<title>Actionable E-commerce Sentiment Dashboard — Bright Radial Dark Text</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <style>
-    body {
-        font-family: 'Inter', sans-serif;
-        background: #f5f7fa;
-        color: #333;
-    }
+:root{
+  --bg-rad1: radial-gradient(circle at 10% 20%, rgba(255,255,59,0.18), transparent 12%), radial-gradient(circle at 90% 80%, rgba(124,58,237,0.18), transparent 12%);
+  --bg-rad2: radial-gradient(circle at 20% 10%, rgba(0,221,255,0.16), transparent 12%), radial-gradient(circle at 80% 90%, rgba(255,107,107,0.16), transparent 12%);
+  --surface: rgba(255,255,255,0.02);
+  --card: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  --glass: rgba(255,255,255,0.02);
+  --text-dark: #03121a; /* very dark for max contrast */
+  --muted: #6e7a86;
+  --accent-violet: #8b5cf6; /* brighter violet */
+  --accent-coral: #ff4d6d; /* punchier coral */
+  --accent-teal: #00ffd1; /* neon teal */
+  --accent-yellow: #ffdf5a; /* bright yellow */
+}
 
-    /* Header */
-    .header {
-        background: linear-gradient(90deg,#83d0cb,#145277);
-        color: white;
-        padding: 25px 0;
-        margin-bottom: 30px;
-        border-radius: 0 0 20px 20px;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
+/* Base */
+*{box-sizing:border-box}
+html,body{height:100%;}
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(180deg,#ffffff,#f7fbff), var(--bg-rad1), var(--bg-rad2);
+    color: var(--text-dark);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    transition: background 0.4s ease;
+    margin: 0;
+}
 
-    .header h1 {
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
+/* Layout */
+.container-fluid{padding:22px 28px;}
+.main-grid{
+  display:grid;
+  grid-template-columns: 320px minmax(680px, 1fr);
+  gap:26px;
+  align-items:start;
+}
+@media (max-width: 1100px){ .main-grid{ grid-template-columns: 280px 1fr } }
+@media (max-width: 900px){ .main-grid{ grid-template-columns: 1fr } }
 
-    .header p {
-        font-weight: 500;
-        opacity: 0.9;
-    }
+/* Header */
+.header {
+    background: radial-gradient(circle at 10% 20%, rgba(139,92,246,0.16), transparent 8%), radial-gradient(circle at 90% 80%, rgba(0,221,255,0.10), transparent 8%), linear-gradient(90deg,#fff 0%, #f8fcff 100%);
+    color: var(--text-dark);
+    padding: 22px;
+    margin-bottom: 18px;
+    border-radius: 12px;
+    text-shadow: 0 6px 20px rgba(139,92,246,0.06);
+    box-shadow: 0 18px 60px rgba(3,18,26,0.06);
+}
+.header h1{font-weight:800; letter-spacing:-0.3px; margin:0;}
+.header p{color:var(--muted); margin:4px 0 0 0;}
 
-    /* Sidebar */
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        width: 250px;
-        background: linear-gradient(180deg,#1e1e2f,#2a2a3e);
-        color: white;
-        padding-top: 20px;
-        overflow-y: auto;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.15);
-    }
+/* Sidebar */
+.sidebar{
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    border-radius:14px;
+    padding:18px;
+    position:sticky; top:22px;
+    height: calc(100vh - 44px);
+    overflow:auto;
+    border:1px solid rgba(3,18,26,0.04);
+    box-shadow: 0 20px 60px rgba(3,18,26,0.06);
+}
+.sidebar h5{color:var(--accent-yellow); text-transform:uppercase; letter-spacing:1px}
+.sidebar .nav{margin-top:12px}
+.sidebar-link{
+  display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; color:var(--text-dark);
+  background: linear-gradient(90deg, rgba(139,92,246,0.06), rgba(255,77,109,0.03));
+  text-decoration:none; font-weight:700; transition: transform .22s ease, box-shadow .22s ease;
+}
+.sidebar-link.inactive{ background: transparent; color:var(--text-dark); box-shadow:none; opacity:0.92 }
+.sidebar-link:hover{ transform: translateX(10px); box-shadow: 0 18px 36px rgba(3,18,26,0.06) }
+.sidebar-link i{font-size:1.05rem; color:var(--accent-violet) }
 
-    .sidebar h5 {
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
+/* Main content (fallback to older class) */
+.main-content{ margin-left: 0; }
 
-    .sidebar-link {
-        padding: 12px 20px;
-        display: block;
-        color: rgba(255,255,255,0.85);
-        font-weight: 500;
-        text-decoration: none;
-        border-radius: 8px;
-        margin: 5px 10px;
-        transition: all 0.3s;
-    }
+/* Cards */
+.card{ border-radius:14px; background:var(--card); border:1px solid rgba(3,18,26,0.04); }
+.card-sentiment{ transition: transform .35s cubic-bezier(.2,.9,.2,1), box-shadow .35s; transform-origin:center; }
+.card-sentiment:hover{ transform: perspective(900px) rotateX(6deg) rotateY(-4deg) translateY(-10px) scale(1.02); box-shadow: 0 30px 70px rgba(3,18,26,0.10) }
 
-    .sidebar-link:hover, .sidebar-link.active {
-        background-color: #5656a0;
-        color: #fff;
-        transform: translateX(5px);
-    }
+/* subtle animations */
+.fade-in{ animation: fadeInUp .6s ease both; }
+@keyframes fadeInUp{ from{ opacity:0; transform: translateY(8px) } to{ opacity:1; transform:none } }
 
-    /* Main Content */
-    .main-content {
-        margin-left: 250px;
-        padding: 20px 30px;
-    }
+/* Buttons */
+.btn-pill{ border-radius:999px; font-weight:700; }
+.btn-primary{
+  background: linear-gradient(90deg,var(--accent-violet),var(--accent-coral));
+  border:none; box-shadow: 0 12px 30px rgba(139,92,246,0.12);
+  transition: transform .22s ease, box-shadow .22s ease;
+}
+.btn-primary:hover{ transform: translateY(-6px) scale(1.02); box-shadow: 0 26px 60px rgba(139,92,246,0.14) }
+.btn-outline-secondary{ border-radius:999px; }
 
-    /* Card Styles */
-    .card-sentiment {
-        border-radius: 15px;
-        transition: all 0.3s ease;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.08);
-    }
+/* File drop */
+.file-drop{
+  border-radius:12px; padding:18px; text-align:center; border:2px dashed rgba(3,18,26,0.06);
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s;
+  cursor:pointer;
+}
+.file-drop:hover{ transform: translateY(-6px); box-shadow: 0 18px 40px rgba(3,18,26,0.06); border-color: rgba(139,92,246,0.16) }
+.file-drop.dragover{ border-color: rgba(0,255,209,0.18); box-shadow: 0 28px 60px rgba(0,255,209,0.06) }
+.file-drop i{ font-size:28px; color:var(--accent-violet) }
 
-    .card-sentiment:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    }
+/* Badges (vibrant) */
+.badge-positive{ background: linear-gradient(90deg,var(--accent-teal), #06d6a0); color:#04201a; font-weight:700; }
+.badge-negative{ background: linear-gradient(90deg,var(--accent-coral), #ff8787); color:#fff; font-weight:700; }
+.badge-neutral{ background: linear-gradient(90deg,#9aa5b1,#c9d6e3); color:#062; font-weight:700; }
+.badge-anger{ background: linear-gradient(90deg,#ff7043,#ff5722); color:white; font-weight:700; }
+.badge-joy{ background: linear-gradient(90deg,#ffd166,#fff4b7); color:#3b1f00; font-weight:700; }
+.badge-churn{ background: linear-gradient(90deg,#ffc107,#ffd54f); color:#2b2b00; font-weight:700; }
+.badge-inquiry{ background: linear-gradient(90deg,#5bc0de,#7ad8ea); color:#002b33; font-weight:700; }
+.badge-sarcasm{ background: linear-gradient(90deg,#ff9800,#ffb74d); color:#2b1a00; font-weight:700; }
 
-    .badge-positive {
-        background-color: #28a745 !important;
-        color: white !important;
-    }
-    .badge-negative {
-        background-color: #dc3545 !important;
-        color: white !important;
-    }
-    .badge-neutral {
-        background-color: #6c757d !important;
-        color: white !important;
-    }
-    .badge-anger {
-        background-color: #ff5722 !important;
-        color: white !important;
-    }
-    .badge-joy {
-        background-color: #ffeb3b !important;
-        color: #333 !important;
-    }
-    .badge-churn {
-        background-color: #ffc107 !important;
-        color: #333 !important;
-    }
-    .badge-inquiry {
-        background-color: #17a2b8 !important;
-        color: white !important;
-    }
-    .badge-sarcasm {
-        background-color: #ff9800 !important;
-        color: white !important;
-    }
+/* Aspect tag */
+.aspect-tag{ margin-right:8px; margin-top:6px; font-weight:700; padding:6px 10px; border-radius:999px; display:inline-block; }
 
-    .aspect-tag {
-        margin-right: 5px;
-        margin-top: 5px;
-        font-size: 0.85em;
-        font-weight: 500;
-    }
+/* Ratings */
+.rating-star{ color: gold; margin-right:3px; }
 
-    .rating-star {
-        color: gold;
-        margin-right: 2px;
-    }
+/* List item hover */
+.list-group-item{ border-radius:10px; border:none; transition: transform .18s ease, box-shadow .18s ease; background: rgba(255,255,255,0.005); }
+.list-group-item:hover{ transform: translateY(-10px); box-shadow: 0 22px 46px rgba(3,18,26,0.06) }
 
-    /* Buttons */
-    .btn-primary, .btn-secondary {
-        border-radius: 50px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
+/* Dashboard grid */
+.dashboard-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:18px; margin-bottom:18px; }
+@media(max-width:1200px){ .dashboard-grid{ grid-template-columns: repeat(2,1fr) } }
+@media(max-width:768px){ .dashboard-grid{ grid-template-columns: 1fr } }
 
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-    }
+/* Neon glow for header and numbers */
+.header h1{ text-shadow: 0 8px 40px rgba(139,92,246,0.12); }
+#positiveCount{ text-shadow: 0 10px 40px rgba(0,255,209,0.06); }
+#negativeCount{ text-shadow: 0 10px 40px rgba(255,77,109,0.06); }
+#neutralCount{ text-shadow: 0 8px 30px rgba(147,156,167,0.04); }
 
-    /* Review List */
-    .list-group-item {
-        border-radius: 10px;
-        margin-bottom: 8px;
-        border: none;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-    }
-    .list-group-item:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-    }
-
-    /* Recommendation Card */
-    #recommendationCard {
-        border-radius: 15px;
-        padding: 20px;
-        transition: all 0.3s;
-        text-align: center;
-    }
-
-    #recommendationCard h2 {
-        font-weight: 700;
-    }
-
-    /* Setting initial states */
-    #bulk-analysis-output {
-        display: block; /* Hide Dashboard Results by default */
-    }
-    #manual-analysis-section {
-        display: none; /* Show Manual Analysis by default */
-    }
+/* Responsive small tweaks */
+@media (max-width: 992px){
+  .sidebar{ position: relative; width:100%; height:auto; margin-bottom:12px; top:0; left:0; }
+  .container-fluid{ padding:14px; }
+}
 </style>
 </head>
 <body>
 
+<div class="container-fluid">
+  <div class="main-grid">
+    <aside class="sidebar">
+      <h5 class="text-center mb-4">Sentiment Tool</h5>
+      <nav class="nav flex-column mb-3">
+        <a class="sidebar-link" href="#" onclick="showSection('manual-analysis-section', this); return false;">
+          <i class="bi bi-pencil-square"></i> Manual Analysis
+        </a>
+        <a class="sidebar-link inactive mt-2" href="#" onclick="showSection('bulk-analysis-output', this); return false;">
+          <i class="bi bi-speedometer2"></i> Automated Analysis
+        </a>
+      </nav>
 
+      <hr style="border-color: rgba(3,18,26,0.04); margin:12px 0" />
+      <div style="font-size:14px; color:var(--muted); line-height:1.35">
+        <strong>Tips:</strong>
+        <ul style="margin:8px 0 0 18px; padding:0; color:var(--muted)">
+          <li>Upload CSV, TXT, PDF, DOCX, XLSX — demo parses CSV/TXT client-side</li>
+          <li>For PDF/DOCX/XLSX, parse on server for best accuracy</li>
+          <li>Use keyword search to filter local results</li>
+        </ul>
+      </div>
+    </aside>
 
-<div class="sidebar">
-    <h5 class="text-center mb-4 text-warning">Sentiment Tool</h5>
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="sidebar-link active" href="#" onclick="showSection('manual-analysis-section', this)">
-                <i class="bi bi-pencil-square me-2"></i> Manual Analysis
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="sidebar-link" href="#" onclick="showSection('bulk-analysis-output', this)">
-                <i class="bi bi-speedometer2 me-2"></i> Automated Analysis 
-            </a>
-        </li>
-    </ul>
-</div>
+    <main>
+      <header class="header fade-in">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h1>🚀 Detailed Sentiment Analysis Dashboard</h1>
+            <p id="header-subtitle">Manually Analyze Text or Upload File</p>
+          </div>
+          <div>
+            <button class="btn btn-pill btn-primary me-2" onclick="generatePDFReport()"><i class="bi bi-download me-2"></i>Export</button>
+            <button class="btn btn-outline-secondary btn-pill" onclick="location.reload()">Reset</button>
+          </div>
+        </div>
+      </header>
 
-<div class="main-content">
-    <header class="header text-center">
-        <h1>🚀 Detailed Sentiment Analysis Dashboard</h1>
-        <p id="header-subtitle">Manually Analyze Text or Upload CSV</p>
-    </header>
+      <section id="manual-analysis-section" class="mb-4">
+        <div class="card p-3 mb-3">
+          <ul class="nav nav-tabs card-header-tabs mb-3">
+            <li class="nav-item"><a class="nav-link active" href="#single-review-tab" data-bs-toggle="tab">Single Text</a></li>
+            <li class="nav-item"><a class="nav-link" href="#file-upload-tab" data-bs-toggle="tab">Upload File</a></li>
+          </ul>
 
-    <div class="container-fluid">
-        
-        <div id="manual-analysis-section" class="row mb-5 pt-4">
-            <div class="col-lg-8 mx-auto">
-                <div class="card shadow p-3 rounded-4">
-                    <div class="card-header bg-white rounded-top border-bottom-0">
-                        <ul class="nav nav-tabs card-header-tabs">
-                            <li class="nav-item">
-                                <a class="nav-link active" aria-current="true" href="#single-review-tab" data-bs-toggle="tab">
-                                    <i class="bi bi-chat-text me-1"></i> Single Text Analysis
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#csv-upload-tab" data-bs-toggle="tab">
-                                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> CSV File Upload
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                    
-                    <div class="card-body tab-content">
-                        <div class="tab-pane fade show active" id="single-review-tab">
-                            <p class="text-muted">Enter a single review or comment for instant analysis:</p>
-                            <textarea id="reviewInput" class="form-control mb-3 rounded-3" rows="3" 
-                                placeholder="The screen resolution is superb, but the battery life is poor."></textarea>
-                            <button class="btn btn-secondary w-100" onclick="analyzeSingleReview()">Analyze Single Review</button>
-                            
-                            <div id="singleReviewOutput" class="mt-4 p-3 border rounded-3" style="display: none;">
-                                <h6>Detailed Analysis Result:</h6>
-                                <p class="mb-1">Overall Sentiment: <span id="singleSentiment" class="badge"></span></p>
-                                <p class="mb-1">Emotion Detected: <span id="singleEmotion" class="badge bg-info text-dark"></span></p>
-                                <p class="mb-1">User Intent: <span id="singleIntent" class="badge bg-primary"></span></p>
-                                <p class="mb-1">Aspects: <span id="singleAspects"></span></p>
-                                <p class="mb-0">Advanced Flags: 
-                                    <span id="singleSarcasm" class="badge bg-warning text-dark me-2"></span>
-                                    <span id="singleLanguage" class="badge bg-secondary"></span>
-                                </p>
-                            </div>
-                            </div>
+          <div class="tab-content">
+            <div class="tab-pane fade show active" id="single-review-tab">
+              <textarea id="reviewInput" class="form-control mb-3" rows="3" placeholder="Type a review here..."></textarea>
+              <div class="d-flex gap-2">
+                <button class="btn btn-pill btn-primary" onclick="analyzeSingleReview()">Analyze</button>
+                <button class="btn btn-outline-secondary btn-pill" onclick="document.getElementById('reviewInput').value=''">Clear</button>
+              </div>
 
-                        <div class="tab-pane fade" id="csv-upload-tab">
-                            <p class="text-muted">Upload a CSV file containing reviews for bulk analysis.</p>
-                            <div class="alert alert-info small" role="alert">
-                                <strong>Tip:</strong> Your CSV should have a column named **"review"** with the text you want to analyze.
-                            </div>
-                            <input type="file" id="csvFileInput" class="form-control mb-3" accept=".csv">
-                            <button class="btn btn-primary w-100" onclick="processCSVFile()">Upload & Analyze Bulk CSV</button>
-                        </div>
-                    </div>
-                </div>
+              <div id="singleReviewOutput" class="mt-4 p-3" style="display:none;">
+                <h6>Detailed Analysis Result:</h6>
+                <p class="mb-1">Overall Sentiment: <span id="singleSentiment" class="badge"></span></p>
+                <p class="mb-1">Emotion Detected: <span id="singleEmotion" class="badge"></span></p>
+                <p class="mb-1">User Intent: <span id="singleIntent" class="badge bg-primary"></span></p>
+                <p class="mb-1">Aspects: <span id="singleAspects"></span></p>
+                <p class="mb-0">Advanced Flags:
+                  <span id="singleSarcasm" class="badge"></span>
+                  <span id="singleLanguage" class="badge bg-secondary"></span>
+                </p>
+              </div>
             </div>
+
+            <div class="tab-pane fade" id="file-upload-tab">
+              <p class="text-muted">Upload a file (CSV, TXT, PDF, DOCX, XLSX) for bulk analysis.</p>
+
+              <label class="file-drop mb-3" id="fileDropLabel">
+                <input type="file" id="fileInput" accept=".csv,.txt,.pdf,.doc,.docx,.xls,.xlsx" />
+                <div>
+                  <i class="bi bi-cloud-arrow-up" style="color:var(--accent-violet)"></i>
+                  <div style="margin-top:6px">Click to select or drag & drop a file</div>
+                  <small>Supported: csv, txt, pdf, docx, xlsx</small>
+                </div>
+              </label>
+
+              <div class="mt-3 d-flex gap-2">
+                <button class="btn btn-pill btn-primary" onclick="handleFileUpload()">Upload & Analyze</button>
+                <button class="btn btn-outline-secondary btn-pill" onclick="document.getElementById('fileInput').value=''; document.getElementById('filePreview').style.display='none'">Clear</button>
+              </div>
+
+              <div id="filePreview" class="mt-3" style="display:none;"></div>
+            </div>
+          </div>
         </div>
 
-        <hr class="mb-5 border-4 border-primary">
-
-        <div id="bulk-analysis-output">
-            <div id="resultsContainer" class="row" style="display:none;">
-                <div class="col-12 mb-4">
-                    <h2 class="text-center text-primary">Automated Bulk Sentiment Output</h2>
-                    <p class="text-center text-muted">Data loaded from web scrape</p>
-                </div>
-
-                <div class="col-12 mb-5">
-                    <div id="recommendationCard" class="card shadow border-3 border-dark" style="display:none;">
-                        <div class="card-body p-4">
-                            <div class="row g-0 align-items-center">
-                                <div class="col-md-3 d-flex justify-content-center">
-                                    <img id="productImageDisplay" src="" alt="Product Image"
-                                        style="max-width:100%; max-height:250px; border-radius:12px; display:none;">
-                                </div>
-                                <div class="col-md-9">
-                                    <h4 class="card-title text-muted mb-3">Purchase Recommendation for:
-                                        <strong id="productNameDisplay"></strong>
-                                    </h4>
-                                    <div id="recommendationContent"></div>
-                                    <p class="mt-3 text-muted" id="recommendationMessage"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 mb-5 text-center">
-                    <button class="btn btn-lg btn-primary shadow-lg" onclick="generatePDFReport()">
-                        <i class="bi bi-file-earmark-arrow-down-fill me-2"></i> Download Analysis Report
-                    </button>
-                </div>
-
-                <div class="col-lg-4 mb-4">
-                    <div class="card card-sentiment h-100 border-success text-center">
-                        <div class="card-body">
-                            <h5 class="card-title text-success">Positive Reviews</h5>
-                            <p class="card-text display-4" id="positiveCount">0</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 mb-4">
-                    <div class="card card-sentiment h-100 border-danger text-center">
-                        <div class="card-body">
-                            <h5 class="card-title text-danger">Negative Reviews</h5>
-                            <p class="card-text display-4" id="negativeCount">0</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 mb-4">
-                    <div class="card card-sentiment h-100 border-secondary text-center">
-                        <div class="card-body">
-                            <h5 class="card-title text-secondary">Neutral Reviews</h5>
-                            <p class="card-text display-4" id="neutralCount">0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header">Sentiment Distribution</div>
-                        <div class="card-body"><canvas id="sentimentChart"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header bg-warning-subtle">Aspect-Sentiment Matrix (Top 5)</div>
-                        <div class="card-body p-2"><canvas id="aspectMatrixChart"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header bg-primary-subtle">Sentiment Trend Over Time</div>
-                        <div class="card-body"><canvas id="timeSeriesChart"></canvas></div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            Detailed Review Breakdown (<span id="totalReviews">0</span> Total)
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="d-flex mb-3 gap-2">
-                                <button class="btn btn-outline-secondary btn-sm" onclick="filterReviews('All')">All</button>
-                                <button class="btn btn-outline-success btn-sm" onclick="filterReviews('Positive')">Positive</button>
-                                <button class="btn btn-outline-danger btn-sm" onclick="filterReviews('Negative')">Negative</button>
-                                <input type="text" id="keywordSearch" class="form-control form-control-sm ms-auto" onkeyup="filterReviews('All')" placeholder="Search keyword...">
-                            </div>
-                            <div class="review-list-wrapper" style="max-height: 400px; overflow-y:auto;">
-                                <ul class="list-group list-group-flush" id="detailedResultsList"></ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+        <div class="card p-3">
+          <h5 class="mb-3">Single Review Result</h5>
+          <div id="singleReviewDetails" class="text-muted">Results will appear here after analysis.</div>
         </div>
-    </div>
+      </section>
+
+      <section id="bulk-analysis-output">
+        <div id="resultsContainer" style="display:none">
+          <div class="dashboard-grid mb-3">
+            <div class="card card-sentiment p-3 text-center">
+              <h6 class="mb-1">Positive</h6>
+              <div id="positiveCount" style="font-size:36px; font-weight:800; color:var(--accent-teal)">0</div>
+            </div>
+            <div class="card card-sentiment p-3 text-center">
+              <h6 class="mb-1">Negative</h6>
+              <div id="negativeCount" style="font-size:36px; font-weight:800; color:var(--accent-coral)">0</div>
+            </div>
+            <div class="card card-sentiment p-3 text-center">
+              <h6 class="mb-1">Neutral</h6>
+              <div id="neutralCount" style="font-size:36px; font-weight:800; color:var(--muted)">0</div>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-lg-6">
+              <div class="card p-3"><h6>Sentiment Distribution</h6><canvas id="sentimentChart"></canvas></div>
+            </div>
+            <div class="col-lg-6">
+              <div class="card p-3"><h6>Aspect Matrix</h6><canvas id="aspectMatrixChart"></canvas></div>
+            </div>
+            <div class="col-lg-6 mt-3">
+              <div class="card p-3"><h6>Trend Over Time</h6><canvas id="timeSeriesChart"></canvas></div>
+            </div>
+            <div class="col-lg-6 mt-3">
+              <div class="card p-3">
+                <div class="d-flex mb-2">
+                  <div class="me-2">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="filterReviews('All')">All</button>
+                    <button class="btn btn-outline-success btn-sm" onclick="filterReviews('Positive')">Positive</button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="filterReviews('Negative')">Negative</button>
+                  </div>
+                  <input id="keywordSearch" class="form-control form-control-sm ms-auto" placeholder="Search..." onkeyup="filterReviews('All')" />
+                </div>
+                <div style="max-height:420px; overflow:auto"><ul class="list-group" id="detailedResultsList"></ul></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 </div>
 
+<!-- libs -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
 <script>
-// --- Existing Global Variables ---
+// --- Global state ---
 let sentimentChart, aspectMatrixChart, timeSeriesChart;
-let allReviewData = []; 
-let currentAnalysisData = {}; 
+let allReviewData = [];
+let currentAnalysisData = {};
 
-// --- Core Section Management Function ---
-function showSection(sectionId, element) {
-    // Hide all main sections
-    document.getElementById('manual-analysis-section').style.display = 'none';
-    document.getElementById('bulk-analysis-output').style.display = 'none';
-
-    // Show the requested section
-    document.getElementById(sectionId).style.display = 'block';
-
-    // Update active state in sidebar
-    document.querySelectorAll('.sidebar-link').forEach(link => {
-        link.classList.remove('active');
-    });
-    element.classList.add('active');
-    
-    // Update header subtitle for context
-    if (sectionId === 'manual-analysis-section') {
-        document.getElementById('header-subtitle').textContent = 'Manually Analyze Text or Upload CSV';
-    } else if (sectionId === 'bulk-analysis-output') {
-        document.getElementById('header-subtitle').textContent = 'Automated Analysis';
-    }
-}
-
-// Ensure the correct section is visible on load (Manual Analysis)
-// --- INITIALIZATION (Sets default visibility and handles session) ---
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get('session_id');
-
-    // 1. Get references to the sidebar links
-    const manualLink = document.querySelector(".sidebar-link[onclick*='manual-analysis-section']");
-    const bulkLink = document.querySelector(".sidebar-link[onclick*='bulk-analysis-output']");
-
-    // Default state: Manual section visible, Bulk section hidden
-    document.getElementById('manual-analysis-section').style.display = 'block';
-    document.getElementById('bulk-analysis-output').style.display = 'none';
-    
-    // Ensure 'Manual Analysis' is active by default in the sidebar
-    if (manualLink) {
-        manualLink.classList.add('active');
-    }
-    if (bulkLink) {
-        bulkLink.classList.remove('active');
-    }
-
-    if (sessionId) {
-        document.title = "Analysis Results - Loading...";
-        
-        // When a sessionId is present, switch the view to 'Automated Analysis'
-        if (bulkLink) {
-            // Programmatically call showSection to set the correct state and active link
-            showSection('bulk-analysis-output', bulkLink);
-        }
-        
-        loadDataFromSession(sessionId);
-    } else {
-        // If no session ID, the manual section remains visible
-        document.getElementById('resultsContainer').style.display = 'none';
-        
-        // Ensure 'Manual Analysis' is active
-        if (manualLink) {
-            manualLink.classList.add('active');
-        }
-    }
-});
-
-
-// ----------------------------------------
-// --- MANUAL ANALYSIS (UPDATED FOR ADVANCED FEATURES) ----
-// ----------------------------------------
-
-/**
- * Placeholder for analyzing a single review text.
- * Mocks advanced NLP logic (Emotion, Intent, Sarcasm, Multilingual) based on keywords.
- */
-function analyzeSingleReview() {
-    const reviewText = document.getElementById('reviewInput').value.trim();
-    const outputDiv = document.getElementById('singleReviewOutput');
-    
-    // Output spans for new fields
-    const sentimentSpan = document.getElementById('singleSentiment');
-    const emotionSpan = document.getElementById('singleEmotion');
-    const intentSpan = document.getElementById('singleIntent');
-    const aspectsSpan = document.getElementById('singleAspects');
-    const sarcasmSpan = document.getElementById('singleSarcasm');
-    const languageSpan = document.getElementById('singleLanguage');
-
-    if (!reviewText) {
-        alert("Please enter a review to analyze.");
-        outputDiv.style.display = 'none';
-        return;
-    }
-
-    const textLower = reviewText.toLowerCase();
-
-    // --- MOCK ANALYSIS LOGIC ---
-    let mockSentiment = 'Neutral';
-    let mockEmotion = 'N/A';
-    let mockIntent = 'N/A';
-    let mockAspects = {};
-    let mockSarcasm = false;
-    let mockLanguage = 'English';
-
-    // Sentiment and Emotion
-    if (textLower.includes('superb') || textLower.includes('excellent') || textLower.includes('loved') || textLower.includes('mast hai')) {
-        mockSentiment = 'Positive';
-        mockEmotion = 'Joy';
-    } else if (textLower.includes('poor') || textLower.includes('bad') || textLower.includes('broke') || textLower.includes('cancel')) {
-        mockSentiment = 'Negative';
-        mockEmotion = 'Anger';
-    } else if (textLower.includes('que lastima')) {
-        mockSentiment = 'Negative';
-        mockEmotion = 'Sadness';
-    } else {
-        mockEmotion = 'Neutral';
-    }
-
-    // Intent Detection
-    if (textLower.includes('upgrade') || textLower.includes('buy again') || textLower.includes('purchase')) {
-        mockIntent = 'Purchase';
-    } else if (textLower.includes('cancel') || textLower.includes('stop subscription') || textLower.includes('return')) {
-        mockIntent = 'Churn';
-    } else if (textLower.includes('how does') || textLower.includes('what size') || textLower.includes('where is')) {
-        mockIntent = 'Inquiry';
-    }
-    
-    // Aspect Detection
-    if (textLower.includes('screen') || textLower.includes('resolution')) {
-        mockAspects['Screen'] = textLower.includes('superb') ? 'Positive' : 'Neutral';
-    }
-    if (textLower.includes('battery') || textLower.includes('life')) {
-        mockAspects['Battery'] = textLower.includes('poor') ? 'Negative' : 'Positive';
-    }
-    
-    // Multilingual Detection
-    if (textLower.includes('mast hai') || textLower.includes('badiya')) {
-        mockLanguage = 'Hinglish';
-    } else if (textLower.includes('que lastima') || textLower.includes('malo')) {
-        mockLanguage = 'Spanish';
-    }
-
-    // Sarcasm Detection (Advanced)
-    if (textLower.includes('amazing quality') && textLower.includes('broke')) {
-        mockSarcasm = true;
-        // In case of sarcasm, the true sentiment is the opposite of the surface words
-        mockSentiment = 'Negative'; 
-        mockEmotion = 'Anger';
-    }
-    // --- END MOCK LOGIC ---
-    
-    sentimentSpan.textContent = mockSentiment;
-    sentimentSpan.className = 'badge ' + getSentimentClass(mockSentiment);
-    
-    emotionSpan.textContent = mockEmotion;
-    emotionSpan.className = 'badge ' + getSentimentClass(mockEmotion.toLowerCase()); // Using emotion name for class
-    
-    intentSpan.textContent = mockIntent;
-    intentSpan.className = 'badge bg-primary'; 
-    
-    aspectsSpan.innerHTML = formatAspects(mockAspects);
-    
-    sarcasmSpan.textContent = mockSarcasm ? '⚠️ Sarcasm Detected' : 'No Sarcasm';
-    sarcasmSpan.className = 'badge ' + (mockSarcasm ? 'badge-sarcasm' : 'bg-success');
-    
-    languageSpan.textContent = `Lang: ${mockLanguage}`;
-    
-    outputDiv.style.display = 'block';
-    document.getElementById('reviewInput').value = ""; // Clear input after analysis
-    
-    alert(`Single Review Analyzed! Sentiment: ${mockSentiment}, Emotion: ${mockEmotion}`);
-}
-
-/**
- * Processes the uploaded CSV file.
- * Mocks bulk analysis results including new advanced features.
- */
-function processCSVFile() {
-    const fileInput = document.getElementById('csvFileInput');
-    const file = fileInput.files[0];
-
-    if (!file) {
-        alert("Please select a CSV file to upload.");
-        return;
-    }
-
-    Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: function(results) {
-            const csvData = results.data;
-            
-            if (!csvData[0] || !('review' in csvData[0])) {
-                alert("Error: CSV file must contain a column named 'review'.");
-                return;
-            }
-
-            // --- Mock Data Generation for Demo (Including New Fields) ---
-            const newFields = {
-                emotion: ['Joy', 'Anger', 'Sadness', 'Neutral'],
-                intent: ['Purchase', 'Churn', 'Inquiry', 'Compliment'],
-                is_sarcastic: [true, false, false, false, false, false, false, false, false, false], // 10% chance
-                language: ['English', 'English', 'English', 'Hinglish', 'Spanish']
-            };
-
-            const mockBulkResults = csvData.map((row, index) => {
-                // Ensure the review text is present
-                const reviewText = row.review || 'No review text provided.';
-
-                const sentiment = index % 3 === 0 ? 'Positive' : (index % 3 === 1 ? 'Negative' : 'Neutral');
-                const aspects = sentiment === 'Positive' ? {'quality': 'Positive', 'delivery': 'Positive'} : {'size': 'Negative', 'price': 'Neutral'};
-                
-                // Advanced fields simulation
-                const emotion = newFields.emotion[Math.floor(Math.random() * newFields.emotion.length)];
-                const intent = newFields.intent[Math.floor(Math.random() * newFields.intent.length)];
-                const is_sarcastic = newFields.is_sarcastic[Math.floor(Math.random() * newFields.is_sarcastic.length)];
-                const language = newFields.language[Math.floor(Math.random() * newFields.language.length)];
-                
-                return {
-                    review: reviewText.substring(0, 100) + (reviewText.length > 100 ? '...' : ''), // Truncate for display
-                    sentiment: sentiment,
-                    confidence: (0.7 + Math.random() * 0.3).toFixed(2),
-                    rating: (Math.floor(Math.random() * 5) + 1),
-                    date: `2024-05-${String(Math.floor(Math.random() * 30) + 1).padStart(2, '0')}`,
-                    aspects: aspects,
-                    emotion: emotion, // NEW
-                    intent: intent,   // NEW
-                    is_sarcastic: is_sarcastic, // NEW
-                    language: language  // NEW
-                };
-            });
-            
-            const positiveCount = mockBulkResults.filter(r => r.sentiment === 'Positive').length;
-            const negativeCount = mockBulkResults.filter(r => r.sentiment === 'Negative').length;
-            const neutralCount = mockBulkResults.length - positiveCount - negativeCount;
-            const total = mockBulkResults.length;
-
-            const recommendationStatus = positiveCount > (negativeCount + neutralCount) ? 'Good' : (negativeCount > positiveCount ? 'Bad' : 'Decent');
-            
-            const mockAnalysisResult = {
-                product_name: 'CSV Uploaded Reviews',
-                product_image_url: '', 
-                summary: {
-                    Positive: positiveCount,
-                    Negative: negativeCount,
-                    Neutral: neutralCount,
-                    total: total
-                },
-                recommendation: {
-                    status: recommendationStatus,
-                    message: `Analysis of ${total} reviews complete. Overall sentiment is ${recommendationStatus}. Key negative aspect: Size. Key positive aspect: Quality.`
-                },
-                drill_down_matrix: [
-                    { aspect: 'Quality', Positive: 10, Negative: 2, Neutral: 1 },
-                    { aspect: 'Price', Positive: 8, Negative: 5, Neutral: 3 },
-                    { aspect: 'Delivery', Positive: 12, Negative: 1, Neutral: 0 },
-                    { aspect: 'Size', Positive: 1, Negative: 15, Neutral: 4 } // A negative-driving aspect
-                ],
-                detailed_results: mockBulkResults
-            };
-            // --- End Mock Data Generation ---
-
-            // Call the existing function to display the dashboard results
-            processBulkData(mockAnalysisResult);
-            showSection('bulk-analysis-output', document.querySelector('[onclick="showSection(\'bulk-analysis-output\', this)"]'));
-
-            alert(`Successfully analyzed ${total} reviews from CSV! Displaying results in Dashboard.`);
-        }
-    });
-}
-
-
-// ----------------------------------------
-// --- UTILITY AND DISPLAY FUNCTIONS (MODIFIED for New Fields) ---
-// ----------------------------------------
-
-function getSentimentClass(sentiment) {
-    if (sentiment === 'Positive') return 'badge-positive';
-    if (sentiment === 'Negative') return 'badge-negative';
-    if (sentiment === 'Neutral') return 'badge-neutral';
-    if (sentiment === 'joy') return 'badge-joy';
-    if (sentiment === 'anger') return 'badge-anger';
-    if (sentiment === 'sadness') return 'bg-info text-white';
+// small helpers (kept consistent with previous logic)
+function getSentimentClass(sentiment){
+    if (!sentiment) return 'badge-neutral';
+    const s = String(sentiment).toLowerCase();
+    if (s.includes('positive') || s.includes('joy')) return 'badge-positive';
+    if (s.includes('negative') || s.includes('anger')) return 'badge-negative';
     return 'badge-neutral';
 }
-function getStarRating(rating) {
-    if (!rating) return '';
-    const fullStar = '<i class="bi bi-star-fill rating-star"></i>';
-    return fullStar.repeat(rating);
-}
-function formatAspects(aspects) {
-    let html = '';
-    for (const aspect in aspects) {
-        const sentiment = aspects[aspect];
-        const sentimentClass = getSentimentClass(sentiment);
-        html += `<span class="badge rounded-pill aspect-tag ${sentimentClass}">${aspect}</span>`;
-    }
-    return html;
+function getStarRating(rating){ if (!rating) return ''; const star = '<i class="bi bi-star-fill rating-star"></i>'; return star.repeat(Math.max(0, Math.min(5, parseInt(rating)||0))); }
+function formatAspects(aspects){ let html=''; if(!aspects) return html; for(const k in aspects){ html += `<span class="aspect-tag ${getSentimentClass(aspects[k])}">${k}</span>`; } return html; }
+
+// UI: show/hide sections
+function showSection(sectionId, element){
+    ['manual-analysis-section','bulk-analysis-output'].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display = (id===sectionId)?'block':'none'; });
+    document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.add('inactive'));
+    if(element) element.classList.remove('inactive');
+    document.getElementById('header-subtitle').textContent = (sectionId==='manual-analysis-section')? 'Manually Analyze Text or Upload File' : 'Automated Analysis';
+    if (sectionId === 'bulk-analysis-output') document.getElementById('resultsContainer').style.display = 'block';
 }
 
-// --- Chart Display Functions (Kept as is) ---
-function updateChart(summary) {
-    const data = [summary.Positive, summary.Negative, summary.Neutral];
-    const labels = ['Positive', 'Negative', 'Neutral'];
-    const colors = ['#28a745', '#dc3545', '#6c757d'];
+// Single review mock analyzer (keeps your rules)
+function analyzeSingleReview(){
+    const review = document.getElementById('reviewInput').value.trim();
+    if(!review){ alert('Enter a review to analyze.'); return; }
+    const txt = review.toLowerCase();
+    let sentiment='Neutral', emotion='Neutral', intent='N/A', aspects={}, sarcasm=false, lang='English';
+    if(txt.match(/(superb|excellent|loved|amazing|mast hai|badiya)/)) { sentiment='Positive'; emotion='Joy'; }
+    else if(txt.match(/(poor|bad|broke|cancel|disappoint)/)) { sentiment='Negative'; emotion='Anger'; }
+    if(txt.includes('battery')) aspects['Battery'] = txt.includes('poor')? 'Negative':'Positive';
+    if(txt.includes('screen')) aspects['Screen'] = txt.includes('superb')? 'Positive':'Neutral';
+    if(txt.includes('mast hai')|| txt.includes('badiya')) lang='Hinglish';
+    if(txt.includes('amazing quality') && txt.includes('broke')) { sarcasm=true; sentiment='Negative'; emotion='Anger'; }
 
-    if (sentimentChart) { sentimentChart.destroy(); }
-
-    const ctx = document.getElementById('sentimentChart').getContext('2d');
-    sentimentChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: data,
-                backgroundColor: colors,
-                hoverOffset: 4
-            }]
-        },
-        options: { responsive: true, plugins: { legend: { position: 'top' }, title: { display: false } } }
-    });
+    // populate DOM
+    document.getElementById('singleSentiment').textContent = sentiment; document.getElementById('singleSentiment').className = 'badge ' + getSentimentClass(sentiment);
+    document.getElementById('singleEmotion').textContent = emotion; document.getElementById('singleEmotion').className = 'badge ' + getSentimentClass(emotion);
+    document.getElementById('singleIntent').textContent = intent; document.getElementById('singleIntent').className = 'badge bg-primary';
+    document.getElementById('singleAspects').innerHTML = formatAspects(aspects);
+    document.getElementById('singleSarcasm').textContent = sarcasm? '⚠️ Sarcasm Detected' : 'No Sarcasm'; document.getElementById('singleSarcasm').className = sarcasm? 'badge badge-sarcasm':'badge bg-success';
+    document.getElementById('singleLanguage').textContent = 'Lang: ' + lang;
+    document.getElementById('singleReviewOutput').style.display = 'block';
+    document.getElementById('reviewInput').value = '';
 }
 
-function updateAspectMatrixChart(matrixData) {
-    const topAspects = matrixData.slice(0, 5);
-    const labels = topAspects.map(item => item.aspect);
-    
-    const data = {
-        labels: labels,
-        datasets: [
-            { label: 'Positive', data: topAspects.map(item => item.Positive), backgroundColor: '#28a745' },
-            { label: 'Negative', data: topAspects.map(item => item.Negative), backgroundColor: '#dc3545' },
-            { label: 'Neutral', data: topAspects.map(item => item.Neutral), backgroundColor: '#6c757d' }
-        ]
-    };
-
-    if (aspectMatrixChart) { aspectMatrixChart.destroy(); }
-
-    const ctx = document.getElementById('aspectMatrixChart').getContext('2d');
-    aspectMatrixChart = new Chart(ctx, {
-        type: 'bar',
-        data: data,
-        options: { responsive: true, scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: 'Review Count' } } }, plugins: { title: { display: false } } }
-    });
+// --- File handling: accept many formats, lightweight client-side demo processing ---
+// drag & drop UX
+const fileDropLabel = document.getElementById('fileDropLabel');
+if(fileDropLabel){
+    ['dragenter','dragover'].forEach(ev=> fileDropLabel.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); fileDropLabel.classList.add('dragover'); }));
+    ['dragleave','drop'].forEach(ev=> fileDropLabel.addEventListener(ev, (e)=>{ e.preventDefault(); e.stopPropagation(); fileDropLabel.classList.remove('dragover'); }));
+    fileDropLabel.addEventListener('drop', (e)=>{ const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f){ document.getElementById('fileInput').files = e.dataTransfer.files; showFilePreview(f); } });
 }
 
-function updateTimeSeriesChart(detailedResults) {
-    const dailyData = detailedResults.reduce((acc, item) => {
-        const date = item.date || new Date().toISOString().slice(0, 10);
-        if (!acc[date]) { acc[date] = { total: 0, positive: 0, negative: 0 }; }
-        acc[date].total += 1;
-        if (item.sentiment === 'Positive') acc[date].positive += 1;
-        if (item.sentiment === 'Negative') acc[date].negative += 1;
-        return acc;
-    }, {});
-
-    const sortedDates = Object.keys(dailyData).sort();
-    const positivePercentages = sortedDates.map(date => (dailyData[date].positive / dailyData[date].total) * 100);
-    const negativePercentages = sortedDates.map(date => (dailyData[date].negative / dailyData[date].total) * 100);
-
-    const data = {
-        labels: sortedDates,
-        datasets: [
-            { label: 'Positive Trend (%)', data: positivePercentages, borderColor: '#28a745', tension: 0.1, fill: false },
-            { label: 'Negative Trend (%)', data: negativePercentages, borderColor: '#dc3545', tension: 0.1, fill: false }
-        ]
-    };
-    
-    if (timeSeriesChart) { timeSeriesChart.destroy(); }
-    
-    const ctx = document.getElementById('timeSeriesChart').getContext('2d');
-    timeSeriesChart = new Chart(ctx, {
-        type: 'line',
-        data: data,
-        options: { responsive: true, scales: { y: { min: 0, max: 100, title: { display: true, text: 'Percentage (%)' } }, x: { title: { display: true, text: 'Date' } } }, plugins: { title: { display: false } } }
-    });
+// show a simple preview of the chosen file
+function showFilePreview(file){
+    const p = document.getElementById('filePreview'); p.style.display='block'; p.innerHTML = `<div class="p-3 rounded-3" style="background:rgba(255,255,255,0.01); border:1px dashed rgba(3,18,26,0.03)"><strong>Selected:</strong> ${file.name} <small class="text-muted ms-2">(${Math.round(file.size/1024)} KB)</small></div>`;
 }
 
-// --- Recommendation & Image Display ---
-function displayRecommendation(productName, recommendation, imageUrl) {
-    const card = document.getElementById('recommendationCard');
-    const content = document.getElementById('recommendationContent');
-    const message = document.getElementById('recommendationMessage');
-    const nameDisplay = document.getElementById('productNameDisplay');
-    const imageDisplay = document.getElementById('productImageDisplay');
-    
-    card.style.display = 'block';
-    nameDisplay.textContent = productName;
-    message.textContent = recommendation.message;
+document.getElementById('fileInput').addEventListener('change', (e)=>{ const f = e.target.files && e.target.files[0]; if(f) showFilePreview(f); });
 
-    // Image Logic
-    if (imageUrl) {
-        imageDisplay.src = imageUrl;
-        imageDisplay.style.display = 'block';
-    } else {
-        imageDisplay.style.display = 'none';
-        imageDisplay.src = ''; 
-    }
+// process the uploaded file (demo behavior: parse CSV/TXT, accept others)
+function handleFileUpload(){
+    const input = document.getElementById('fileInput');
+    const file = input.files && input.files[0];
+    if(!file){ alert('Please select a file first.'); return; }
 
-    let icon, title, bgClass;
+    const name = (file.name||'').toLowerCase();
+    const ext = name.split('.').pop();
 
-    if (recommendation.status === 'Good') {
-        icon = 'bi-check-circle-fill text-success';
-        title = 'GO FOR IT!';
-        bgClass = 'border-success';
-    } else if (recommendation.status === 'Bad') {
-        icon = 'bi-x-octagon-fill text-danger';
-        title = 'PROCEED WITH CAUTION';
-        bgClass = 'border-danger';
-    } else { // Decent or Neutral
-        icon = 'bi-info-circle-fill text-warning';
-        title = 'MIXED REVIEWS';
-        bgClass = 'border-warning';
-    }
-
-    content.innerHTML = `
-        <i class="bi ${icon}" style="font-size: 3rem;"></i>
-        <h2 class="card-text display-3 fw-bold">${title}</h2>
-    `;
-    
-    card.className = `card shadow border-3 ${bgClass}`;
-}
-
-// --- UPDATED to display new fields (Emotion, Intent, Sarcasm, Language) ---
-function populateDetailedList(data) {
-    const list = document.getElementById('detailedResultsList');
-    list.innerHTML = '';
-    const keyword = document.getElementById('keywordSearch').value.toLowerCase();
-
-    data.forEach(item => {
-        // Filter logic
-        if (keyword && !item.review.toLowerCase().includes(keyword)) {
-            return; 
-        }
-
-        const sentimentClass = getSentimentClass(item.sentiment);
-        const aspectHtml = formatAspects(item.aspects);
-        const ratingStars = getStarRating(item.rating);
-        
-        // New advanced tags
-        const emotionTag = item.emotion ? `<span class="badge ${getSentimentClass(item.emotion.toLowerCase())} text-uppercase me-1">${item.emotion}</span>` : '';
-        const intentTag = item.intent ? `<span class="badge ${item.intent === 'Churn' ? 'badge-churn' : 'badge-inquiry'} text-uppercase me-1">${item.intent}</span>` : '';
-        const sarcasmTag = item.is_sarcastic ? `<span class="badge badge-sarcasm text-uppercase me-1">SARCASTIC</span>` : '';
-        const languageTag = item.language && item.language !== 'English' ? `<span class="badge bg-light text-dark me-1">${item.language}</span>` : '';
-
-        const listItem = `
-            <li class="list-group-item" data-sentiment="${item.sentiment}" data-rating="${item.rating || 0}">
-                <div class="d-flex justify-content-between">
-                    <span class="d-block mb-1 text-truncate"><strong>Review:</strong> ${item.review}</span>
-                    <span class="badge bg-light text-dark">${ratingStars}</span>
-                </div>
-                <div class="d-flex align-items-center mb-1">
-                    <span class="badge ${sentimentClass} rounded-pill me-2">
-                        ${item.sentiment} (${item.confidence})
-                    </span>
-                    ${emotionTag}
-                    ${intentTag}
-                    ${sarcasmTag}
-                    ${languageTag}
-                </div>
-                <div class="mt-1">${aspectHtml}</div>
-            </li>
-        `;
-        list.innerHTML += listItem;
-    });
-}
-
-function filterReviews(sentimentFilter = 'All') {
-    let filteredData = allReviewData;
-    
-    if (sentimentFilter !== 'All') {
-        filteredData = filteredData.filter(item => item.sentiment === sentimentFilter);
-    }
-    
-    populateDetailedList(filteredData);
-}
-
-// --- Main Data Processing Functions (Hides Manual, Shows Bulk) ---
-function processBulkData(data) {
-    
-    // Store all incoming data for PDF generation
-    currentAnalysisData = data; 
-
-    // This section is now managed by showSection() but is kept for data flow
-    document.getElementById('manual-analysis-section').style.display = 'none'; 
-    document.getElementById('bulk-analysis-output').style.display = 'block'; 
-    document.getElementById('resultsContainer').style.display = 'flex'; 
-
-    allReviewData = data.detailed_results;
-
-    const summary = data.summary;
-    document.getElementById('positiveCount').textContent = summary.Positive;
-    document.getElementById('negativeCount').textContent = summary.Negative;
-    document.getElementById('neutralCount').textContent = summary.Neutral;
-    document.getElementById('totalReviews').textContent = summary.total;
-    
-    displayRecommendation(
-        data.product_name || 'Analyzed Product', 
-        data.recommendation,
-        data.product_image_url || '' 
-    ); 
-
-    updateChart(summary);
-    updateAspectMatrixChart(data.drill_down_matrix || []);
-    updateTimeSeriesChart(data.detailed_results);
-    populateDetailedList(allReviewData);
-}
-
-// --- Image Loading Helper for jsPDF ---
-function getBase64Image(url) {
-    return new Promise((resolve, reject) => {
-        if (!url) return resolve(null);
-
-        const img = new Image();
-        img.crossOrigin = 'Anonymous'; // Essential for CORS issues
-        img.onload = function () {
-            const canvas = document.createElement('canvas');
-            
-            // Keep aspect ratio but limit size
-            const maxWidth = 300;
-            const ratio = this.naturalWidth / this.naturalHeight;
-            canvas.width = Math.min(this.naturalWidth, maxWidth);
-            canvas.height = canvas.width / ratio;
-            
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(this, 0, 0, canvas.width, canvas.height);
-            
-            resolve(canvas.toDataURL('image/jpeg', 0.9)); // Resolve with data URL
-        };
-        img.onerror = function (error) {
-            console.error("Image loading failed:", error);
-            // Fallback: If image fails to load, resolve with null
-            resolve(null); 
-        };
-        img.src = url;
-    });
-}
-
-// --- PDF Generation Function (COMPLETED) ---
-async function generatePDFReport() {
-    if (Object.keys(currentAnalysisData).length === 0) {
-        alert("Please analyze a product first to generate a report.");
+    // CSV -> parse and mock analyze
+    if(ext === 'csv'){
+        Papa.parse(file, { header:true, skipEmptyLines:true, complete: function(results){
+            const rows = results.data || [];
+            // If there's a 'review' column we'll use it, otherwise try to use the first text column
+            const sampleCol = (rows[0] && rows[0].review) ? 'review' : (rows[0] ? Object.keys(rows[0])[0] : null);
+            const extracted = rows.map(r => ({ review: sampleCol ? (r[sampleCol]||'') : JSON.stringify(r).slice(0,120) }));
+            createMockBulkAnalysisFromReviews(extracted);
+        }, error: function(err){ console.error(err); alert('CSV parsing failed.'); } });
         return;
     }
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    let y = 20;
-    const padding = 15;
-    const reviewLineHeight = 5;
-
-    const data = currentAnalysisData;
-    const productName = data.product_name || "Product Analysis Report";
-    const productImageUrl = data.product_image_url || "";
-    const summary = data.summary;
-    const recommendation = data.recommendation;
-
-    // Load Image
-    let imageBase64 = null;
-    if (productImageUrl) {
-        imageBase64 = await getBase64Image(productImageUrl);
+    // TXT -> read text lines as reviews
+    if(ext === 'txt'){
+        const reader = new FileReader();
+        reader.onload = function(evt){ const content = evt.target.result || ''; const lines = content.split(/\r?\n/).filter(Boolean); const extracted = lines.map(l=>({review: l.slice(0,200)})); createMockBulkAnalysisFromReviews(extracted); }; reader.readAsText(file); return;
     }
 
-    // --- Header Banner ---
-    doc.setFillColor(0, 82, 163);
-    doc.rect(0, 0, 210, 20, "F");
-    doc.setFontSize(18);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.text("Sentiment Analysis Report", 105, 13, { align: "center" });
-    y = 30;
-
-    // --- Product Overview Box ---
-    const boxHeight = 45;
-    doc.setFillColor(245, 245, 245);
-    doc.roundedRect(padding, y, 180, boxHeight, 3, 3, "F");
-    doc.setDrawColor(200, 200, 200);
-    doc.roundedRect(padding, y, 180, boxHeight, 3, 3);
-
-    // Product Name (wrapped text)
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.setTextColor(20, 20, 20);
-    const productText = doc.splitTextToSize(`Product: ${productName}`, 120);
-    doc.text(productText, padding + 5, y + 10);
-
-    // Status
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(11);
-    doc.setTextColor(60, 60, 60);
-    doc.text(`Status: ${recommendation.status}`, padding + 5, y + 25);
-
-    // Executive Summary
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(10);
-    const summaryText = doc.splitTextToSize(
-        `Executive Summary: ${recommendation.message}`,
-        120
-    );
-    doc.text(summaryText, padding + 5, y + 33);
-
-    // Product Image (if available)
-    if (imageBase64) {
-        doc.addImage(imageBase64, "JPEG", 160, y + 5, 35, 30);
+    // For PDF/DOCX/XLSX etc — demo accepts but defers parsing to server. We'll create a single mock review to demonstrate the dashboard.
+    if(['pdf','doc','docx','xls','xlsx'].includes(ext)){
+        const mock = [{ review: `Uploaded file: ${file.name} (type: ${ext}). Server-side parsing recommended.` }];
+        createMockBulkAnalysisFromReviews(mock);
+        return;
     }
 
-    y += boxHeight + 20;
-
-    // --- Sentiment Distribution Section ---
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor(30, 30, 30);
-    doc.text("Overall Sentiment Distribution", padding, y);
-    y += 8;
-
-    const cardWidth = 55;
-    const cardHeight = 20;
-    const gap = 8;
-    const cardYOffset = 13;
-
-    function drawCard(x, label, value, color) {
-        doc.setFillColor(...color);
-        doc.roundedRect(x, y, cardWidth, cardHeight, 3, 3, "F");
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(11);
-        doc.text(label, x + cardWidth / 2, y + 7, { align: "center" });
-        doc.setFontSize(9);
-        doc.text(value, x + cardWidth / 2, y + cardYOffset, { align: "center" });
-    }
-
-    drawCard(
-        padding,
-        "Positive",
-        `${((summary.Positive / summary.total) * 100).toFixed(1)}% (${summary.Positive})`,
-        [39, 174, 96]
-    );
-    drawCard(
-        padding + cardWidth + gap,
-        "Negative",
-        `${((summary.Negative / summary.total) * 100).toFixed(1)}% (${summary.Negative})`,
-        [192, 57, 43]
-    );
-    drawCard(
-        padding + (cardWidth + gap) * 2,
-        "Neutral",
-        `${((summary.Neutral / summary.total) * 100).toFixed(1)}% (${summary.Neutral})`,
-        [127, 140, 141]
-    );
-
-    y += cardHeight + 20;
-
-    // --- Key Reviews Section ---
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor(30, 30, 30);
-    doc.text("Critical Review Insights", padding, y);
-    y += 10;
-
-    const positiveReviews = data.detailed_results
-        .filter((r) => r.sentiment === "Positive")
-        .slice(0, 1);
-    const negativeReviews = data.detailed_results
-        .filter((r) => r.sentiment === "Negative")
-        .slice(0, 1);
-
-    const keyReviews = [
-        ...positiveReviews.map((r) => ({
-            ...r,
-            title: "Top Positive Insight",
-            color: [39, 174, 96],
-        })),
-        ...negativeReviews.map((r) => ({
-            ...r,
-            title: "Key Negative Concern",
-            color: [192, 57, 43],
-        })),
-    ];
-
-    keyReviews.forEach((review, index) => {
-        if (y > 250) {
-            doc.addPage();
-            y = 20;
-        }
-
-        // Title
-        doc.setTextColor(...review.color);
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(12);
-        doc.text(review.title, padding, y);
-
-        // User
-        doc.setTextColor(100, 100, 100);
-        doc.setFont("helvetica", "normal");
-        doc.setFontSize(9);
-        const userName = review.user_name || "Anonymous";
-        doc.text(`User: ${userName}`, 200 - padding, y, { align: "right" });
-        y += 6;
-
-        // Review Content
-        doc.setTextColor(50, 50, 50);
-        doc.setFontSize(10);
-        const reviewText = `[Intent: ${review.intent || "N/A"}] ${review.review}`;
-        const splitText = doc.splitTextToSize(reviewText, 180);
-        doc.text(splitText, padding + 2, y);
-        y += splitText.length * reviewLineHeight + 6;
-
-        if (index < keyReviews.length - 1) {
-            doc.setDrawColor(220, 220, 220);
-            doc.line(padding, y - 2, 200, y - 2);
-            y += 6;
-        }
-    });
-
-    // --- Footer ---
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text(
-            `Generated by Sentiment Analyzer | Page ${i} of ${pageCount}`,
-            105,
-            290,
-            { align: "center" }
-        );
-    }
-
-    // --- Save PDF ---
-    doc.save(`${productName.replace(/ /g, "_")}_Sentiment_Report.pdf`);
-    alert("Report generated successfully. Downloading PDF...");
+    // fallback
+    alert('Unsupported file type for demo. Supported: csv, txt, pdf, doc, docx, xls, xlsx');
 }
 
-async function analyzeReviews(isBulkRequest) {
-            // This function is placeholder for manual input
-            alert("Single review analysis is currently not configured to display in a stable way via the bulk redirect endpoint. Please use the Chrome Extension on an e-commerce page.");
-        }
+// creates a mock analysis object (keeps your existing mock structure) from an array of {review}
+function createMockBulkAnalysisFromReviews(reviews){
+    const mockBulkResults = (reviews || []).map((r, i) => {
+        const sentiment = i % 3 === 0 ? 'Positive' : (i % 3 === 1 ? 'Negative' : 'Neutral');
+        const aspects = (sentiment === 'Positive') ? { quality: 'Positive', delivery: 'Positive' } : { size: 'Negative', price: 'Neutral' };
+        return { review: (r.review||'').slice(0,140), sentiment: sentiment, confidence: (0.7+Math.random()*0.3).toFixed(2), rating: (Math.floor(Math.random()*5)+1), date: `2024-05-${String(Math.floor(Math.random()*28)+1).padStart(2,'0')}`, aspects: aspects, emotion: ['Joy','Anger','Sadness','Neutral'][Math.floor(Math.random()*4)], intent: ['Purchase','Churn','Inquiry'][Math.floor(Math.random()*3)], is_sarcastic: Math.random() < 0.08, language: ['English','Hinglish','Spanish'][Math.floor(Math.random()*3)] };
+    });
 
-        async function loadDataFromSession(sessionId) {
-            const endpoint = `/api/get_session_data/${sessionId}`;
-            
-            try {
-                const response = await fetch(endpoint);
-                if (!response.ok) {
-                    throw new Error(`Could not load session data. Status: ${response.status}`);
-                }
-                const data = await response.json();
-                processBulkData(data);
-            } catch (error) {
-                console.error("Session load failed:", error);
-                alert(`Error loading results: ${error.message}. Session may have expired.`); 
-                document.getElementById('resultsContainer').style.display = 'none';
-            }
-        }
+    const positiveCount = mockBulkResults.filter(r=>r.sentiment==='Positive').length;
+    const negativeCount = mockBulkResults.filter(r=>r.sentiment==='Negative').length;
+    const neutralCount = mockBulkResults.length - positiveCount - negativeCount;
+    const total = mockBulkResults.length;
+    const recommendationStatus = positiveCount > (negativeCount + neutralCount) ? 'Good' : (negativeCount > positiveCount ? 'Bad' : 'Decent');
 
-        // --- INITIALIZATION (Sets default visibility) ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const sessionId = urlParams.get('session_id');
+    const analysis = {
+        product_name: 'Uploaded File Analysis',
+        product_image_url: '',
+        summary: { Positive: positiveCount, Negative: negativeCount, Neutral: neutralCount, total: total },
+        recommendation: { status: recommendationStatus, message: `Demo analysis of ${total} items. Overall sentiment: ${recommendationStatus}.` },
+        drill_down_matrix: [ { aspect:'Quality', Positive:10, Negative:2, Neutral:1 }, { aspect:'Price', Positive:8, Negative:5, Neutral:3 }, { aspect:'Delivery', Positive:12, Negative:1, Neutral:0 }, { aspect:'Size', Positive:1, Negative:15, Neutral:4 } ],
+        detailed_results: mockBulkResults
+    };
 
-            // Default state: Manual section visible, Bulk section hidden
-            document.getElementById('manual-analysis-section').style.display = 'block';
-            document.getElementById('bulk-analysis-output').style.display = 'none';
+    processBulkData(analysis);
+}
 
-            if (sessionId) {
-                document.title = "Analysis Results - Loading...";
-                loadDataFromSession(sessionId);
-            } else {
-                // If no session ID, the manual section remains visible
-                document.getElementById('resultsContainer').style.display = 'none';
-            }
+// Charts & rendering
+function updateChart(summary){ const data = [summary.Positive||0, summary.Negative||0, summary.Neutral||0]; const labels = ['Positive','Negative','Neutral']; const colors = ['#06d6a0','#ff6b6b','#9aa5b1']; if(sentimentChart) sentimentChart.destroy(); const ctx = document.getElementById('sentimentChart').getContext('2d'); sentimentChart = new Chart(ctx, { type:'doughnut', data:{ labels, datasets:[{ data, backgroundColor: colors, hoverOffset:4 }] }, options:{ responsive:true, plugins:{ legend:{ position:'top' } } } }); }
+function updateAspectMatrixChart(matrixData){ const top = (matrixData||[]).slice(0,5); const labels = top.map(i=>i.aspect||'N/A'); const data = { labels, datasets: [ { label:'Positive', data: top.map(i=>i.Positive||0), backgroundColor:'#06d6a0' }, { label:'Negative', data: top.map(i=>i.Negative||0), backgroundColor:'#ff6b6b' }, { label:'Neutral', data: top.map(i=>i.Neutral||0), backgroundColor:'#9aa5b1' } ] }; if(aspectMatrixChart) aspectMatrixChart.destroy(); const ctx = document.getElementById('aspectMatrixChart').getContext('2d'); aspectMatrixChart = new Chart(ctx, { type:'bar', data, options:{ responsive:true, scales:{ x:{ stacked:true }, y:{ stacked:true, title:{ display:true, text:'Review Count' } } } } }); }
+function updateTimeSeriesChart(detailedResults){ const daily = (detailedResults||[]).reduce((acc,it)=>{ const d = it.date || new Date().toISOString().slice(0,10); if(!acc[d]) acc[d] = { total:0, positive:0, negative:0 }; acc[d].total++; if(it.sentiment==='Positive') acc[d].positive++; if(it.sentiment==='Negative') acc[d].negative++; return acc; }, {}); const dates = Object.keys(daily).sort(); const pos = dates.map(d=> daily[d].total? (daily[d].positive/daily[d].total)*100:0); const neg = dates.map(d=> daily[d].total? (daily[d].negative/daily[d].total)*100:0); if(timeSeriesChart) timeSeriesChart.destroy(); const ctx = document.getElementById('timeSeriesChart').getContext('2d'); timeSeriesChart = new Chart(ctx, { type:'line', data:{ labels:dates, datasets:[ { label:'Positive Trend (%)', data:pos, borderColor:'#06d6a0', tension:0.1, fill:false }, { label:'Negative Trend (%)', data:neg, borderColor:'#ff6b6b', tension:0.1, fill:false } ] }, options:{ responsive:true, scales:{ y:{ min:0, max:100, title:{ display:true, text:'Percentage (%)' } } } } }); }
+
+function displayRecommendation(productName, recommendation, imageUrl){ const card = document.getElementById('recommendationCard'); const content = document.getElementById('recommendationContent'); const message = document.getElementById('recommendationMessage'); const nameDisplay = document.getElementById('productNameDisplay'); const imageDisplay = document.getElementById('productImageDisplay'); if(!card) return; card.style.display = 'block'; nameDisplay.textContent = productName || 'Analyzed Product'; message.textContent = (recommendation && recommendation.message) ? recommendation.message : ''; if(imageUrl){ imageDisplay.src=imageUrl; imageDisplay.style.display='block'; } else { imageDisplay.style.display='none'; imageDisplay.src=''; } let icon='bi-info-circle-fill text-warning', title='MIXED REVIEWS', bg='border-warning'; if(recommendation && recommendation.status==='Good'){ icon='bi-check-circle-fill text-success'; title='GO FOR IT!'; bg='border-success'; } else if(recommendation && recommendation.status==='Bad'){ icon='bi-x-octagon-fill text-danger'; title='PROCEED WITH CAUTION'; bg='border-danger'; } content.innerHTML = `<i class="bi ${icon}" style="font-size:3rem;"></i><h2 class="card-text display-3 fw-bold">${title}</h2>`; card.className = `card shadow border-3 ${bg}`; }
+
+function populateDetailedList(data){ const list = document.getElementById('detailedResultsList'); list.innerHTML=''; const kw = (document.getElementById('keywordSearch').value||'').toLowerCase(); (data||[]).forEach(item=>{ if(kw && !(item.review||'').toLowerCase().includes(kw)) return; const sentimentClass = getSentimentClass(item.sentiment); const aspectHtml = formatAspects(item.aspects); const ratingStars = getStarRating(item.rating); const emotionTag = item.emotion? `<span class="badge ${getSentimentClass(item.emotion)} text-uppercase me-1">${item.emotion}</span>`:''; const intentTag = item.intent? `<span class="badge ${item.intent==='Churn'?'badge-churn':'badge-inquiry'} text-uppercase me-1">${item.intent}</span>`:''; const sarcasmTag = item.is_sarcastic? `<span class="badge badge-sarcasm text-uppercase me-1">SARCASTIC</span>`:''; const languageTag = item.language && item.language!=='English'? `<span class="badge bg-light text-dark me-1">${item.language}</span>`:''; const li = ` <li class="list-group-item" data-sentiment="${item.sentiment}" data-rating="${item.rating||0}"> <div class="d-flex justify-content-between"> <span class="d-block mb-1 text-truncate"><strong>Review:</strong> ${item.review}</span> <span class="badge bg-light text-dark">${ratingStars}</span> </div> <div class="d-flex align-items-center mb-1"> <span class="badge ${sentimentClass} rounded-pill me-2">${item.sentiment} (${item.confidence})</span> ${emotionTag}${intentTag}${sarcasmTag}${languageTag} </div> <div class="mt-1">${aspectHtml}</div> </li>`; list.insertAdjacentHTML('beforeend', li); }); }
+function filterReviews(sentimentFilter='All'){ let filtered = allReviewData; if(sentimentFilter!=='All') filtered = (allReviewData||[]).filter(i=>i.sentiment===sentimentFilter); populateDetailedList(filtered); }
+
+function processBulkData(data){ currentAnalysisData = data||{}; document.getElementById('manual-analysis-section').style.display='none'; document.getElementById('bulk-analysis-output').style.display='block'; document.getElementById('resultsContainer').style.display='block'; allReviewData = data.detailed_results || []; const summary = data.summary || {Positive:0,Negative:0,Neutral:0,total: (allReviewData.length)}; document.getElementById('positiveCount').textContent = summary.Positive||0; document.getElementById('negativeCount').textContent = summary.Negative||0; document.getElementById('neutralCount').textContent = summary.Neutral||0; document.getElementById('totalReviews').textContent = summary.total||allReviewData.length; displayRecommendation(data.product_name||'Analyzed Product', data.recommendation||{}, data.product_image_url||''); updateChart(summary); updateAspectMatrixChart(data.drill_down_matrix||[]); updateTimeSeriesChart(allReviewData); populateDetailedList(allReviewData); }
+
+// PDF generation: concise demo
+async function generatePDFReport(){ if(!currentAnalysisData || Object.keys(currentAnalysisData).length===0){ alert('Please analyze a product first to generate a report.'); return; } const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text('Sentiment Analysis Report', 14, 20); doc.setFontSize(11); doc.text(currentAnalysisData.product_name || 'Uploaded File Analysis', 14, 30); doc.save((currentAnalysisData.product_name||'sentiment_report').replace(/\s+/g,'_') + '.pdf'); }
+
+// initialization
+window.addEventListener('DOMContentLoaded', ()=>{
+    // default view
+    document.getElementById('manual-analysis-section').style.display='block';
+    document.getElementById('bulk-analysis-output').style.display='none';
+    document.getElementById('resultsContainer').style.display='none';
+
+    // sidebar link wiring (safe)
+    document.querySelectorAll('.sidebar-link').forEach((link, idx) => {
+        if (idx === 0) link.classList.remove('inactive');
+        else link.classList.add('inactive');
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = (idx === 0) ? 'manual-analysis-section' : 'bulk-analysis-output';
+            showSection(target, link);
         });
-
+    });
+});
 </script>
 </body>
 </html>
