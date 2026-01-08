@@ -3,375 +3,835 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Actionable E-commerce Sentiment Dashboard</title>
+<title>Actionable E‑commerce Sentiment Dashboard</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <style>
+    :root {
+        --bg-body: #020617;
+        --bg-sidebar: #020617;
+        --bg-surface: #020617;
+        --bg-elevated: #020617;
+        --accent: #4f46e5;
+        --accent-soft: rgba(79, 70, 229, 0.14);
+        --accent-strong: #4f46e5;
+        --text-muted: #9ca3af;
+        --border-soft: rgba(148, 163, 184, 0.2);
+        --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.75);
+        --radius-lg: 18px;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
     body {
-        font-family: 'Inter', sans-serif;
-        background: #f5f7fa;
-        color: #333;
-    }
-
-    /* Header */
-    .header {
-        background: linear-gradient(90deg,#83d0cb,#145277);
-        color: white;
-        padding: 25px 0;
-        margin-bottom: 30px;
-        border-radius: 0 0 20px 20px;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
-
-    .header h1 {
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
-
-    .header p {
-        font-weight: 500;
-        opacity: 0.9;
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background:
+            radial-gradient(circle at top left, rgba(79,70,229,0.35), transparent 55%),
+            radial-gradient(circle at bottom right, rgba(16,185,129,0.25), transparent 55%),
+            #020617;
+        color: #e5e7eb;
+        min-height: 100vh;
+        overflow-x: hidden;
     }
 
     /* Sidebar */
     .sidebar {
         position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
+        inset-block: 12px;
+        left: 12px;
         width: 250px;
-        background: linear-gradient(180deg,#1e1e2f,#2a2a3e);
-        color: white;
-        padding-top: 20px;
+        border-radius: 22px;
+        padding: 18px 16px 16px;
+        background: radial-gradient(circle at 0 0, rgba(148,163,184,0.25), rgba(15,23,42,0.92));
+        border: 1px solid rgba(148,163,184,0.25);
+        box-shadow: 0 30px 50px rgba(15,23,42,0.9);
+        backdrop-filter: blur(22px);
+        color: #e5e7eb;
         overflow-y: auto;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.15);
     }
 
-    .sidebar h5 {
-        font-weight: 700;
+    .sidebar-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+
+    .brand-logo {
+        width: 38px;
+        height: 38px;
+        border-radius: 16px;
+        background:
+            conic-gradient(from 210deg, #4f46e5, #22c55e, #06b6d4, #4f46e5);
+        position: relative;
+        box-shadow: 0 0 0 1px rgba(15,23,42,0.8),
+                    0 14px 30px rgba(15,23,42,0.9);
+    }
+
+    .brand-logo::after {
+        content: "";
+        position: absolute;
+        inset: 5px;
+        border-radius: 12px;
+        background:
+            radial-gradient(circle at 0 0, rgba(255,255,255,0.5), transparent 60%);
+        mix-blend-mode: screen;
+    }
+
+    .brand-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
         text-transform: uppercase;
-        letter-spacing: 1px;
+    }
+
+    .brand-sub {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .sidebar-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.72rem;
+        padding: 5px 10px;
+        border-radius: 999px;
+        background: rgba(22,163,74,0.12);
+        color: #bbf7d0;
+        border: 1px solid rgba(34,197,94,0.4);
+        margin-bottom: 14px;
+    }
+
+    .sidebar-pill i {
+        font-size: 0.85rem;
+    }
+
+    .sidebar h6 {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--text-muted);
+        margin: 16px 4px 6px;
     }
 
     .sidebar-link {
-        padding: 12px 20px;
-        display: block;
-        color: rgba(255,255,255,0.85);
+        padding: 10px 11px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: rgba(248, 250, 252, 0.9);
+        font-size: 0.84rem;
         font-weight: 500;
         text-decoration: none;
-        border-radius: 8px;
-        margin: 5px 10px;
-        transition: all 0.3s;
+        border-radius: 12px;
+        margin: 3px 2px;
+        border: 1px solid transparent;
+        transition: all 0.18s ease-out;
     }
 
-    .sidebar-link:hover, .sidebar-link.active {
-        background-color: #5656a0;
-        color: #fff;
-        transform: translateX(5px);
+    .sidebar-link i {
+        font-size: 1rem;
     }
 
-    /* Main Content */
+    .sidebar-link span {
+        flex: 1;
+    }
+
+    .sidebar-link small {
+        font-size: 0.68rem;
+        color: var(--text-muted);
+    }
+
+    .sidebar-link:hover,
+    .sidebar-link.active {
+        background: linear-gradient(135deg, rgba(79,70,229,0.22), rgba(16,185,129,0.16));
+        border-color: rgba(129,140,248,0.8);
+        box-shadow: 0 8px 25px rgba(15,23,42,0.7);
+        transform: translateY(-1px);
+    }
+
+    .sidebar-footer {
+        margin-top: 18px;
+        padding: 10px;
+        border-radius: 16px;
+        border: 1px dashed rgba(148,163,184,0.35);
+        background: rgba(15,23,42,0.85);
+        font-size: 0.74rem;
+        color: var(--text-muted);
+    }
+
+    .sidebar-footer strong {
+        color: #e5e7eb;
+    }
+
+    /* Main layout */
     .main-content {
-        margin-left: 250px;
-        padding: 20px 30px;
+        margin-left: 280px;
+        padding: 18px 24px 26px;
     }
 
-    /* Card Styles */
-    .card-sentiment {
-        border-radius: 15px;
-        transition: all 0.3s ease;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+    @media (max-width: 991px) {
+        .sidebar {
+            position: static;
+            width: 100%;
+            margin: 10px auto 0;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .sidebar-nav {
+            display: flex;
+            gap: 6px;
+        }
+        .sidebar-footer {
+            display: none;
+        }
+        .main-content {
+            margin-left: 0;
+            padding-inline: 14px;
+            padding-top: 16px;
+        }
     }
 
-    .card-sentiment:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    /* Header */
+    .header {
+        border-radius: 20px;
+        padding: 18px 20px 14px;
+        margin-bottom: 18px;
+        position: relative;
+        overflow: hidden;
+        background:
+            radial-gradient(circle at 0 0, rgba(129,140,248,0.26), transparent 55%),
+            radial-gradient(circle at 100% 0, rgba(16,185,129,0.26), transparent 55%),
+            linear-gradient(135deg, #020617, #020617);
+        border: 1px solid rgba(148,163,184,0.16);
+        box-shadow: var(--shadow-soft);
     }
 
+    .header::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(circle at 20% 0%, rgba(248,250,252,0.09), transparent 45%);
+        opacity: 0.9;
+        pointer-events: none;
+    }
+
+    .header-inner {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+    }
+
+    .header h1 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin: 0;
+        color: #f9fafb;
+    }
+
+    .header p {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        margin: 4px 0 0;
+    }
+
+    .header-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .header-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.72rem;
+        padding: 6px 9px;
+        border-radius: 999px;
+        background: rgba(15,23,42,0.8);
+        color: var(--text-muted);
+        border: 1px solid rgba(148,163,184,0.35);
+    }
+
+    .header-chip i {
+        font-size: 0.9rem;
+        color: #a5b4fc;
+    }
+
+    /* Cards / sections */
+    .card-glass {
+        border-radius: 20px;
+        background: radial-gradient(circle at 0 0, rgba(148,163,184,0.18), rgba(15,23,42,0.96));
+        border: 1px solid rgba(148,163,184,0.22);
+        backdrop-filter: blur(22px);
+        box-shadow: var(--shadow-soft);
+        color: #e5e7eb;
+    }
+
+    .card-glass .card-header {
+        border-bottom: 1px solid rgba(148,163,184,0.2);
+        background: transparent;
+        padding-bottom: 10px;
+    }
+
+    .card-glass .card-body {
+        padding-top: 14px;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        font-weight: 500;
+        padding: 8px 10px;
+        border-radius: 999px !important;
+        margin-right: 6px;
+        background: transparent;
+    }
+
+    .nav-tabs {
+        border: none;
+        padding: 4px;
+        border-radius: 999px;
+        background: rgba(15,23,42,0.9);
+        display: inline-flex;
+    }
+
+    .nav-tabs .nav-link.active {
+        background: linear-gradient(135deg, #4f46e5, #22c55e);
+        color: #f9fafb;
+        box-shadow: 0 10px 25px rgba(15,23,42,0.9);
+    }
+
+    textarea.form-control {
+        background: radial-gradient(circle at 0 0, rgba(148,163,184,0.15), rgba(15,23,42,0.96));
+        border-radius: 14px;
+        border: 1px solid rgba(51,65,85,0.9);
+        color: #e5e7eb;
+        font-size: 0.9rem;
+    }
+
+    textarea.form-control::placeholder {
+        color: rgba(148,163,184,0.85);
+    }
+
+    textarea.form-control:focus {
+        border-color: var(--accent-strong);
+        box-shadow: 0 0 0 1px rgba(79,70,229,0.8);
+    }
+
+    /* Buttons */
+    .btn-primary,
+    .btn-secondary {
+        border-radius: 999px;
+        font-weight: 500;
+        font-size: 0.9rem;
+        padding-block: 8px;
+        padding-inline: 16px;
+        border: none;
+        transition: all 0.16s ease-out;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #4f46e5, #22c55e);
+        box-shadow: 0 14px 32px rgba(22,101,52,0.8);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 18px 40px rgba(22,101,52,0.9);
+        filter: brightness(1.05);
+    }
+
+    .btn-secondary {
+        background: rgba(15,23,42,1);
+        border: 1px solid rgba(148,163,184,0.7);
+        color: #e5e7eb;
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 25px rgba(15,23,42,0.9);
+        border-color: rgba(129,140,248,0.8);
+    }
+
+    .btn-outline-secondary.btn-sm {
+        border-radius: 999px;
+        font-size: 0.75rem;
+        border-color: rgba(148,163,184,0.5);
+        color: #e5e7eb;
+    }
+
+    .btn-outline-secondary.btn-sm:hover {
+        background: rgba(15,23,42,0.9);
+        border-color: rgba(129,140,248,0.8);
+    }
+
+    /* Badges / tags */
     .badge-positive {
-        background-color: #28a745 !important;
+        background: linear-gradient(135deg, #22c55e, #16a34a) !important;
         color: white !important;
     }
     .badge-negative {
-        background-color: #dc3545 !important;
+        background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
         color: white !important;
     }
     .badge-neutral {
-        background-color: #6c757d !important;
+        background: linear-gradient(135deg, #6b7280, #4b5563) !important;
         color: white !important;
     }
     .badge-anger {
-        background-color: #ff5722 !important;
+        background-color: #f97316 !important;
         color: white !important;
     }
     .badge-joy {
-        background-color: #ffeb3b !important;
-        color: #333 !important;
+        background-color: #eab308 !important;
+        color: #111827 !important;
     }
     .badge-churn {
-        background-color: #ffc107 !important;
-        color: #333 !important;
+        background-color: #facc15 !important;
+        color: #111827 !important;
     }
     .badge-inquiry {
-        background-color: #17a2b8 !important;
+        background-color: #0ea5e9 !important;
         color: white !important;
     }
     .badge-sarcasm {
-        background-color: #ff9800 !important;
+        background: linear-gradient(135deg, #f97316, #ea580c) !important;
         color: white !important;
     }
 
     .aspect-tag {
         margin-right: 5px;
         margin-top: 5px;
-        font-size: 0.85em;
+        font-size: 0.78em;
         font-weight: 500;
+        border-radius: 999px !important;
+        padding-inline: 8px;
     }
 
     .rating-star {
-        color: gold;
-        margin-right: 2px;
+        color: #fbbf24;
+        margin-right: 1px;
+        font-size: 0.75rem;
     }
 
-    /* Buttons */
-    .btn-primary, .btn-secondary {
-        border-radius: 50px;
-        font-weight: 600;
-        transition: all 0.3s ease;
+    .review-list-wrapper {
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 4px;
     }
 
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-    }
-
-    /* Review List */
     .list-group-item {
-        border-radius: 10px;
+        border-radius: 14px;
         margin-bottom: 8px;
-        border: none;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-    }
-    .list-group-item:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+        border: 1px solid rgba(31,41,55,0.7);
+        background: radial-gradient(circle at 0 0, rgba(15,23,42,0.95), rgba(15,23,42,0.98));
+        box-shadow: 0 10px 28px rgba(15,23,42,0.85);
+        color: #e5e7eb;
+        transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
     }
 
-    /* Recommendation Card */
+    .list-group-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 40px rgba(15,23,42,0.95);
+        border-color: rgba(129,140,248,0.8);
+    }
+
+    /* Recommendation card */
     #recommendationCard {
-        border-radius: 15px;
-        padding: 20px;
-        transition: all 0.3s;
-        text-align: center;
+        border-radius: 22px;
+        padding: 0;
+        background: radial-gradient(circle at 0 0, rgba(34,197,94,0.12), rgba(15,23,42,0.98));
+        border-width: 1px;
+        border-style: solid;
+    }
+
+    #recommendationCard .card-body {
+        padding: 20px 22px;
     }
 
     #recommendationCard h2 {
         font-weight: 700;
+        letter-spacing: 0.04em;
     }
 
-    /* Setting initial states */
-    #bulk-analysis-output {
-        display: block; /* Hide Dashboard Results by default */
+    /* Stats cards */
+    .card-sentiment {
+        border-radius: 18px;
+        background: radial-gradient(circle at 0 0, rgba(148,163,184,0.16), rgba(15,23,42,0.98));
+        border: 1px solid rgba(148,163,184,0.22);
+        box-shadow: var(--shadow-soft);
+        color: #e5e7eb;
+        transition: transform 0.16s ease-out, box-shadow 0.16s ease-out, border-color 0.16s ease-out;
     }
-    #manual-analysis-section {
-        display: none; /* Show Manual Analysis by default */
+
+    .card-sentiment:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 50px rgba(15,23,42,0.96);
+        border-color: rgba(129,140,248,0.85);
+    }
+
+    /* Charts */
+    .chart-card .card-header {
+        background: transparent;
+        border-bottom: 1px solid rgba(148,163,184,0.22);
+        font-size: 0.86rem;
+        font-weight: 500;
+        color: var(--text-muted);
+    }
+
+    .chart-card {
+        border-radius: 18px;
+        background: radial-gradient(circle at 0 0, rgba(148,163,184,0.14), rgba(15,23,42,0.98));
+        border: 1px solid rgba(148,163,184,0.2);
+        box-shadow: var(--shadow-soft);
+        color: #e5e7eb;
+    }
+
+    /* CSV alert */
+    .alert-info {
+        border-radius: 14px;
+        border: 1px solid rgba(59,130,246,0.4);
+        background: radial-gradient(circle at 0 0, rgba(59,130,246,0.20), rgba(15,23,42,1));
+        color: #dbeafe;
+        font-size: 0.8rem;
+    }
+
+    /* Keyword search */
+    #keywordSearch {
+        background: rgba(15,23,42,1);
+        border-radius: 999px;
+        border: 1px solid rgba(148,163,184,0.6);
+        color: #e5e7eb;
+        font-size: 0.8rem;
+    }
+
+    #keywordSearch::placeholder {
+        color: rgba(148,163,184,0.85);
+    }
+
+    #keywordSearch:focus {
+        border-color: rgba(129,140,248,0.9);
+        box-shadow: 0 0 0 1px rgba(79,70,229,0.8);
+    }
+
+    hr {
+        border-top-width: 2px;
+        border-color: rgba(30,64,175,0.9);
+        margin-block: 18px 24px;
+    }
+
+    /* File input */
+    input[type="file"].form-control {
+        background: rgba(15,23,42,1);
+        border-radius: 12px;
+        border: 1px dashed rgba(148,163,184,0.7);
+        color: #e5e7eb;
+        font-size: 0.85rem;
+    }
+
+    input[type="file"].form-control::file-selector-button {
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(135deg, #4f46e5, #22c55e);
+        color: white;
+        padding: 6px 12px;
+        margin-right: 10px;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+    /* Download button */
+    .btn-lg.btn-primary {
+        border-radius: 999px;
+        padding-inline: 24px;
+        padding-block: 10px;
+        font-size: 0.92rem;
     }
 </style>
 </head>
 <body>
 
-
-
 <div class="sidebar">
-    <h5 class="text-center mb-4 text-warning">Sentiment Tool</h5>
-    <ul class="nav flex-column">
-        <li class="nav-item">
+    <div>
+        <div class="sidebar-brand">
+            <div class="brand-logo"></div>
+            <div>
+                <div class="brand-title">Sentiment Studio</div>
+                <div class="brand-sub">Real-time ecommerce insights</div>
+            </div>
+        </div>
+        <div class="sidebar-pill">
+            <i class="bi bi-lightning-charge-fill"></i>
+            <span>AI-powered review analysis</span>
+        </div>
+
+        <h6>Workspace</h6>
+        <div class="sidebar-nav">
             <a class="sidebar-link active" href="#" onclick="showSection('manual-analysis-section', this)">
-                <i class="bi bi-pencil-square me-2"></i> Manual Analysis
+                <i class="bi bi-pencil-square"></i>
+                <span>
+                    Manual analysis
+                    <br><small>Single text / CSV</small>
+                </span>
             </a>
-        </li>
-        <li class="nav-item">
             <a class="sidebar-link" href="#" onclick="showSection('bulk-analysis-output', this)">
-                <i class="bi bi-speedometer2 me-2"></i> Automated Analysis 
+                <i class="bi bi-speedometer2"></i>
+                <span>
+                    Automated dashboard
+                    <br><small>Scraped sessions</small>
+                </span>
             </a>
-        </li>
-    </ul>
+        </div>
+    </div>
+
+    <div class="sidebar-footer mt-3">
+        <strong>Tip:</strong> For bulk uploads, keep a column named <strong>review</strong> in your CSV for clean detection.
+    </div>
 </div>
 
 <div class="main-content">
-    <header class="header text-center">
-        <h1>🚀 Detailed Sentiment Analysis Dashboard</h1>
-        <p id="header-subtitle">Manually Analyze Text or Upload CSV</p>
+    <header class="header">
+        <div class="header-inner">
+            <div>
+                <h1>Detailed Sentiment Analysis Dashboard</h1>
+                <p id="header-subtitle">Manually analyze text or upload CSV</p>
+            </div>
+            <div class="header-chips">
+                <div class="header-chip">
+                    <i class="bi bi-graph-up"></i> Aspect-level signals
+                </div>
+                <div class="header-chip">
+                    <i class="bi bi-emoji-smile"></i> Emotion & intent tags
+                </div>
+                <div class="header-chip">
+                    <i class="bi bi-shield-check"></i> Churn & sarcasm flags
+                </div>
+            </div>
+        </div>
     </header>
 
     <div class="container-fluid">
-        
-        <div id="manual-analysis-section" class="row mb-5 pt-4">
+
+        <!-- Manual Analysis Panel -->
+        <div id="manual-analysis-section" class="row mb-4 pt-2">
             <div class="col-lg-8 mx-auto">
-                <div class="card shadow p-3 rounded-4">
-                    <div class="card-header bg-white rounded-top border-bottom-0">
+                <div class="card card-glass shadow">
+                    <div class="card-header border-0">
                         <ul class="nav nav-tabs card-header-tabs">
                             <li class="nav-item">
                                 <a class="nav-link active" aria-current="true" href="#single-review-tab" data-bs-toggle="tab">
-                                    <i class="bi bi-chat-text me-1"></i> Single Text Analysis
+                                    <i class="bi bi-chat-text me-1"></i> Single text analysis
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="#csv-upload-tab" data-bs-toggle="tab">
-                                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> CSV File Upload
+                                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> CSV bulk upload
                                 </a>
                             </li>
                         </ul>
                     </div>
-                    
+
                     <div class="card-body tab-content">
+                        <!-- Single Review -->
                         <div class="tab-pane fade show active" id="single-review-tab">
-                            <p class="text-muted">Enter a single review or comment for instant analysis:</p>
-                            <textarea id="reviewInput" class="form-control mb-3 rounded-3" rows="3" 
-                                placeholder="The screen resolution is superb, but the battery life is poor."></textarea>
-                            <button class="btn btn-secondary w-100" onclick="analyzeSingleReview()">Analyze Single Review</button>
-                            
-                            <div id="singleReviewOutput" class="mt-4 p-3 border rounded-3" style="display: none;">
-                                <h6>Detailed Analysis Result:</h6>
-                                <p class="mb-1">Overall Sentiment: <span id="singleSentiment" class="badge"></span></p>
-                                <p class="mb-1">Emotion Detected: <span id="singleEmotion" class="badge bg-info text-dark"></span></p>
-                                <p class="mb-1">User Intent: <span id="singleIntent" class="badge bg-primary"></span></p>
-                                <p class="mb-1">Aspects: <span id="singleAspects"></span></p>
-                                <p class="mb-0">Advanced Flags: 
+                            <p class="text-muted mb-2" style="font-size:0.85rem;">
+                                Enter any review or comment and get instant sentiment, emotion, intent and aspect tags.
+                            </p>
+                            <textarea id="reviewInput" class="form-control mb-3" rows="3"
+                                placeholder="Example: The screen resolution is superb, but the battery life is poor."></textarea>
+                            <button class="btn btn-secondary w-100 mb-2" onclick="analyzeSingleReview()">
+                                Analyze single review
+                            </button>
+
+                            <div id="singleReviewOutput" class="mt-3 p-3 border rounded-3" style="display: none; background: rgba(15,23,42,0.95); border-color: rgba(129,140,248,0.6)!important;">
+                                <h6 class="mb-2" style="font-size:0.9rem;">Detailed analysis result</h6>
+                                <p class="mb-1">
+                                    Overall sentiment:
+                                    <span id="singleSentiment" class="badge"></span>
+                                </p>
+                                <p class="mb-1">
+                                    Emotion detected:
+                                    <span id="singleEmotion" class="badge bg-info text-dark"></span>
+                                </p>
+                                <p class="mb-1">
+                                    User intent:
+                                    <span id="singleIntent" class="badge bg-primary"></span>
+                                </p>
+                                <p class="mb-1">
+                                    Aspects:
+                                    <span id="singleAspects"></span>
+                                </p>
+                                <p class="mb-0">
+                                    Advanced flags:
                                     <span id="singleSarcasm" class="badge bg-warning text-dark me-2"></span>
                                     <span id="singleLanguage" class="badge bg-secondary"></span>
                                 </p>
                             </div>
-                            </div>
+                        </div>
 
+                        <!-- CSV Upload -->
                         <div class="tab-pane fade" id="csv-upload-tab">
-                            <p class="text-muted">Upload a CSV file containing reviews for bulk analysis.</p>
+                            <p class="text-muted mb-2" style="font-size:0.85rem;">
+                                Upload a CSV file containing reviews for bulk analysis.
+                            </p>
                             <div class="alert alert-info small" role="alert">
-                                <strong>Tip:</strong> Your CSV should have a column named **"review"** with the text you want to analyze.
+                                <strong>Tip:</strong> Your CSV should have a column named <span class="fw-semibold">review</span> with the text you want to analyze.
                             </div>
                             <input type="file" id="csvFileInput" class="form-control mb-3" accept=".csv">
-                            <button class="btn btn-primary w-100" onclick="processCSVFile()">Upload & Analyze Bulk CSV</button>
+                            <button class="btn btn-primary w-100" onclick="processCSVFile()">
+                                <i class="bi bi-arrow-repeat me-1"></i>
+                                Upload & analyze bulk CSV
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <hr class="mb-5 border-4 border-primary">
+        <hr>
 
+        <!-- Bulk / Dashboard Output -->
         <div id="bulk-analysis-output">
             <div id="resultsContainer" class="row" style="display:none;">
-                <div class="col-12 mb-4">
-                    <h2 class="text-center text-primary">Automated Bulk Sentiment Output</h2>
-                    <p class="text-center text-muted">Data loaded from web scrape</p>
+                <div class="col-12 mb-3 text-center">
+                    <h2 class="text-primary" style="font-size:1.1rem; letter-spacing:0.05em; text-transform:uppercase;">
+                        Automated bulk sentiment output
+                    </h2>
+                    <p class="text-muted" style="font-size:0.8rem;">Data loaded from web scrape or CSV session</p>
                 </div>
 
-                <div class="col-12 mb-5">
-                    <div id="recommendationCard" class="card shadow border-3 border-dark" style="display:none;">
-                        <div class="card-body p-4">
-                            <div class="row g-0 align-items-center">
+                <!-- Recommendation -->
+                <div class="col-12 mb-4">
+                    <div id="recommendationCard" class="card shadow border-dark" style="display:none;">
+                        <div class="card-body">
+                            <div class="row g-3 align-items-center">
                                 <div class="col-md-3 d-flex justify-content-center">
                                     <img id="productImageDisplay" src="" alt="Product Image"
-                                        style="max-width:100%; max-height:250px; border-radius:12px; display:none;">
+                                        style="max-width:100%; max-height:250px; border-radius:14px; display:none; border:1px solid rgba(148,163,184,0.4);">
                                 </div>
                                 <div class="col-md-9">
-                                    <h4 class="card-title text-muted mb-3">Purchase Recommendation for:
+                                    <h4 class="card-title text-muted mb-2" style="font-size:0.95rem;">
+                                        Purchase recommendation for:
                                         <strong id="productNameDisplay"></strong>
                                     </h4>
-                                    <div id="recommendationContent"></div>
-                                    <p class="mt-3 text-muted" id="recommendationMessage"></p>
+                                    <div id="recommendationContent" class="mb-2"></div>
+                                    <p class="mt-1 text-muted" id="recommendationMessage" style="font-size:0.82rem;"></p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-12 mb-5 text-center">
+                <!-- Download & Summary cards -->
+                <div class="col-12 mb-4 text-center">
                     <button class="btn btn-lg btn-primary shadow-lg" onclick="generatePDFReport()">
-                        <i class="bi bi-file-earmark-arrow-down-fill me-2"></i> Download Analysis Report
+                        <i class="bi bi-file-earmark-arrow-down-fill me-2"></i>
+                        Download analysis report
                     </button>
                 </div>
 
                 <div class="col-lg-4 mb-4">
                     <div class="card card-sentiment h-100 border-success text-center">
                         <div class="card-body">
-                            <h5 class="card-title text-success">Positive Reviews</h5>
-                            <p class="card-text display-4" id="positiveCount">0</p>
+                            <h5 class="card-title text-success" style="font-size:0.9rem;">Positive reviews</h5>
+                            <p class="card-text display-6" id="positiveCount">0</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-4 mb-4">
                     <div class="card card-sentiment h-100 border-danger text-center">
                         <div class="card-body">
-                            <h5 class="card-title text-danger">Negative Reviews</h5>
-                            <p class="card-text display-4" id="negativeCount">0</p>
+                            <h5 class="card-title text-danger" style="font-size:0.9rem;">Negative reviews</h5>
+                            <p class="card-text display-6" id="negativeCount">0</p>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-4 mb-4">
                     <div class="card card-sentiment h-100 border-secondary text-center">
                         <div class="card-body">
-                            <h5 class="card-title text-secondary">Neutral Reviews</h5>
-                            <p class="card-text display-4" id="neutralCount">0</p>
+                            <h5 class="card-title text-secondary" style="font-size:0.9rem;">Neutral reviews</h5>
+                            <p class="card-text display-6" id="neutralCount">0</p>
                         </div>
                     </div>
                 </div>
 
+                <!-- Charts -->
                 <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header">Sentiment Distribution</div>
+                    <div class="card chart-card shadow h-100">
+                        <div class="card-header">
+                            Sentiment distribution
+                        </div>
                         <div class="card-body"><canvas id="sentimentChart"></canvas></div>
                     </div>
                 </div>
                 <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header bg-warning-subtle">Aspect-Sentiment Matrix (Top 5)</div>
+                    <div class="card chart-card shadow h-100">
+                        <div class="card-header">
+                            Aspect–sentiment matrix (top 5)
+                        </div>
                         <div class="card-body p-2"><canvas id="aspectMatrixChart"></canvas></div>
                     </div>
                 </div>
                 <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header bg-primary-subtle">Sentiment Trend Over Time</div>
+                    <div class="card chart-card shadow h-100">
+                        <div class="card-header">
+                            Sentiment trend over time
+                        </div>
                         <div class="card-body"><canvas id="timeSeriesChart"></canvas></div>
                     </div>
                 </div>
 
+                <!-- Detailed review breakdown -->
                 <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
+                    <div class="card card-glass shadow h-100">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            Detailed Review Breakdown (<span id="totalReviews">0</span> Total)
+                            <span>Detailed review breakdown (<span id="totalReviews">0</span> total)</span>
                         </div>
                         <div class="card-body p-3">
-                            <div class="d-flex mb-3 gap-2">
+                            <div class="d-flex mb-3 gap-2 flex-wrap">
                                 <button class="btn btn-outline-secondary btn-sm" onclick="filterReviews('All')">All</button>
-                                <button class="btn btn-outline-success btn-sm" onclick="filterReviews('Positive')">Positive</button>
-                                <button class="btn btn-outline-danger btn-sm" onclick="filterReviews('Negative')">Negative</button>
-                                <input type="text" id="keywordSearch" class="form-control form-control-sm ms-auto" onkeyup="filterReviews('All')" placeholder="Search keyword...">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="filterReviews('Positive')">Positive</button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="filterReviews('Negative')">Negative</button>
+                                <input type="text" id="keywordSearch"
+                                    class="form-control form-control-sm ms-auto"
+                                    onkeyup="filterReviews('All')"
+                                    placeholder="Search keyword...">
                             </div>
-                            <div class="review-list-wrapper" style="max-height: 400px; overflow-y:auto;">
+                            <div class="review-list-wrapper">
                                 <ul class="list-group list-group-flush" id="detailedResultsList"></ul>
                             </div>
                         </div>
                     </div>
                 </div>
 
-            </div>
-        </div>
-    </div>
-</div>
+            </div> <!-- resultsContainer -->
+        </div> <!-- bulk-analysis-output -->
+    </div> <!-- container-fluid -->
+</div> <!-- main-content -->
 
+<!-- Scripts (unchanged logic from your file) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
+<!-- Your existing JS from paste.txt goes here: keep all logic same -->
 <script>
-// --- Existing Global Variables ---
 let sentimentChart, aspectMatrixChart, timeSeriesChart;
 let allReviewData = []; 
 let currentAnalysisData = {}; 
@@ -1148,5 +1608,6 @@ async function analyzeReviews(isBulkRequest) {
         });
 
 </script>
+
 </body>
 </html>
