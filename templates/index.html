@@ -1,272 +1,345 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Sentiment Analyzer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Tailwind CDN (agar already use nahi kar rahe ho) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elegant Sentiment Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <script>
-    // Theme from localStorage
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "dark") {
-      document.documentElement.classList.remove("light");
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.classList.add("light");
-    }
-  </script>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #fff;
+            overflow-x: hidden;
+        }
 
-  <style>
-    /* Smooth transitions for theme */
-    * {
-      transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-    }
-  </style>
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 0 0 32px 32px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, rgba(255,255,255,0.8));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        /* Main Content Grid */
+        .main-content {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            padding: 2rem 1.5rem;
+            text-align: center;
+        }
+
+        .stat-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-positive { background: rgba(46, 204, 113, 0.2); border: 1px solid rgba(46, 204, 113, 0.4); }
+        .stat-negative { background: rgba(231, 76, 60, 0.2); border: 1px solid rgba(231, 76, 60, 0.4); }
+        .stat-neutral { background: rgba(52, 152, 219, 0.2); border: 1px solid rgba(52, 152, 219, 0.4); }
+
+        .stat-number {
+            font-size: clamp(2.5rem, 8vw, 4rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff, rgba(255,255,255,0.8));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .chart-card {
+            padding: 2rem;
+            height: 400px;
+        }
+
+        .chart-placeholder {
+            height: 100%;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            opacity: 0.7;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 280px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            padding: 2rem 1.5rem;
+            z-index: 1000;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            border-radius: 16px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link i {
+            margin-right: 1rem;
+            width: 24px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            transform: translateX(8px);
+        }
+
+        /* Main offset for sidebar */
+        @media (min-width: 1200px) {
+            .main-wrapper {
+                margin-left: 280px;
+            }
+        }
+
+        /* Mobile */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .main-wrapper {
+                margin-left: 0;
+            }
+        }
+
+        /* Button Styles */
+        .btn-modern {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-modern:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        }
+    </style>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-  <div class="min-h-screen flex flex-col">
+<body>
+    <div class="sidebar">
+        <h3><i class="bi bi-speedometer2"></i> Dashboard</h3>
+        <a href="#" class="nav-link active">
+            <i class="bi bi-house"></i> Overview
+        </a>
+        <a href="#" class="nav-link">
+            <i class="bi bi-chat-text"></i> Sentiment Analysis
+        </a>
+        <a href="#" class="nav-link">
+            <i class="bi bi-graph-up"></i> Analytics
+        </a>
+        <a href="#" class="nav-link">
+            <i class="bi bi-file-earmark-spreadsheet"></i> Reports
+        </a>
+        <a href="#" class="nav-link">
+            <i class="bi bi-gear"></i> Settings
+        </a>
+    </div>
 
-    <!-- Navbar -->
-    <header class="border-b border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur">
-      <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <div class="h-8 w-8 rounded-xl bg-gradient-to-tr from-indigo-500 via-sky-500 to-emerald-400 flex items-center justify-center text-white text-sm font-semibold shadow-md">
-            SA
-          </div>
-          <div>
-            <h1 class="text-base font-semibold tracking-tight">
-              Sentiment Analyzer
-            </h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400">
-              NLP powered review insights
-            </p>
-          </div>
-        </div>
+    <div class="main-wrapper">
+        <header class="header">
+            <h1>Sentiment Dashboard</h1>
+            <p>Professional analytics for e-commerce reviews</p>
+        </header>
 
-        <!-- Theme toggle -->
-        <button
-          id="themeToggle"
-          class="inline-flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700 px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700"
-        >
-          <span id="themeIcon">🌙</span>
-          <span id="themeLabel">Dark</span>
-        </button>
-      </div>
-    </header>
-
-    <!-- Main content -->
-    <main class="flex-1">
-      <div class="max-w-5xl mx-auto px-4 py-8 lg:py-10 grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-
-        <!-- Left: Input section -->
-        <section class="space-y-4">
-          <div
-            class="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 shadow-sm"
-          >
-            <div class="border-b border-slate-200/80 dark:border-slate-800 px-5 py-3 flex items-center justify-between">
-              <h2 class="text-sm font-semibold tracking-tight">
-                Analyze text
-              </h2>
-              <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-800">
-                Real-time
-              </span>
-            </div>
-
-            <div class="p-5 space-y-4">
-              <!-- Single review textarea -->
-              <div class="space-y-1.5">
-                <label class="text-xs font-medium text-slate-600 dark:text-slate-300">
-                  Single review or comment
-                </label>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                  Paste any customer review, tweet, or feedback and get instant sentiment with confidence score.
-                </p>
-                <textarea
-                  id="singleReviewInput"
-                  rows="4"
-                  class="mt-1.5 w-full rounded-xl border border-slate-200/80 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/70 px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500/70 focus:border-indigo-500/70 placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                  placeholder="Type or paste a review, e.g. “The product quality is amazing and delivery was super fast!”"
-                ></textarea>
-              </div>
-
-              <div class="flex flex-wrap items-center gap-3 justify-between">
-                <div class="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400">
-                  <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                  <span>Model: Logistic Regression (NLTK)</span>
+        <main class="main-content">
+            <div class="stats-grid">
+                <div class="glass-card stat-card">
+                    <div class="stat-icon stat-positive">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div class="stat-number">1,247</div>
+                    <div class="stat-label">Positive Reviews</div>
                 </div>
-                <button
-                  id="analyzeSingleBtn"
-                  class="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-medium text-white px-3 py-1.5 shadow-sm"
-                >
-                  Analyze text
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- CSV upload card -->
-          <div
-            class="rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-900/60 p-5 space-y-3"
-          >
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <h2 class="text-sm font-semibold tracking-tight">
-                  Bulk analysis (CSV)
-                </h2>
-                <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-                  Upload a CSV file with a <span class="font-semibold">review</span> column to analyze multiple texts at once.
-                </p>
-              </div>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-900 text-slate-100 dark:bg-slate-100 dark:text-slate-900">
-                Beta
-              </span>
-            </div>
-
-            <div
-              class="mt-2 flex flex-col items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-900/60 px-4 py-5 text-center"
-            >
-              <input type="file" id="csvUpload" accept=".csv" class="hidden" />
-              <button
-                id="csvUploadTrigger"
-                class="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-950 text-slate-50 dark:bg-slate-100 dark:text-slate-900 px-3 py-1.5 text-xs font-medium"
-              >
-                <span>Upload CSV</span>
-              </button>
-              <p class="text-[11px] text-slate-500 dark:text-slate-400 max-w-xs">
-                Max 5MB CSV file. Make sure it has a <span class="font-semibold">review</span> text column.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Right: Results section -->
-        <aside class="space-y-4">
-          <!-- Single result -->
-          <div class="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 shadow-sm p-5 space-y-4">
-            <div class="flex items-center justify-between">
-              <h2 class="text-sm font-semibold tracking-tight">
-                Result
-              </h2>
-              <span id="sentimentBadge" class="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                Waiting for input
-              </span>
-            </div>
-
-            <div class="space-y-3">
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-slate-500 dark:text-slate-400">Predicted sentiment</span>
-                <span id="sentimentLabel" class="font-semibold text-slate-800 dark:text-slate-100">
-                  —
-                </span>
-              </div>
-
-              <div class="space-y-1">
-                <div class="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
-                  <span>Confidence</span>
-                  <span id="confidenceValue">0%</span>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon stat-negative">
+                        <i class="bi bi-x-circle-fill"></i>
+                    </div>
+                    <div class="stat-number">289</div>
+                    <div class="stat-label">Negative Reviews</div>
                 </div>
-                <div class="h-1.5 w-full rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
-                  <div
-                    id="confidenceBar"
-                    class="h-1.5 w-0 rounded-full bg-gradient-to-r from-emerald-500 via-sky-500 to-indigo-500"
-                  ></div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon stat-neutral">
+                        <i class="bi bi-dash-circle"></i>
+                    </div>
+                    <div class="stat-number">456</div>
+                    <div class="stat-label">Neutral Reviews</div>
                 </div>
-              </div>
+                <div class="glass-card stat-card">
+                    <div class="stat-icon" style="background: rgba(155, 89, 182, 0.2); border: 1px solid rgba(155, 89, 182, 0.4);">
+                        <i class="bi bi-arrow-up-circle-fill"></i>
+                    </div>
+                    <div class="stat-number">87%</div>
+                    <div class="stat-label">Overall Score</div>
+                </div>
             </div>
-          </div>
 
-          <!-- Bulk summary -->
-          <div class="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-slate-950 text-slate-50 dark:bg-black/80 p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <h2 class="text-sm font-semibold tracking-tight">
-                Bulk summary
-              </h2>
-              <span class="text-[11px] text-slate-400">
-                CSV insights
-              </span>
+            <div class="charts-grid">
+                <div class="glass-card chart-card">
+                    <h3 style="margin-bottom: 1.5rem; font-weight: 600; opacity: 0.9;">Sentiment Distribution</h3>
+                    <div class="chart-placeholder">
+                        <i class="bi bi-pie-chart-fill" style="font-size: 3rem; opacity: 0.5;"></i>
+                        Chart.js Integration Ready
+                    </div>
+                </div>
+                <div class="glass-card chart-card">
+                    <h3 style="margin-bottom: 1.5rem; font-weight: 600; opacity: 0.9;">Trend Over Time</h3>
+                    <div class="chart-placeholder">
+                        <i class="bi bi-graph-up" style="font-size: 3rem; opacity: 0.5;"></i>
+                        Line Chart Area
+                    </div>
+                </div>
+                <div class="glass-card chart-card">
+                    <h3 style="margin-bottom: 1.5rem; font-weight: 600; opacity: 0.9;">Aspect Analysis</h3>
+                    <div class="chart-placeholder">
+                        <i class="bi bi-bar-chart" style="font-size: 3rem; opacity: 0.5;"></i>
+                        Bar Chart Ready
+                    </div>
+                </div>
             </div>
-            <ul class="space-y-1.5 text-[11px] text-slate-300">
-              <li class="flex justify-between">
-                <span>Positive reviews</span>
-                <span id="bulkPositive">0</span>
-              </li>
-              <li class="flex justify-between">
-                <span>Negative reviews</span>
-                <span id="bulkNegative">0</span>
-              </li>
-              <li class="flex justify-between">
-                <span>Neutral / mixed</span>
-                <span id="bulkNeutral">0</span>
-              </li>
-              <li class="flex justify-between border-t border-slate-800 mt-1 pt-1">
-                <span>Total processed</span>
-                <span id="bulkTotal">0</span>
-              </li>
-            </ul>
-          </div>
-        </aside>
-      </div>
-    </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-200/70 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80">
-      <div class="max-w-5xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 dark:text-slate-400">
-        <span>Made for quick sentiment experiments.</span>
-        <span>Built by You • NLP • 2026</span>
-      </div>
-    </footer>
-  </div>
+            <div style="text-align: center; margin-top: 3rem;">
+                <a href="#" class="btn-modern" style="font-size: 1.1rem;">
+                    <i class="bi bi-download"></i> Generate Report
+                </a>
+            </div>
+        </main>
+    </div>
 
-
-<!-- Scripts (unchanged logic from your file) -->
+  <!-- Scripts (unchanged logic from your file) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-  <!-- Your existing JS logic yahan attach kar do -->
-  <script>
-    // Theme toggle logic
-    const themeToggle = document.getElementById("themeToggle");
-    const themeIcon = document.getElementById("themeIcon");
-    const themeLabel = document.getElementById("themeLabel");
+<!-- Your existing JS from paste.txt goes here: keep all logic same -->
+<script>
 
-    function applyThemeUI() {
-      const isDark = document.documentElement.classList.contains("dark");
-      if (isDark) {
-        themeIcon.textContent = "☀️";
-        themeLabel.textContent = "Light";
-      } else {
-        themeIcon.textContent = "🌙";
-        themeLabel.textContent = "Dark";
-      }
-    }
+   document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+            });
+        });
 
-    themeToggle?.addEventListener("click", () => {
-      const root = document.documentElement;
-      const isDark = root.classList.contains("dark");
-
-      if (isDark) {
-        root.classList.remove("dark");
-        root.classList.add("light");
-        localStorage.setItem("theme", "light");
-      } else {
-        root.classList.remove("light");
-        root.classList.add("dark");
-        localStorage.setItem("theme", "dark");
-      }
-      applyThemeUI();
-    });
-
-    applyThemeUI();
-
-
-
-	let sentimentChart, aspectMatrixChart, timeSeriesChart;
+let sentimentChart, aspectMatrixChart, timeSeriesChart;
 let allReviewData = []; 
 let currentAnalysisData = {}; 
 
@@ -1041,6 +1114,6 @@ async function analyzeReviews(isBulkRequest) {
             }
         });
 
-  </script>
+</script>
 </body>
 </html>
