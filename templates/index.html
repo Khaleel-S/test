@@ -1,344 +1,377 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elegant Sentiment Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Actionable E-commerce Sentiment Dashboard</title>
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #fff;
-            overflow-x: hidden;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-        /* Glassmorphism Cards */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
-        }
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background: #f5f7fa;
+        color: #333;
+    }
 
-        .glass-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-        }
+    /* Header */
+    .header {
+        background: linear-gradient(90deg,#83d0cb,#145277);
+        color: white;
+        padding: 25px 0;
+        margin-bottom: 30px;
+        border-radius: 0 0 20px 20px;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
 
-        .glass-card:hover {
-            transform: translateY(-12px) scale(1.02);
-            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.2);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
+    .header h1 {
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
 
-        /* Header */
-        .header {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            border-radius: 0 0 32px 32px;
-            padding: 2rem;
-            text-align: center;
-            margin-bottom: 2rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
+    .header p {
+        font-weight: 500;
+        opacity: 0.9;
+    }
 
-        .header h1 {
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            font-weight: 700;
-            background: linear-gradient(135deg, #fff, rgba(255,255,255,0.8));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
-        }
+    /* Sidebar */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 250px;
+        background: linear-gradient(180deg,#1e1e2f,#2a2a3e);
+        color: white;
+        padding-top: 20px;
+        overflow-y: auto;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.15);
+    }
 
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-            font-weight: 400;
-        }
+    .sidebar h5 {
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
 
-        /* Main Content Grid */
-        .main-content {
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+    .sidebar-link {
+        padding: 12px 20px;
+        display: block;
+        color: rgba(255,255,255,0.85);
+        font-weight: 500;
+        text-decoration: none;
+        border-radius: 8px;
+        margin: 5px 10px;
+        transition: all 0.3s;
+    }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
+    .sidebar-link:hover, .sidebar-link.active {
+        background-color: #5656a0;
+        color: #fff;
+        transform: translateX(5px);
+    }
 
-        .stat-card {
-            padding: 2rem 1.5rem;
-            text-align: center;
-        }
+    /* Main Content */
+    .main-content {
+        margin-left: 250px;
+        padding: 20px 30px;
+    }
 
-        .stat-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1rem;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            backdrop-filter: blur(10px);
-        }
+    /* Card Styles */
+    .card-sentiment {
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+    }
 
-        .stat-positive { background: rgba(46, 204, 113, 0.2); border: 1px solid rgba(46, 204, 113, 0.4); }
-        .stat-negative { background: rgba(231, 76, 60, 0.2); border: 1px solid rgba(231, 76, 60, 0.4); }
-        .stat-neutral { background: rgba(52, 152, 219, 0.2); border: 1px solid rgba(52, 152, 219, 0.4); }
+    .card-sentiment:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
 
-        .stat-number {
-            font-size: clamp(2.5rem, 8vw, 4rem);
-            font-weight: 700;
-            background: linear-gradient(135deg, #fff, rgba(255,255,255,0.8));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
-        }
+    .badge-positive {
+        background-color: #28a745 !important;
+        color: white !important;
+    }
+    .badge-negative {
+        background-color: #dc3545 !important;
+        color: white !important;
+    }
+    .badge-neutral {
+        background-color: #6c757d !important;
+        color: white !important;
+    }
+    .badge-anger {
+        background-color: #ff5722 !important;
+        color: white !important;
+    }
+    .badge-joy {
+        background-color: #ffeb3b !important;
+        color: #333 !important;
+    }
+    .badge-churn {
+        background-color: #ffc107 !important;
+        color: #333 !important;
+    }
+    .badge-inquiry {
+        background-color: #17a2b8 !important;
+        color: white !important;
+    }
+    .badge-sarcasm {
+        background-color: #ff9800 !important;
+        color: white !important;
+    }
 
-        .stat-label {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            font-weight: 500;
-        }
+    .aspect-tag {
+        margin-right: 5px;
+        margin-top: 5px;
+        font-size: 0.85em;
+        font-weight: 500;
+    }
 
-        /* Charts Section */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 2rem;
-        }
+    .rating-star {
+        color: gold;
+        margin-right: 2px;
+    }
 
-        .chart-card {
-            padding: 2rem;
-            height: 400px;
-        }
+    /* Buttons */
+    .btn-primary, .btn-secondary {
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
 
-        .chart-placeholder {
-            height: 100%;
-            border-radius: 16px;
-            background: rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            opacity: 0.7;
-        }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    }
 
-        /* Sidebar */
-        .sidebar {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 280px;
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px);
-            padding: 2rem 1.5rem;
-            z-index: 1000;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-        }
+    /* Review List */
+    .list-group-item {
+        border-radius: 10px;
+        margin-bottom: 8px;
+        border: none;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    .list-group-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    }
 
-        .sidebar h3 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 2rem;
-            opacity: 0.9;
-        }
+    /* Recommendation Card */
+    #recommendationCard {
+        border-radius: 15px;
+        padding: 20px;
+        transition: all 0.3s;
+        text-align: center;
+    }
 
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            border-radius: 16px;
-            margin-bottom: 1rem;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
+    #recommendationCard h2 {
+        font-weight: 700;
+    }
 
-        .nav-link i {
-            margin-right: 1rem;
-            width: 24px;
-        }
-
-        .nav-link:hover, .nav-link.active {
-            background: rgba(255, 255, 255, 0.15);
-            color: #fff;
-            transform: translateX(8px);
-        }
-
-        /* Main offset for sidebar */
-        @media (min-width: 1200px) {
-            .main-wrapper {
-                margin-left: 280px;
-            }
-        }
-
-        /* Mobile */
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-            }
-            
-            .main-wrapper {
-                margin-left: 0;
-            }
-        }
-
-        /* Button Styles */
-        .btn-modern {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: #fff;
-            padding: 0.75rem 2rem;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-
-        .btn-modern:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-        }
-    </style>
+    /* Setting initial states */
+    #bulk-analysis-output {
+        display: block; /* Hide Dashboard Results by default */
+    }
+    #manual-analysis-section {
+        display: none; /* Show Manual Analysis by default */
+    }
+</style>
 </head>
 <body>
-    <div class="sidebar">
-        <h3><i class="bi bi-speedometer2"></i> Dashboard</h3>
-        <a href="#" class="nav-link active">
-            <i class="bi bi-house"></i> Overview
-        </a>
-        <a href="#" class="nav-link">
-            <i class="bi bi-chat-text"></i> Sentiment Analysis
-        </a>
-        <a href="#" class="nav-link">
-            <i class="bi bi-graph-up"></i> Analytics
-        </a>
-        <a href="#" class="nav-link">
-            <i class="bi bi-file-earmark-spreadsheet"></i> Reports
-        </a>
-        <a href="#" class="nav-link">
-            <i class="bi bi-gear"></i> Settings
-        </a>
+
+
+
+<div class="sidebar">
+    <h5 class="text-center mb-4 text-warning">Sentiment Tool</h5>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="sidebar-link active" href="#" onclick="showSection('manual-analysis-section', this)">
+                <i class="bi bi-pencil-square me-2"></i> Manual Analysis
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="sidebar-link" href="#" onclick="showSection('bulk-analysis-output', this)">
+                <i class="bi bi-speedometer2 me-2"></i> Automated Analysis 
+            </a>
+        </li>
+    </ul>
+</div>
+
+<div class="main-content">
+    <header class="header text-center">
+        <h1>🚀 Detailed Sentiment Analysis Dashboard</h1>
+        <p id="header-subtitle">Manually Analyze Text or Upload CSV</p>
+    </header>
+
+    <div class="container-fluid">
+        
+        <div id="manual-analysis-section" class="row mb-5 pt-4">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow p-3 rounded-4">
+                    <div class="card-header bg-white rounded-top border-bottom-0">
+                        <ul class="nav nav-tabs card-header-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" aria-current="true" href="#single-review-tab" data-bs-toggle="tab">
+                                    <i class="bi bi-chat-text me-1"></i> Single Text Analysis
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#csv-upload-tab" data-bs-toggle="tab">
+                                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> CSV File Upload
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card-body tab-content">
+                        <div class="tab-pane fade show active" id="single-review-tab">
+                            <p class="text-muted">Enter a single review or comment for instant analysis:</p>
+                            <textarea id="reviewInput" class="form-control mb-3 rounded-3" rows="3" 
+                                placeholder="The screen resolution is superb, but the battery life is poor."></textarea>
+                            <button class="btn btn-secondary w-100" onclick="analyzeSingleReview()">Analyze Single Review</button>
+                            
+                            <div id="singleReviewOutput" class="mt-4 p-3 border rounded-3" style="display: none;">
+                                <h6>Detailed Analysis Result:</h6>
+                                <p class="mb-1">Overall Sentiment: <span id="singleSentiment" class="badge"></span></p>
+                                <p class="mb-1">Emotion Detected: <span id="singleEmotion" class="badge bg-info text-dark"></span></p>
+                                <p class="mb-1">User Intent: <span id="singleIntent" class="badge bg-primary"></span></p>
+                                <p class="mb-1">Aspects: <span id="singleAspects"></span></p>
+                                <p class="mb-0">Advanced Flags: 
+                                    <span id="singleSarcasm" class="badge bg-warning text-dark me-2"></span>
+                                    <span id="singleLanguage" class="badge bg-secondary"></span>
+                                </p>
+                            </div>
+                            </div>
+
+                        <div class="tab-pane fade" id="csv-upload-tab">
+                            <p class="text-muted">Upload a CSV file containing reviews for bulk analysis.</p>
+                            <div class="alert alert-info small" role="alert">
+                                <strong>Tip:</strong> Your CSV should have a column named **"review"** with the text you want to analyze.
+                            </div>
+                            <input type="file" id="csvFileInput" class="form-control mb-3" accept=".csv">
+                            <button class="btn btn-primary w-100" onclick="processCSVFile()">Upload & Analyze Bulk CSV</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="mb-5 border-4 border-primary">
+
+        <div id="bulk-analysis-output">
+            <div id="resultsContainer" class="row" style="display:none;">
+                <div class="col-12 mb-4">
+                    <h2 class="text-center text-primary">Automated Bulk Sentiment Output</h2>
+                    <p class="text-center text-muted">Data loaded from web scrape</p>
+                </div>
+
+                <div class="col-12 mb-5">
+                    <div id="recommendationCard" class="card shadow border-3 border-dark" style="display:none;">
+                        <div class="card-body p-4">
+                            <div class="row g-0 align-items-center">
+                                <div class="col-md-3 d-flex justify-content-center">
+                                    <img id="productImageDisplay" src="" alt="Product Image"
+                                        style="max-width:100%; max-height:250px; border-radius:12px; display:none;">
+                                </div>
+                                <div class="col-md-9">
+                                    <h4 class="card-title text-muted mb-3">Purchase Recommendation for:
+                                        <strong id="productNameDisplay"></strong>
+                                    </h4>
+                                    <div id="recommendationContent"></div>
+                                    <p class="mt-3 text-muted" id="recommendationMessage"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 mb-5 text-center">
+                    <button class="btn btn-lg btn-primary shadow-lg" onclick="generatePDFReport()">
+                        <i class="bi bi-file-earmark-arrow-down-fill me-2"></i> Download Analysis Report
+                    </button>
+                </div>
+
+                <div class="col-lg-4 mb-4">
+                    <div class="card card-sentiment h-100 border-success text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">Positive Reviews</h5>
+                            <p class="card-text display-4" id="positiveCount">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card card-sentiment h-100 border-danger text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-danger">Negative Reviews</h5>
+                            <p class="card-text display-4" id="negativeCount">0</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <div class="card card-sentiment h-100 border-secondary text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-secondary">Neutral Reviews</h5>
+                            <p class="card-text display-4" id="neutralCount">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow h-100 rounded-4">
+                        <div class="card-header">Sentiment Distribution</div>
+                        <div class="card-body"><canvas id="sentimentChart"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow h-100 rounded-4">
+                        <div class="card-header bg-warning-subtle">Aspect-Sentiment Matrix (Top 5)</div>
+                        <div class="card-body p-2"><canvas id="aspectMatrixChart"></canvas></div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow h-100 rounded-4">
+                        <div class="card-header bg-primary-subtle">Sentiment Trend Over Time</div>
+                        <div class="card-body"><canvas id="timeSeriesChart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow h-100 rounded-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            Detailed Review Breakdown (<span id="totalReviews">0</span> Total)
+                        </div>
+                        <div class="card-body p-3">
+                            <div class="d-flex mb-3 gap-2">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="filterReviews('All')">All</button>
+                                <button class="btn btn-outline-success btn-sm" onclick="filterReviews('Positive')">Positive</button>
+                                <button class="btn btn-outline-danger btn-sm" onclick="filterReviews('Negative')">Negative</button>
+                                <input type="text" id="keywordSearch" class="form-control form-control-sm ms-auto" onkeyup="filterReviews('All')" placeholder="Search keyword...">
+                            </div>
+                            <div class="review-list-wrapper" style="max-height: 400px; overflow-y:auto;">
+                                <ul class="list-group list-group-flush" id="detailedResultsList"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
+</div>
 
-    <div class="main-wrapper">
-        <header class="header">
-            <h1>Sentiment Dashboard</h1>
-            <p>Professional analytics for e-commerce reviews</p>
-        </header>
-
-        <main class="main-content">
-            <div class="stats-grid">
-                <div class="glass-card stat-card">
-                    <div class="stat-icon stat-positive">
-                        <i class="bi bi-check-circle-fill"></i>
-                    </div>
-                    <div class="stat-number">1,247</div>
-                    <div class="stat-label">Positive Reviews</div>
-                </div>
-                <div class="glass-card stat-card">
-                    <div class="stat-icon stat-negative">
-                        <i class="bi bi-x-circle-fill"></i>
-                    </div>
-                    <div class="stat-number">289</div>
-                    <div class="stat-label">Negative Reviews</div>
-                </div>
-                <div class="glass-card stat-card">
-                    <div class="stat-icon stat-neutral">
-                        <i class="bi bi-dash-circle"></i>
-                    </div>
-                    <div class="stat-number">456</div>
-                    <div class="stat-label">Neutral Reviews</div>
-                </div>
-                <div class="glass-card stat-card">
-                    <div class="stat-icon" style="background: rgba(155, 89, 182, 0.2); border: 1px solid rgba(155, 89, 182, 0.4);">
-                        <i class="bi bi-arrow-up-circle-fill"></i>
-                    </div>
-                    <div class="stat-number">87%</div>
-                    <div class="stat-label">Overall Score</div>
-                </div>
-            </div>
-
-            <div class="charts-grid">
-                <div class="glass-card chart-card">
-                    <h3 style="margin-bottom: 1.5rem; font-weight: 600; opacity: 0.9;">Sentiment Distribution</h3>
-                    <div class="chart-placeholder">
-                        <i class="bi bi-pie-chart-fill" style="font-size: 3rem; opacity: 0.5;"></i>
-                        Chart.js Integration Ready
-                    </div>
-                </div>
-                <div class="glass-card chart-card">
-                    <h3 style="margin-bottom: 1.5rem; font-weight: 600; opacity: 0.9;">Trend Over Time</h3>
-                    <div class="chart-placeholder">
-                        <i class="bi bi-graph-up" style="font-size: 3rem; opacity: 0.5;"></i>
-                        Line Chart Area
-                    </div>
-                </div>
-                <div class="glass-card chart-card">
-                    <h3 style="margin-bottom: 1.5rem; font-weight: 600; opacity: 0.9;">Aspect Analysis</h3>
-                    <div class="chart-placeholder">
-                        <i class="bi bi-bar-chart" style="font-size: 3rem; opacity: 0.5;"></i>
-                        Bar Chart Ready
-                    </div>
-                </div>
-            </div>
-
-            <div style="text-align: center; margin-top: 3rem;">
-                <a href="#" class="btn-modern" style="font-size: 1.1rem;">
-                    <i class="bi bi-download"></i> Generate Report
-                </a>
-            </div>
-        </main>
-    </div>
-
-  <!-- Scripts (unchanged logic from your file) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script> 
 
-<!-- Your existing JS from paste.txt goes here: keep all logic same -->
 <script>
-
-   document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-            });
-        });
-
+// --- Existing Global Variables ---
 let sentimentChart, aspectMatrixChart, timeSeriesChart;
 let allReviewData = []; 
 let currentAnalysisData = {}; 
