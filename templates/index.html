@@ -1,398 +1,324 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Actionable E-commerce Sentiment Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentiment Pro | AI Insights</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-<style>
-    body {
-        font-family: 'Inter', sans-serif;
-        background: #f5f7fa;
-        color: #333;
-    }
+    <style>
+        :root {
+            --bg-main: #0a0a0c;
+            --bg-card: #111114;
+            --primary: #8b5cf6;
+            --secondary: #d946ef;
+            --accent: #3b82f6;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+        }
 
-    /* Header */
-    .header {
-        background: linear-gradient(90deg,#83d0cb,#145277);
-        color: white;
-        padding: 25px 0;
-        margin-bottom: 30px;
-        border-radius: 0 0 20px 20px;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-    }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+        }
 
-    .header h1 {
-        font-weight: 700;
-        margin-bottom: 5px;
-    }
+        /* --- Custom Mesh Background --- */
+        .mesh-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 100% 100%, rgba(217, 70, 239, 0.1) 0%, transparent 40%);
+        }
 
-    .header p {
-        font-weight: 500;
-        opacity: 0.9;
-    }
+        /* --- Sidebar Dock --- */
+        .sidebar {
+            position: fixed;
+            top: 20px; left: 20px; bottom: 20px;
+            width: 80px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 25px 0;
+            transition: width 0.3s ease;
+            z-index: 1000;
+        }
 
-    /* Sidebar */
-    .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        width: 250px;
-        background: linear-gradient(180deg,#1e1e2f,#2a2a3e);
-        color: white;
-        padding-top: 20px;
-        overflow-y: auto;
-        box-shadow: 2px 0 10px rgba(0,0,0,0.15);
-    }
+        .sidebar:hover { width: 240px; }
 
-    .sidebar h5 {
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
+        .sidebar-brand {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 40px;
+        }
 
-    .sidebar-link {
-        padding: 12px 20px;
-        display: block;
-        color: rgba(255,255,255,0.85);
-        font-weight: 500;
-        text-decoration: none;
-        border-radius: 8px;
-        margin: 5px 10px;
-        transition: all 0.3s;
-    }
+        .nav-item {
+            width: 100%;
+            padding: 0 15px;
+            margin-bottom: 10px;
+        }
 
-    .sidebar-link:hover, .sidebar-link.active {
-        background-color: #5656a0;
-        color: #fff;
-        transform: translateX(5px);
-    }
+        .nav-link-custom {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            color: var(--text-dim);
+            text-decoration: none;
+            border-radius: 12px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
 
-    /* Main Content */
-    .main-content {
-        margin-left: 250px;
-        padding: 20px 30px;
-    }
+        .nav-link-custom i { font-size: 1.4rem; min-width: 45px; text-align: center; }
+        .nav-link-custom span { opacity: 0; transition: opacity 0.2s; font-weight: 600; }
+        .sidebar:hover .nav-link-custom span { opacity: 1; margin-left: 10px; }
 
-    /* Card Styles */
-    .card-sentiment {
-        border-radius: 15px;
-        transition: all 0.3s ease;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.08);
-    }
+        .nav-link-custom:hover, .nav-link-custom.active {
+            background: var(--glass);
+            color: var(--text-main);
+            border-right: 3px solid var(--primary);
+        }
 
-    .card-sentiment:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    }
+        /* --- Main Layout --- */
+        .main-content {
+            margin-left: 120px;
+            padding: 40px 60px 40px 40px;
+            transition: margin-left 0.3s ease;
+        }
 
-    .badge-positive {
-        background-color: #28a745 !important;
-        color: white !important;
-    }
-    .badge-negative {
-        background-color: #dc3545 !important;
-        color: white !important;
-    }
-    .badge-neutral {
-        background-color: #6c757d !important;
-        color: white !important;
-    }
-    .badge-anger {
-        background-color: #ff5722 !important;
-        color: white !important;
-    }
-    .badge-joy {
-        background-color: #ffeb3b !important;
-        color: #333 !important;
-    }
-    .badge-churn {
-        background-color: #ffc107 !important;
-        color: #333 !important;
-    }
-    .badge-inquiry {
-        background-color: #17a2b8 !important;
-        color: white !important;
-    }
-    .badge-sarcasm {
-        background-color: #ff9800 !important;
-        color: white !important;
-    }
+        /* --- Premium Cards --- */
+        .premium-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 25px;
+            height: 100%;
+            transition: transform 0.3s ease, border-color 0.3s;
+        }
 
-    .aspect-tag {
-        margin-right: 5px;
-        margin-top: 5px;
-        font-size: 0.85em;
-        font-weight: 500;
-    }
+        .premium-card:hover {
+            border-color: rgba(139, 92, 246, 0.4);
+            transform: translateY(-5px);
+        }
 
-    .rating-star {
-        color: gold;
-        margin-right: 2px;
-    }
+        /* --- Statistics Highlight --- */
+        .stat-label { color: var(--text-dim); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-size: 2.8rem; font-weight: 800; margin: 10px 0; background: linear-gradient(to bottom, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-    /* Buttons */
-    .btn-primary, .btn-secondary {
-        border-radius: 50px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
+        /* --- Recommendation Hero --- */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(217, 70, 239, 0.05));
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            padding: 40px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
 
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-    }
+        .hero-banner::after {
+            content: '';
+            position: absolute; top: -50px; right: -50px;
+            width: 200px; height: 200px;
+            background: var(--primary);
+            filter: blur(100px); opacity: 0.2;
+        }
 
-    /* Review List */
-    .list-group-item {
-        border-radius: 10px;
-        margin-bottom: 8px;
-        border: none;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
-    }
-    .list-group-item:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-    }
+        /* --- Modern Form Elements --- */
+        .form-control-ai {
+            background: rgba(0,0,0,0.3) !important;
+            border: 1px solid var(--border) !important;
+            color: #fff !important;
+            padding: 15px 20px !important;
+            border-radius: 15px !important;
+        }
 
-    /* Recommendation Card */
-    #recommendationCard {
-        border-radius: 15px;
-        padding: 20px;
-        transition: all 0.3s;
-        text-align: center;
-    }
+        .form-control-ai:focus {
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1) !important;
+        }
 
-    #recommendationCard h2 {
-        font-weight: 700;
-    }
+        .btn-ai {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white; border: none; padding: 14px 28px; border-radius: 14px;
+            font-weight: 700; transition: all 0.3s;
+        }
 
-    /* Setting initial states */
-    #bulk-analysis-output {
-        display: block; /* Hide Dashboard Results by default */
-    }
-    #manual-analysis-section {
-        display: none; /* Show Manual Analysis by default */
-    }
-</style>
+        .btn-ai:hover { transform: scale(1.02); filter: brightness(1.1); box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3); }
+
+        /* --- Review Feed --- */
+        .review-row {
+            padding: 15px;
+            border-radius: 16px;
+            background: var(--glass);
+            border: 1px solid transparent;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+        .review-row:hover { border-color: var(--border); background: rgba(255,255,255,0.05); }
+
+        /* --- Badges --- */
+        .badge-ai {
+            padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.7rem; text-transform: uppercase;
+        }
+    </style>
 </head>
 <body>
 
-
+<div class="mesh-bg"></div>
 
 <div class="sidebar">
-    <h5 class="text-center mb-4 text-warning">Sentiment Tool</h5>
-    <ul class="nav flex-column">
-        <li class="nav-item">
-            <a class="sidebar-link active" href="#" onclick="showSection('manual-analysis-section', this)">
-                <i class="bi bi-pencil-square me-2"></i> Manual Analysis
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="sidebar-link" href="#" onclick="showSection('bulk-analysis-output', this)">
-                <i class="bi bi-speedometer2 me-2"></i> Automated Analysis 
-            </a>
-        </li>
-<li class="nav-item">
-    <a class="sidebar-link" href="#" onclick="showSection('reports-section', this); renderReports();">
-        <i class="bi bi-clock-history me-2"></i> Reports History
-    </a>
-</li>
-    </ul>
+    <div class="sidebar-brand"><i class="bi bi-lightning-fill text-white"></i></div>
+    <div class="nav-item">
+        <a href="#" class="nav-link-custom active" onclick="showSection('manual-analysis-section', this)">
+            <i class="bi bi-input-cursor"></i> <span>Analyze Text</span>
+        </a>
+    </div>
+    <div class="nav-item">
+        <a href="#" class="nav-link-custom" onclick="showSection('bulk-analysis-output', this)">
+            <i class="bi bi-bar-chart-steps"></i> <span>Automated Dashboard</span>
+        </a>
+    </div>
+    <div class="nav-item">
+        <a href="#" class="nav-link-custom" onclick="showSection('reports-section', this); renderReports();">
+            <i class="bi bi-clock-history"></i> <span>History Log</span>
+        </a>
+    </div>
 </div>
 
 <div class="main-content">
-    <header class="header text-center">
-        <h1>🚀 Detailed Sentiment Analysis Dashboard</h1>
-        <p id="header-subtitle">Manually Analyze Text or Upload CSV</p>
+    <header class="d-flex justify-content-between align-items-center mb-5">
+        <div>
+            <h1 class="fw-bolder" style="font-size: 2.2rem;">AI Insights Console</h1>
+            <p class="text-secondary mb-0">Decoding customer sentiment with deep learning.</p>
+        </div>
+        <div class="d-flex gap-3">
+            <button class="btn btn-dark rounded-circle" style="width: 45px; height: 45px;"><i class="bi bi-bell"></i></button>
+            <div class="bg-secondary rounded-pill p-1 d-flex align-items-center" style="background: var(--glass) !important; border: 1px solid var(--border);">
+                <span class="px-3 fw-bold small">Enterprise v2.0</span>
+            </div>
+        </div>
     </header>
 
-    <div class="container-fluid">
-        
-        <div id="manual-analysis-section" class="row mb-5 pt-4">
-            <div class="col-lg-8 mx-auto">
-                <div class="card shadow p-3 rounded-4">
-                    <div class="card-header bg-white rounded-top border-bottom-0">
-                        <ul class="nav nav-tabs card-header-tabs">
-                            <li class="nav-item">
-                                <a class="nav-link active" aria-current="true" href="#single-review-tab" data-bs-toggle="tab">
-                                    <i class="bi bi-chat-text me-1"></i> Single Text Analysis
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="#csv-upload-tab" data-bs-toggle="tab">
-                                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> CSV File Upload
-                                </a>
-                            </li>
-                        </ul>
+    <div id="manual-analysis-section">
+        <div class="premium-card p-5">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <h3 class="fw-bold mb-4">Input Data Stream</h3>
+                    <textarea id="reviewInput" class="form-control form-control-ai mb-4" rows="5" placeholder="Enter review or feedback text for instant analysis..."></textarea>
+                    <div class="d-flex gap-3">
+                        <button class="btn-ai w-100" onclick="analyzeSingleReview()">Compute Sentiment</button>
+                        <input type="file" id="csvFileInput" class="d-none">
+                        <button class="btn btn-outline-light rounded-4 px-4" onclick="document.getElementById('csvFileInput').click()">
+                            <i class="bi bi-file-earmark-arrow-up"></i>
+                        </button>
                     </div>
-                    
-                    <div class="card-body tab-content">
-                        <div class="tab-pane fade show active" id="single-review-tab">
-                            <p class="text-muted">Enter a single review or comment for instant analysis:</p>
-                            <textarea id="reviewInput" class="form-control mb-3 rounded-3" rows="3" 
-                                placeholder="The screen resolution is superb, but the battery life is poor."></textarea>
-                            <button class="btn btn-secondary w-100" onclick="analyzeSingleReview()">Analyze Single Review</button>
-                            
-                            <div id="singleReviewOutput" class="mt-4 p-3 border rounded-3" style="display: none;">
-                                <h6>Detailed Analysis Result:</h6>
-                                <p class="mb-1">Overall Sentiment: <span id="singleSentiment" class="badge"></span></p>
-                                <p class="mb-1">Emotion Detected: <span id="singleEmotion" class="badge bg-info text-dark"></span></p>
-                                <p class="mb-1">User Intent: <span id="singleIntent" class="badge bg-primary"></span></p>
-                                <p class="mb-1">Aspects: <span id="singleAspects"></span></p>
-                                <p class="mb-0">Advanced Flags: 
-                                    <span id="singleSarcasm" class="badge bg-warning text-dark me-2"></span>
-                                    <span id="singleLanguage" class="badge bg-secondary"></span>
-                                </p>
+                </div>
+                <div class="col-lg-5 ps-lg-5">
+                    <div id="singleReviewOutput" class="p-4 rounded-4" style="display:none; background: rgba(0,0,0,0.2); border: 1px solid var(--border);">
+                        <h6 class="text-primary fw-bold text-uppercase small mb-3">Analysis Result</h6>
+                        <div class="mb-3">
+                            <label class="d-block text-secondary small">Sentiment</label>
+                            <h4 id="singleSentiment" class="fw-bold m-0"></h4>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <label class="d-block text-secondary small">Emotion</label>
+                                <span id="singleEmotion" class="badge-ai bg-info text-dark"></span>
                             </div>
+                            <div class="col-6">
+                                <label class="d-block text-secondary small">Sarcasm</label>
+                                <span id="singleSarcasm" class="badge-ai"></span>
                             </div>
-
-                        <div class="tab-pane fade" id="csv-upload-tab">
-                            <p class="text-muted">Upload a CSV file containing reviews for bulk analysis.</p>
-                            <div class="alert alert-info small" role="alert">
-                                <strong>Tip:</strong> Your CSV should have a column named **"review"** with the text you want to analyze.
-                            </div>
-                            <input type="file" id="csvFileInput" class="form-control mb-3" accept=".csv">
-                            <button class="btn btn-primary w-100" onclick="processCSVFile()">Upload & Analyze Bulk CSV</button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <hr class="mb-5 border-4 border-primary">
-
-        <div id="bulk-analysis-output">
-            <div id="resultsContainer" class="row" style="display:none;">
-                <div class="col-12 mb-4">
-                    <h2 class="text-center text-primary">Automated Bulk Sentiment Output</h2>
-                    <p class="text-center text-muted">Data loaded from web scrape</p>
+    <div id="bulk-analysis-output" style="display:none;">
+        <div class="hero-banner">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center">
+                    <img id="productImageDisplay" src="" class="img-fluid rounded-4 shadow-lg" style="max-height: 250px;">
                 </div>
-
-                <div class="col-12 mb-5">
-                    <div id="recommendationCard" class="card shadow border-3 border-dark" style="display:none;">
-                        <div class="card-body p-4">
-                            <div class="row g-0 align-items-center">
-                                <div class="col-md-3 d-flex justify-content-center">
-                                    <img id="productImageDisplay" src="" alt="Product Image"
-                                        style="max-width:100%; max-height:250px; border-radius:12px; display:none;">
-                                </div>
-                                <div class="col-md-9">
-                                    <h4 class="card-title text-muted mb-3">Purchase Recommendation for:
-                                        <strong id="productNameDisplay"></strong>
-                                    </h4>
-                                    <div id="recommendationContent"></div>
-                                    <p class="mt-3 text-muted" id="recommendationMessage"></p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="col-md-9 px-lg-5">
+                    <h4 class="text-secondary fw-bold text-uppercase small">Product Recommendation</h4>
+                    <h1 id="productNameDisplay" class="fw-extrabold mb-3"></h1>
+                    <div id="recommendationContent"></div>
+                    <p id="recommendationMessage" class="lead text-dim"></p>
+                    <button class="btn btn-primary btn-sm rounded-pill mt-3" onclick="generatePDFReport()">Download Intelligence Report</button>
                 </div>
-
-                <div class="col-12 mb-5 text-center">
-                    <button class="btn btn-lg btn-primary shadow-lg" onclick="generatePDFReport()">
-                        <i class="bi bi-file-earmark-arrow-down-fill me-2"></i> Download Analysis Report
-                    </button>
-                </div>
-
-                <div class="col-lg-4 mb-4">
-                    <div class="card card-sentiment h-100 border-success text-center">
-                        <div class="card-body">
-                            <h5 class="card-title text-success">Positive Reviews</h5>
-                            <p class="card-text display-4" id="positiveCount">0</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 mb-4">
-                    <div class="card card-sentiment h-100 border-danger text-center">
-                        <div class="card-body">
-                            <h5 class="card-title text-danger">Negative Reviews</h5>
-                            <p class="card-text display-4" id="negativeCount">0</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 mb-4">
-                    <div class="card card-sentiment h-100 border-secondary text-center">
-                        <div class="card-body">
-                            <h5 class="card-title text-secondary">Neutral Reviews</h5>
-                            <p class="card-text display-4" id="neutralCount">0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header">Sentiment Distribution</div>
-                        <div class="card-body"><canvas id="sentimentChart"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header bg-warning-subtle">Aspect-Sentiment Matrix (Top 5)</div>
-                        <div class="card-body p-2"><canvas id="aspectMatrixChart"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header bg-primary-subtle">Sentiment Trend Over Time</div>
-                        <div class="card-body"><canvas id="timeSeriesChart"></canvas></div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            Detailed Review Breakdown (<span id="totalReviews">0</span> Total)
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="d-flex mb-3 gap-2">
-                                <button class="btn btn-outline-secondary btn-sm" onclick="filterReviews('All')">All</button>
-                                <button class="btn btn-outline-success btn-sm" onclick="filterReviews('Positive')">Positive</button>
-                                <button class="btn btn-outline-danger btn-sm" onclick="filterReviews('Negative')">Negative</button>
-                                <input type="text" id="keywordSearch" class="form-control form-control-sm ms-auto" onkeyup="filterReviews('All')" placeholder="Search keyword...">
-                            </div>
-                            <div class="review-list-wrapper" style="max-height: 400px; overflow-y:auto;">
-                                <ul class="list-group list-group-flush" id="detailedResultsList"></ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
-        <div id="reports-section" style="display: none;" class="mt-4">
-    <div class="card shadow-sm border-0 rounded-4 p-4">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="text-primary m-0"><i class="bi bi-journal-text me-2"></i> Scraped Data History</h3>
-            <button class="btn btn-outline-danger btn-sm" onclick="clearAllHistory()">
-                <i class="bi bi-trash me-1"></i> Clear History
-            </button>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-4">
+                <div class="premium-card text-center">
+                    <div class="stat-label">Positive Focus</div>
+                    <div class="stat-value text-success" id="positiveCount">0</div>
+                    <div class="progress bg-dark" style="height: 4px;"><div class="progress-bar bg-success" style="width: 75%"></div></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="premium-card text-center">
+                    <div class="stat-label">Negative Friction</div>
+                    <div class="stat-value text-danger" id="negativeCount">0</div>
+                    <div class="progress bg-dark" style="height: 4px;"><div class="progress-bar bg-danger" style="width: 25%"></div></div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="premium-card text-center">
+                    <div class="stat-label">Neutral Balance</div>
+                    <div class="stat-value text-secondary" id="neutralCount">0</div>
+                    <div class="progress bg-dark" style="height: 4px;"><div class="progress-bar bg-secondary" style="width: 50%"></div></div>
+                </div>
+            </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>Date & Time</th>
-                        <th>Product Name</th>
-                        <th>Total Reviews</th>
-                        <th>Recommendation</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="reportsTableBody">
-                    </tbody>
-            </table>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="premium-card">
+                    <h5 class="fw-bold mb-4">Timeline Volatility</h5>
+                    <canvas id="timeSeriesChart" height="280"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="premium-card">
+                    <h5 class="fw-bold mb-4">Core Distribution</h5>
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="premium-card mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold">Feedback Feed</h5>
+                <div class="d-flex gap-2">
+                    <input type="text" id="keywordSearch" class="form-control form-control-ai form-control-sm" placeholder="Search insights...">
+                </div>
+            </div>
+            <div id="detailedResultsList" style="max-height: 400px; overflow-y: auto;">
+                </div>
         </div>
     </div>
 </div>
-    </div>
-</div>
+
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -883,10 +809,10 @@ function filterReviews(sentimentFilter = 'All') {
 }
 
 // --- Main Data Processing Functions (Hides Manual, Shows Bulk) ---
-
-
+function processBulkData(data) {
     
     // Store all incoming data for PDF generation
+    currentAnalysisData = data; 
 
     // This section is now managed by showSection() but is kept for data flow
     document.getElementById('manual-analysis-section').style.display = 'none'; 
@@ -911,68 +837,6 @@ function filterReviews(sentimentFilter = 'All') {
     updateAspectMatrixChart(data.drill_down_matrix || []);
     updateTimeSeriesChart(data.detailed_results);
     populateDetailedList(allReviewData);
-
-    function processBulkData(data) {
-    currentAnalysisData = data;
-    
-    // ... aapka existing code jo charts aur table banata hai (keep it as is) ...
-// This section is now managed by showSection() but is kept for data flow
-    document.getElementById('manual-analysis-section').style.display = 'none'; 
-    document.getElementById('bulk-analysis-output').style.display = 'block'; 
-    document.getElementById('resultsContainer').style.display = 'flex'; 
-
-    allReviewData = data.detailed_results;
-
-    const summary = data.summary;
-    document.getElementById('positiveCount').textContent = summary.Positive;
-    document.getElementById('negativeCount').textContent = summary.Negative;
-    document.getElementById('neutralCount').textContent = summary.Neutral;
-    document.getElementById('totalReviews').textContent = summary.total;
-    
-    displayRecommendation(
-        data.product_name || 'Analyzed Product', 
-        data.recommendation,
-        data.product_image_url || '' 
-    ); 
-
-    updateChart(summary);
-    updateAspectMatrixChart(data.drill_down_matrix || []);
-    updateTimeSeriesChart(data.detailed_results);
-    populateDetailedList(allReviewData);
-
-    // --- NAYA: History mein save karne ka logic ---
-    saveToHistory(data);
-    
-    document.getElementById('resultsContainer').style.display = 'block';
-    // Bulk section dikhao agar extension se data aaya hai
-    const bulkLink = document.querySelector(".sidebar-link[onclick*='bulk-analysis-output']");
-    showSection('bulk-analysis-output', bulkLink);
-}
-
-// Function jo data ko localStorage mein daalega
-function saveToHistory(data) {
-    let history = JSON.parse(localStorage.getItem('sentimentHistory') || '[]');
-    
-    // Check karein ki ye exact data pehle se toh nahi (duplicate avoid karne ke liye)
-    const isDuplicate = history.some(item => 
-        item.product_name === data.product_name && 
-        item.summary.total === data.summary.total
-    );
-
-    if (!isDuplicate) {
-        const newEntry = {
-            id: Date.now(),
-            timestamp: new Date().toLocaleString(),
-            product_name: data.product_name || "Scraped Product",
-            summary: data.summary,
-            recommendation: data.recommendation,
-            fullData: data // Poora response save kar rahe hain
-        };
-        
-        history.unshift(newEntry); // Naya record sabse upar
-        localStorage.setItem('sentimentHistory', JSON.stringify(history.slice(0, 15))); // Max 15 records rakhein
-    }
-
 }
 
 // --- Image Loading Helper for jsPDF ---
@@ -1238,56 +1102,7 @@ async function analyzeReviews(isBulkRequest) {
                 document.getElementById('resultsContainer').style.display = 'none';
             }
         });
-
-        function renderReports() {
-    const history = JSON.parse(localStorage.getItem('sentimentHistory') || '[]');
-    const tableBody = document.getElementById('reportsTableBody');
-    tableBody.innerHTML = '';
-
-    if (history.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No history available yet. Start scraping with the extension!</td></tr>';
-        return;
-    }
-
-    history.forEach((item, index) => {
-        const badgeClass = item.recommendation.status === 'Highly Recommended' ? 'bg-success' : 
-                          item.recommendation.status === 'Cautious' ? 'bg-warning' : 'bg-danger';
-        
-        tableBody.innerHTML += `
-            <tr>
-                <td><small>${item.timestamp}</small></td>
-                <td><strong>${item.product_name}</strong></td>
-                <td>${item.summary.total} Reviews</td>
-                <td><span class="badge ${badgeClass}">${item.recommendation.status}</span></td>
-                <td>
-                    <button class="btn btn-sm btn-primary" onclick="loadSavedReport(${index})">
-                        View Details
-                    </button>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-function loadSavedReport(index) {
-    const history = JSON.parse(localStorage.getItem('sentimentHistory') || '[]');
-    const reportData = history[index].fullData;
-    
-    // Dashboard section par switch karein
-    const bulkLink = document.querySelector(".sidebar-link[onclick*='bulk-analysis-output']");
-    showSection('bulk-analysis-output', bulkLink);
-    
-    // Purana data render karein
-    processBulkData(reportData);
-}
-
-function clearAllHistory() {
-    if(confirm("Kya aap saare reports delete karna chahte hain?")) {
-        localStorage.removeItem('sentimentHistory');
-        renderReports();
-    }
-}
-
 </script>
+
 </body>
 </html>
