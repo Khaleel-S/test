@@ -3,22 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SentiMind AI | Premium Sentiment Dashboard</title>
+    <title>SentiMind AI | Premium Dashboard</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
         :root {
-            --primary: #6366f1; /* Indigo */
-            --primary-dark: #4f46e5;
-            --success: #10b981; /* Emerald */
-            --danger: #ef4444; /* Rose */
-            --warning: #f59e0b; /* Amber */
-            --sidebar-width: 280px;
-            --glass-bg: rgba(255, 255, 255, 0.8);
-            --body-bg: #f8fafc; /* Slate 50 */
+            --primary: #6366f1;
+            --sidebar-bg: #0f172a;
+            --body-bg: #f8fafc;
         }
 
         body {
@@ -27,343 +22,200 @@
             color: #1e293b;
         }
 
-        /* --- Sidebar Redesign --- */
+        /* Sidebar */
         .sidebar {
-            width: var(--sidebar-width);
+            width: 260px;
             height: 100vh;
             position: fixed;
-            left: 0; top: 0;
-            background: #0f172a;
-            color: white;
-            padding: 2.5rem 1.5rem;
+            background: var(--sidebar-bg);
+            padding: 2rem 1rem;
             z-index: 1000;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .brand-logo {
-            font-size: 1.6rem;
-            font-weight: 800;
-            background: linear-gradient(to right, #818cf8, #c084fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 3.5rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .nav-link {
+        .sidebar-link {
             color: #94a3b8;
-            padding: 0.9rem 1.2rem;
+            padding: 12px 15px;
             border-radius: 12px;
-            margin-bottom: 0.7rem;
             display: flex;
             align-items: center;
-            gap: 12px;
-            transition: all 0.2s;
+            text-decoration: none;
+            margin-bottom: 8px;
             cursor: pointer;
-            border: none;
-            background: transparent;
+            transition: 0.3s;
         }
 
-        .nav-link:hover {
-            color: white;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .nav-link.active {
+        .sidebar-link:hover, .sidebar-link.active {
             background: var(--primary);
             color: white;
-            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
         }
 
-        /* --- Main Content Layout --- */
+        /* Main Content */
         .main-content {
-            margin-left: var(--sidebar-width);
-            padding: 2.5rem 4rem;
+            margin-left: 260px;
+            padding: 2rem 3rem;
         }
 
-        .top-header {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 1.5rem 2.5rem;
-            margin-bottom: 3rem;
-            border: 1px solid rgba(255,255,255,0.4);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
-        }
-
-        /* --- Modern Card Styling --- */
-        .card {
-            border: 1px solid #e2e8f0;
-            border-radius: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            overflow: hidden;
+        .header-card {
             background: white;
-        }
-
-        .card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05);
-        }
-
-        .card-header {
-            background: transparent;
-            border-bottom: 1px solid #f1f5f9;
             padding: 1.5rem 2rem;
-            font-weight: 700;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
         }
 
-        /* --- Stats Widgets --- */
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+
         .stat-card {
-            padding: 1.8rem;
-            border-radius: 24px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        
-        .stat-value { font-size: 2.5rem; font-weight: 800; }
-
-        /* --- Input Styles --- */
-        .form-control {
-            border-radius: 16px;
-            padding: 1rem;
-            border: 1px solid #e2e8f0;
-            background: #f8fafc;
-            transition: all 0.2s;
+            padding: 1.5rem;
+            border-left: 5px solid var(--primary);
         }
 
-        .form-control:focus {
-            background: white;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-        }
-
-        /* --- Buttons --- */
         .btn-primary {
             background: var(--primary);
             border: none;
-            padding: 0.8rem 1.8rem;
-            border-radius: 14px;
-            font-weight: 700;
-            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.3);
-        }
-
-        /* --- Analysis Output Badges --- */
-        .badge {
-            padding: 8px 14px;
+            padding: 10px 25px;
             border-radius: 10px;
             font-weight: 600;
-            text-transform: capitalize;
         }
-        .badge-positive { background-color: #dcfce7 !important; color: #166534 !important; }
-        .badge-negative { background-color: #fee2e2 !important; color: #991b1b !important; }
-        .badge-neutral { background-color: #f1f5f9 !important; color: #475569 !important; }
 
-        /* --- Animations --- */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .badge-sentiment {
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: 600;
         }
-        .section-fade { animation: fadeIn 0.4s ease-out; }
+
+        #recommendationCard {
+            border-left: 6px solid var(--primary);
+            background: #fff;
+        }
     </style>
 </head>
 <body>
 
-<aside class="sidebar">
-    <div class="brand-logo">
-        <i class="bi bi-robot"></i>
-        <span>SENTIMIND</span>
+<div class="sidebar">
+    <h4 class="text-white fw-800 mb-5 px-3"><i class="bi bi-cpu-fill me-2"></i>SENTIMIND</h4>
+    <a class="sidebar-link active" onclick="showSection('manual-analysis-section', this)">
+        <i class="bi bi-pencil-square me-2"></i> Manual Analysis
+    </a>
+    <a class="sidebar-link" onclick="showSection('bulk-analysis-output', this)">
+        <i class="bi bi-graph-up me-2"></i> Dashboard Results
+    </a>
+    <a class="sidebar-link" onclick="showSection('reports-section', this); renderReports();">
+        <i class="bi bi-clock-history me-2"></i> History
+    </a>
+</div>
+
+<div class="main-content">
+    <div class="header-card d-flex justify-content-between align-items-center">
+        <h2 class="fw-800 m-0">Sentiment Analysis</h2>
+        <div id="header-subtitle" class="text-muted">Analyze your customer feedback</div>
     </div>
-    <nav class="nav flex-column">
-        <a class="nav-link active" onclick="showSection('manual-analysis-section', this)">
-            <i class="bi bi-terminal-plus"></i> Manual Analysis
-        </a>
-        <a class="nav-link" onclick="showSection('bulk-analysis-output', this)">
-            <i class="bi bi-pie-chart"></i> Visual Insights
-        </a>
-        <a class="nav-link" onclick="showSection('reports-section', this); renderReports();">
-            <i class="bi bi-journal-album"></i> History Vault
-        </a>
-    </nav>
-</aside>
 
-<main class="main-content">
-    <header class="top-header d-flex justify-content-between align-items-center">
-        <div>
-            <h3 class="fw-800 m-0">Dashboard</h3>
-            <span class="text-muted" id="header-subtitle">Analyze sentiment with AI precision</span>
-        </div>
-        <div class="d-flex align-items-center gap-3">
-            <div class="text-end">
-                <small class="d-block text-muted">Current Mode</small>
-                <span class="fw-700">Enterprise Analysis</span>
+    <div id="manual-analysis-section">
+        <div class="card p-4">
+            <h5>Enter Feedback</h5>
+            <textarea id="reviewInput" class="form-control mb-3 bg-light border-0" rows="4" placeholder="Type here..."></textarea>
+            <div class="mb-3">
+                <input type="file" id="csvFileInput" class="form-control" accept=".csv">
             </div>
-            <img src="https://ui-avatars.com/api/?name=Admin&background=6366f1&color=fff" class="rounded-circle" width="45">
-        </div>
-    </header>
-
-    <section id="manual-analysis-section" class="section-fade">
-        <div class="row g-4">
-            <div class="col-lg-8">
-                <div class="card p-2">
-                    <div class="card-header border-0 bg-white">
-                        <ul class="nav nav-pills" id="pills-tab">
-                            <li class="nav-item">
-                                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-text">Single Review</button>
-                            </li>
-                            <li class="nav-item">
-                                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-csv">Bulk Upload</button>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="card-body tab-content pt-4">
-                        <div class="tab-pane fade show active" id="tab-text">
-                            <textarea id="reviewInput" class="form-control mb-4" rows="5" 
-                                placeholder="Paste your customer feedback here for instant AI analysis..."></textarea>
-                            <button class="btn btn-primary w-100 py-3" onclick="analyzeSingleReview()">Run AI Analysis</button>
-                        </div>
-                        <div class="tab-pane fade" id="tab-csv">
-                            <div class="border-dashed p-5 text-center rounded-4 bg-light mb-4" style="border: 2px dashed #cbd5e1;">
-                                <i class="bi bi-cloud-arrow-up fs-1 text-primary"></i>
-                                <h5 class="mt-3 fw-700">Drag & Drop CSV</h5>
-                                <p class="text-muted small">File must contain a "review" column</p>
-                                <input type="file" id="csvFileInput" class="form-control mt-3" accept=".csv">
-                            </div>
-                            <button class="btn btn-primary w-100 py-3" onclick="processCSVFile()">Process Bulk CSV</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-4">
-                <div id="singleReviewOutput" class="card h-100 border-primary" style="display: none; background: #eef2ff;">
-                    <div class="card-body p-4">
-                        <h6 class="text-primary fw-800 mb-4">LIVE ANALYSIS RESULT</h6>
-                        <div class="mb-4">
-                            <small class="text-muted d-block mb-1">SENTIMENT</small>
-                            <h2 id="singleSentiment" class="fw-800"></h2>
-                        </div>
-                        <div class="row g-3">
-                            <div class="col-6">
-                                <div class="bg-white p-3 rounded-4 shadow-sm">
-                                    <small class="text-muted d-block">EMOTION</small>
-                                    <span id="singleEmotion" class="fw-700"></span>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="bg-white p-3 rounded-4 shadow-sm">
-                                    <small class="text-muted d-block">INTENT</small>
-                                    <span id="singleIntent" class="fw-700 text-primary"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <small class="text-muted d-block mb-2">EXTRACTED ASPECTS</small>
-                            <div id="singleAspects"></div>
-                        </div>
-                    </div>
-                </div>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary" onclick="analyzeSingleReview()">Analyze Single</button>
+                <button class="btn btn-outline-primary" onclick="processCSVFile()">Process CSV</button>
             </div>
         </div>
-    </section>
 
-    <section id="bulk-analysis-output" style="display:none;" class="section-fade">
-        <div id="resultsContainer">
-            <div class="row g-4 mb-4">
+        <div id="singleReviewOutput" class="card p-4" style="display:none;">
+            <div class="row text-center">
                 <div class="col-md-4">
-                    <div class="card stat-card border-0 bg-white shadow-sm border-start border-success border-5">
-                        <small class="text-success fw-bold">POSITIVE</small>
-                        <div id="positiveCount" class="stat-value text-dark">0</div>
-                    </div>
+                    <small class="text-muted">SENTIMENT</small>
+                    <div id="singleSentiment" class="fw-bold fs-4"></div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card stat-card border-0 bg-white shadow-sm border-start border-danger border-5">
-                        <small class="text-danger fw-bold">NEGATIVE</small>
-                        <div id="negativeCount" class="stat-value text-dark">0</div>
-                    </div>
+                    <small class="text-muted">EMOTION</small>
+                    <div id="singleEmotion" class="fw-bold fs-4"></div>
                 </div>
                 <div class="col-md-4">
-                    <div class="card stat-card border-0 bg-white shadow-sm border-start border-secondary border-5">
-                        <small class="text-muted fw-bold">NEUTRAL</small>
-                        <div id="neutralCount" class="stat-value text-dark">0</div>
-                    </div>
+                    <small class="text-muted">INTENT</small>
+                    <div id="singleIntent" class="fw-bold fs-4"></div>
                 </div>
             </div>
+            <div class="mt-3">
+                <small class="text-muted">Aspects:</small>
+                <div id="singleAspects" class="mt-1"></div>
+            </div>
+        </div>
+    </div>
 
-            <div class="card mb-5" id="recommendationCard">
-                <div class="card-body p-4">
-                    <div class="row align-items-center">
-                        <div class="col-md-2 text-center">
-                            <img id="productImageDisplay" src="" class="img-fluid rounded-4 shadow-sm" style="display:none; max-height: 150px;">
-                        </div>
-                        <div class="col-md-7">
-                            <span class="badge bg-primary text-white mb-2">AI Summary</span>
-                            <h3 id="productNameDisplay" class="fw-800"></h3>
-                            <div id="recommendationContent" class="fs-4 fw-600 mb-2"></div>
-                            <p id="recommendationMessage" class="text-muted"></p>
-                        </div>
-                        <div class="col-md-3 text-end">
-                            <button class="btn btn-dark btn-lg w-100" onclick="generatePDFReport()">
-                                <i class="bi bi-file-earmark-pdf me-2"></i> Export PDF
-                            </button>
-                        </div>
-                    </div>
+    <div id="bulk-analysis-output" style="display:none;">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card stat-card">
+                    <small>POSITIVE</small>
+                    <h2 id="positiveCount">0</h2>
                 </div>
             </div>
-
-            <div class="row g-4">
-                <div class="col-lg-6">
-                    <div class="card h-100">
-                        <div class="card-header">Sentiment Distribution</div>
-                        <div class="card-body"><canvas id="sentimentChart"></canvas></div>
-                    </div>
+            <div class="col-md-4">
+                <div class="card stat-card" style="border-color: #ef4444;">
+                    <small>NEGATIVE</small>
+                    <h2 id="negativeCount">0</h2>
                 </div>
-                <div class="col-lg-6">
-                    <div class="card h-100">
-                        <div class="card-header">Trend Over Time</div>
-                        <div class="card-body"><canvas id="timeSeriesChart"></canvas></div>
-                    </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card stat-card" style="border-color: #64748b;">
+                    <small>NEUTRAL</small>
+                    <h2 id="neutralCount">0</h2>
                 </div>
             </div>
         </div>
-    </section>
 
-    <section id="reports-section" style="display:none;" class="section-fade">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Analysis History</span>
-                <button class="btn btn-sm btn-outline-danger" onclick="clearAllHistory()">Wipe Records</button>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th class="ps-4">Date</th>
-                            <th>Product</th>
-                            <th>Reviews</th>
-                            <th>Verdict</th>
-                            <th class="text-end pe-4">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="reportsTableBody"></tbody>
-                </table>
+        <div id="recommendationCard" class="card p-4">
+            <div class="row align-items-center">
+                <div class="col-md-2 text-center">
+                    <img id="productImageDisplay" class="img-fluid rounded" style="display:none; max-height:120px;">
+                </div>
+                <div class="col-md-7">
+                    <h3 id="productNameDisplay" class="fw-800"></h3>
+                    <div id="recommendationContent" class="fs-5 mb-1"></div>
+                    <p id="recommendationMessage" class="text-muted small"></p>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-dark w-100" onclick="generatePDFReport()">Download PDF</button>
+                </div>
             </div>
         </div>
-    </section>
-</main>
+
+        <div class="row">
+            <div class="col-md-6"><div class="card p-3"><canvas id="sentimentChart"></canvas></div></div>
+            <div class="col-md-6"><div class="card p-3"><canvas id="emotionChart"></canvas></div></div>
+        </div>
+    </div>
+
+    <div id="reports-section" style="display:none;">
+        <div class="card p-4">
+            <div class="d-flex justify-content-between mb-3">
+                <h5>Saved Reports</h5>
+                <button class="btn btn-sm btn-danger" onclick="clearAllHistory()">Clear All</button>
+            </div>
+            <table class="table">
+                <thead><tr><th>Date</th><th>Product</th><th>Reviews</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody id="reportsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
 <script>
-    // Aapka purana saara JavaScript yahan paste hoga...  [cite: 239-501]
-
+    /* PASTE YOUR ORIGINAL JS LOGIC HERE (BINA KISI CHANGE KE) */
 let sentimentChart, aspectMatrixChart, timeSeriesChart;
 let allReviewData = []; 
 let currentAnalysisData = {}; 
@@ -1249,6 +1101,7 @@ function clearAllHistory() {
         renderReports();
     }
 }
+
 
 </script>
 
