@@ -1,221 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SentiMind AI | Premium Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentiment AI | Creative Dashboard</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-    <style>
-        :root {
-            --primary: #6366f1;
-            --sidebar-bg: #0f172a;
-            --body-bg: #f8fafc;
-        }
+<style>
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.7);
+        --glass-border: rgba(255, 255, 255, 0.3);
+        --primary-accent: #6366f1;
+        --secondary-accent: #a855f7;
+        --dark-text: #1e293b;
+        --sidebar-width: 280px;
+    }
 
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--body-bg);
-            color: #1e293b;
-        }
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        min-height: 100vh;
+        color: var(--dark-text);
+        overflow-x: hidden;
+    }
 
-        /* Sidebar */
-        .sidebar {
-            width: 260px;
-            height: 100vh;
-            position: fixed;
-            background: var(--sidebar-bg);
-            padding: 2rem 1rem;
-            z-index: 1000;
-        }
+    /* --- Floating Sidebar --- */
+    .sidebar {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        bottom: 20px;
+        width: var(--sidebar-width);
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 40px 20px;
+        z-index: 1000;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
 
-        .sidebar-link {
-            color: #94a3b8;
-            padding: 12px 15px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+    .sidebar-brand {
+        color: #fff;
+        font-weight: 800;
+        font-size: 1.5rem;
+        text-align: center;
+        margin-bottom: 50px;
+        background: linear-gradient(to right, #818cf8, #c084fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
-        .sidebar-link:hover, .sidebar-link.active {
-            background: var(--primary);
-            color: white;
-        }
+    .sidebar-link {
+        padding: 16px 20px;
+        margin-bottom: 10px;
+        border-radius: 16px;
+        color: #94a3b8 !important;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        transition: all 0.4s ease;
+        font-weight: 500;
+    }
 
-        /* Main Content */
-        .main-content {
-            margin-left: 260px;
-            padding: 2rem 3rem;
-        }
+    .sidebar-link i { font-size: 1.2rem; margin-right: 15px; }
 
-        .header-card {
-            background: white;
-            padding: 1.5rem 2rem;
-            border-radius: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
-        }
+    .sidebar-link:hover, .sidebar-link.active {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff !important;
+        box-shadow: inset 0 0 0 1px var(--glass-border);
+    }
 
-        .card {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
-            margin-bottom: 1.5rem;
-        }
+    /* --- Main Content Layout --- */
+    .main-content {
+        margin-left: calc(var(--sidebar-width) + 40px);
+        padding: 40px 40px 40px 0;
+    }
 
-        .stat-card {
-            padding: 1.5rem;
-            border-left: 5px solid var(--primary);
-        }
+    /* --- Hero Section --- */
+    .hero-card {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-radius: 30px;
+        padding: 60px;
+        color: white;
+        margin-bottom: 40px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
 
-        .btn-primary {
-            background: var(--primary);
-            border: none;
-            padding: 10px 25px;
-            border-radius: 10px;
-            font-weight: 600;
-        }
+    .hero-card::after {
+        content: '';
+        position: absolute;
+        top: -50%; right: -10%;
+        width: 400px; height: 400px;
+        background: radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%);
+        z-index: 0;
+    }
 
-        .badge-sentiment {
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: 600;
-        }
+    /* --- Creative Cards --- */
+    .card {
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.03);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
 
-        #recommendationCard {
-            border-left: 6px solid var(--primary);
-            background: #fff;
-        }
-    </style>
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 35px rgba(0,0,0,0.06);
+    }
+
+    /* --- Tab Styling --- */
+    .nav-pills-custom .nav-link {
+        border-radius: 12px;
+        padding: 12px 25px;
+        color: #64748b;
+        font-weight: 600;
+        margin-right: 10px;
+    }
+
+    .nav-pills-custom .nav-link.active {
+        background: var(--primary-accent);
+        box-shadow: 0 10px 20px rgba(99, 102, 241, 0.2);
+    }
+
+    /* --- Analysis Output Areas --- */
+    #singleReviewOutput {
+        border-left: 5px solid var(--primary-accent);
+        background: white;
+    }
+
+    .stat-card {
+        padding: 30px;
+        text-align: center;
+    }
+
+    .stat-card h2 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-top: 10px;
+    }
+
+    /* Status Dot Colors */
+    .dot { height: 12px; width: 12px; border-radius: 50%; display: inline-block; margin-right: 8px; }
+    .dot-pos { background: #10b981; }
+    .dot-neg { background: #ef4444; }
+    .dot-neu { background: #f59e0b; }
+
+    /* Custom Inputs */
+    .form-control {
+        border-radius: 15px;
+        border: 2px solid #e2e8f0;
+        padding: 15px;
+        transition: 0.3s;
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-accent);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+
+    .btn-primary {
+        background: var(--primary-accent);
+        border: none;
+        border-radius: 15px;
+        padding: 15px 30px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* Chart/Graph Placeholders (Matches your logic) */
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+</style>
 </head>
 <body>
 
-<div class="sidebar">
-    <h4 class="text-white fw-800 mb-5 px-3"><i class="bi bi-cpu-fill me-2"></i>SENTIMIND</h4>
-    <a class="sidebar-link active" onclick="showSection('manual-analysis-section', this)">
-        <i class="bi bi-pencil-square me-2"></i> Manual Analysis
-    </a>
-    <a class="sidebar-link" onclick="showSection('bulk-analysis-output', this)">
-        <i class="bi bi-graph-up me-2"></i> Dashboard Results
-    </a>
-    <a class="sidebar-link" onclick="showSection('reports-section', this); renderReports();">
-        <i class="bi bi-clock-history me-2"></i> History
-    </a>
-</div>
+<aside class="sidebar">
+    <div class="sidebar-brand">SENTIMENT.AI</div>
+    <nav class="nav flex-column">
+        <a class="sidebar-link active" href="#" onclick="showSection('manual-analysis-section', this)">
+            <i class="bi bi-magic"></i> Analysis
+        </a>
+        <a class="sidebar-link" href="#" onclick="showSection('bulk-analysis-output', this)">
+            <i class="bi bi-grid-1x2"></i> Insights
+        </a>
+        <a class="sidebar-link" href="#" onclick="showSection('reports-section', this); renderReports();">
+            <i class="bi bi-archive"></i> History
+        </a>
+    </nav>
+</aside>
 
-<div class="main-content">
-    <div class="header-card d-flex justify-content-between align-items-center">
-        <h2 class="fw-800 m-0">Sentiment Analysis</h2>
-        <div id="header-subtitle" class="text-muted">Analyze your customer feedback</div>
+<main class="main-content">
+    <div class="hero-card">
+        <div style="position:relative; z-index:1;">
+            <h1 class="display-5 fw-bold mb-2">Welcome to Insight Engine</h1>
+            <p class="lead opacity-75">Transform raw customer feedback into actionable business intelligence.</p>
+        </div>
     </div>
 
-    <div id="manual-analysis-section">
+    <div id="manual-analysis-section" class="section">
         <div class="card p-4">
-            <h5>Enter Feedback</h5>
-            <textarea id="reviewInput" class="form-control mb-3 bg-light border-0" rows="4" placeholder="Type here..."></textarea>
-            <div class="mb-3">
-                <input type="file" id="csvFileInput" class="form-control" accept=".csv">
-            </div>
-            <div class="d-flex gap-2">
-                <button class="btn btn-primary" onclick="analyzeSingleReview()">Analyze Single</button>
-                <button class="btn btn-outline-primary" onclick="processCSVFile()">Process CSV</button>
-            </div>
-        </div>
+            <ul class="nav nav-pills nav-pills-custom mb-4" id="pills-tab" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#single-review-tab">Quick Scan</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#csv-upload-tab">Bulk Import (CSV)</button>
+                </li>
+            </ul>
 
-        <div id="singleReviewOutput" class="card p-4" style="display:none;">
-            <div class="row text-center">
-                <div class="col-md-4">
-                    <small class="text-muted">SENTIMENT</small>
-                    <div id="singleSentiment" class="fw-bold fs-4"></div>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="single-review-tab">
+                    <textarea id="reviewInput" class="form-control mb-3" rows="5" placeholder="Pasted a customer review here..."></textarea>
+                    <button class="btn btn-primary px-5" onclick="analyzeSingleReview()">
+                        Analyze Sentiment <i class="bi bi-arrow-right ms-2"></i>
+                    </button>
+                    
+                    <div id="singleReviewOutput" class="mt-4 p-4 rounded-4" style="display: none;">
+                        <h5 class="fw-bold mb-3">AI Engine Result:</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">SENTIMENT</small>
+                                <strong id="singleSentiment" class="fs-5"></strong>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">EMOTION</small>
+                                <strong id="singleEmotion" class="fs-5 text-capitalize"></strong>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted d-block">INTENT</small>
+                                <strong id="singleIntent" class="fs-5 text-capitalize"></strong>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <small class="text-muted">EMOTION</small>
-                    <div id="singleEmotion" class="fw-bold fs-4"></div>
-                </div>
-                <div class="col-md-4">
-                    <small class="text-muted">INTENT</small>
-                    <div id="singleIntent" class="fw-bold fs-4"></div>
-                </div>
-            </div>
-            <div class="mt-3">
-                <small class="text-muted">Aspects:</small>
-                <div id="singleAspects" class="mt-1"></div>
-            </div>
-        </div>
-    </div>
 
-    <div id="bulk-analysis-output" style="display:none;">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card stat-card">
-                    <small>POSITIVE</small>
-                    <h2 id="positiveCount">0</h2>
+                <div class="tab-pane fade" id="csv-upload-tab">
+                    <div class="p-5 border-2 border-dashed rounded-4 text-center bg-light">
+                        <i class="bi bi-cloud-arrow-up display-4 text-primary"></i>
+                        <h5 class="mt-3">Drop your CSV file here</h5>
+                        <p class="text-muted">Ensure it has a 'review' column</p>
+                        <input type="file" id="csvFileInput" class="form-control mt-3 mx-auto" style="max-width: 400px;" accept=".csv">
+                        <button class="btn btn-primary mt-3 w-100" onclick="processCSVFile()" style="max-width: 400px;">Process File</button>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card stat-card" style="border-color: #ef4444;">
-                    <small>NEGATIVE</small>
-                    <h2 id="negativeCount">0</h2>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card stat-card" style="border-color: #64748b;">
-                    <small>NEUTRAL</small>
-                    <h2 id="neutralCount">0</h2>
-                </div>
-            </div>
-        </div>
-
-        <div id="recommendationCard" class="card p-4">
-            <div class="row align-items-center">
-                <div class="col-md-2 text-center">
-                    <img id="productImageDisplay" class="img-fluid rounded" style="display:none; max-height:120px;">
-                </div>
-                <div class="col-md-7">
-                    <h3 id="productNameDisplay" class="fw-800"></h3>
-                    <div id="recommendationContent" class="fs-5 mb-1"></div>
-                    <p id="recommendationMessage" class="text-muted small"></p>
-                </div>
-                <div class="col-md-3">
-                    <button class="btn btn-dark w-100" onclick="generatePDFReport()">Download PDF</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6"><div class="card p-3"><canvas id="sentimentChart"></canvas></div></div>
-            <div class="col-md-6"><div class="card p-3"><canvas id="emotionChart"></canvas></div></div>
         </div>
     </div>
 
-    <div id="reports-section" style="display:none;">
-        <div class="card p-4">
-            <div class="d-flex justify-content-between mb-3">
-                <h5>Saved Reports</h5>
-                <button class="btn btn-sm btn-danger" onclick="clearAllHistory()">Clear All</button>
+    <div id="bulk-analysis-output" style="display:none;" class="section mt-5">
+        <div id="resultsContainer">
+            <div id="recommendationCard" class="card p-4 mb-4" style="border-left: 10px solid var(--primary-accent);">
+                <div class="row align-items-center">
+                    <div class="col-md-2">
+                        <img id="productImageDisplay" class="img-fluid rounded-4 shadow-sm" style="display:none;">
+                    </div>
+                    <div class="col-md-10">
+                        <h3 id="productNameDisplay" class="fw-bold mb-2"></h3>
+                        <div id="recommendationContent" class="mb-2"></div>
+                        <h4 id="recommendationMessage" class="fw-bold text-primary"></h4>
+                    </div>
+                </div>
             </div>
-            <table class="table">
-                <thead><tr><th>Date</th><th>Product</th><th>Reviews</th><th>Status</th><th>Action</th></tr></thead>
-                <tbody id="reportsTableBody"></tbody>
-            </table>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card stat-card">
+                        <span class="dot dot-pos"></span> Positive
+                        <h2 id="positiveCount" class="text-success">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card">
+                        <span class="dot dot-neg"></span> Negative
+                        <h2 id="negativeCount" class="text-danger">0</h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card stat-card">
+                        <span class="dot dot-neu"></span> Neutral
+                        <h2 id="neutralCount" class="text-warning">0</h2>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+</main>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script> 
 
 <script>
-    /* PASTE YOUR ORIGINAL JS LOGIC HERE (BINA KISI CHANGE KE) */
+// --- Existing Global Variables ---
 let sentimentChart, aspectMatrixChart, timeSeriesChart;
 let allReviewData = []; 
 let currentAnalysisData = {}; 
@@ -1101,7 +1189,6 @@ function clearAllHistory() {
         renderReports();
     }
 }
-
 
 </script>
 
