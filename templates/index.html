@@ -204,12 +204,13 @@
         <i class="bi bi-clock-history me-2"></i> Reports History
     </a>
 </li>
-    </ul>
-    <li class="nav-item">
-    <a class="sidebar-link" href="#" onclick="showSection('comparison-section', this)">
+<li class="nav-item">
+    <a class="sidebar-link" href="#" onclick="showSection('comparison-section', this); populateComparisonDropdowns();">
         <i class="bi bi-arrow-left-right me-2"></i> Compare Products
     </a>
 </li>
+    </ul>
+  
 </div>
 
 <div class="main-content">
@@ -397,23 +398,23 @@
     </div>
 </div>
     </div>
-    <div id="comparison-section" style="display: none;" class="mt-4">
-    <div class="card shadow-sm border-0 rounded-4 p-4">
+  <div id="comparison-section" style="display: none;" class="mt-4">
+    <div class="card shadow border-0 rounded-4 p-4">
         <h3 class="text-primary mb-4"><i class="bi bi-columns-gap me-2"></i> Product Comparison</h3>
         <div class="row g-3 mb-4">
             <div class="col-md-5">
-                <label>Select First Product</label>
-                <select id="compare1" class="form-select border-primary"></select>
+                <label class="form-label fw-bold">Select Product A</label>
+                <select id="compare1" class="form-select border-primary rounded-3"></select>
             </div>
             <div class="col-md-2 d-flex align-items-end justify-content-center">
-                <button class="btn btn-primary w-100" onclick="startComparison()">VS</button>
+                <button class="btn btn-primary w-100 rounded-pill" onclick="startComparison()">VS</button>
             </div>
             <div class="col-md-5">
-                <label>Select Second Product</label>
-                <select id="compare2" class="form-select border-primary"></select>
+                <label class="form-label fw-bold">Select Product B</label>
+                <select id="compare2" class="form-select border-primary rounded-3"></select>
             </div>
         </div>
-        <div id="comparisonResults" class="row" style="display:none;">
+        <div id="comparisonResults" class="row mt-4" style="display:none;">
             </div>
     </div>
 </div>
@@ -436,6 +437,8 @@ function showSection(sectionId, element) {
     // Hide all main sections
     document.getElementById('manual-analysis-section').style.display = 'none';
     document.getElementById('bulk-analysis-output').style.display = 'none';
+    document.getElementById('reports-section').style.display = 'none';
+    document.getElementById('comparison-section').style.display = 'none'; // Naya line
 
     // Show the requested section
     document.getElementById(sectionId).style.display = 'block';
@@ -1313,12 +1316,17 @@ function clearAllHistory() {
     }
 }
 
-// Dropdown list ko history se fill karne ke liye
 function populateComparisonDropdowns() {
     const history = JSON.parse(localStorage.getItem('sentimentHistory') || '[]');
     const select1 = document.getElementById('compare1');
     const select2 = document.getElementById('compare2');
     
+    if (history.length === 0) {
+        select1.innerHTML = '<option>No reports found</option>';
+        select2.innerHTML = '<option>No reports found</option>';
+        return;
+    }
+
     let options = history.map((item, index) => 
         `<option value="${index}">${item.product_name} (${item.timestamp})</option>`
     ).join('');
@@ -1327,43 +1335,34 @@ function populateComparisonDropdowns() {
     select2.innerHTML = options;
 }
 
-// Do products ko compare karne ka main logic
 function startComparison() {
     const history = JSON.parse(localStorage.getItem('sentimentHistory') || '[]');
-    const idx1 = document.getElementById('compare1').value;
-    const idx2 = document.getElementById('compare2').value;
-    
-    const p1 = history[idx1];
-    const p2 = history[idx2];
+    const p1 = history[document.getElementById('compare1').value];
+    const p2 = history[document.getElementById('compare2').value];
     
     const resultsDiv = document.getElementById('comparisonResults');
     resultsDiv.style.display = 'flex';
     
+    const getStatusColor = (status) => status === 'Good' ? 'text-success' : 'text-danger';
+
     resultsDiv.innerHTML = `
-        <div class="col-md-6 border-end">
-            <h4 class="text-center text-success">${p1.product_name}</h4>
-            <ul class="list-group">
-                <li class="list-group-item">Positive: ${p1.summary.Positive}</li>
-                <li class="list-group-item">Negative: ${p1.summary.Negative}</li>
-                <li class="list-group-item">Status: <b>${p1.recommendation.status}</b></li>
-            </ul>
+        <div class="col-md-6 border-end text-center">
+            <h4 class="fw-bold">${p1.product_name}</h4>
+            <div class="display-6 my-3">${p1.summary.Positive} 👍</div>
+            <p>Sentiment Score: <b>${((p1.summary.Positive/p1.summary.total)*100).toFixed(1)}%</b></p>
+            <span class="badge ${p1.recommendation.status === 'Good' ? 'bg-success' : 'bg-danger'} p-2">
+                ${p1.recommendation.status}
+            </span>
         </div>
-        <div class="col-md-6">
-            <h4 class="text-center text-primary">${p2.product_name}</h4>
-            <ul class="list-group">
-                <li class="list-group-item">Positive: ${p2.summary.Positive}</li>
-                <li class="list-group-item">Negative: ${p2.summary.Negative}</li>
-                <li class="list-group-item">Status: <b>${p2.recommendation.status}</b></li>
-            </ul>
+        <div class="col-md-6 text-center">
+            <h4 class="fw-bold">${p2.product_name}</h4>
+            <div class="display-6 my-3">${p2.summary.Positive} 👍</div>
+            <p>Sentiment Score: <b>${((p2.summary.Positive/p2.summary.total)*100).toFixed(1)}%</b></p>
+            <span class="badge ${p2.recommendation.status === 'Good' ? 'bg-success' : 'bg-danger'} p-2">
+                ${p2.recommendation.status}
+            </span>
         </div>
     `;
-}
-
-// Modify showSection function to update dropdowns [cite: 493, 494]
-const originalShowSection = showSection;
-showSection = function(sectionId, element) {
-    if(sectionId === 'comparison-section') populateComparisonDropdowns();
-    originalShowSection(sectionId, element);
 }
 
 </script>
