@@ -209,6 +209,11 @@
         <i class="bi bi-arrow-left-right me-2"></i> Compare Products
     </a>
 </li>
+<li class="nav-item">
+        <a class="sidebar-link" href="#" onclick="showSection('visual-dashboard-section', this)">
+            <i class="bi bi-pie-chart-fill me-2"></i> Analytics Dashboard
+        </a>
+    </li>
     </ul>
   
 </div>
@@ -220,6 +225,11 @@
     </header>
 
     <div class="container-fluid">
+
+        <div class="input-group mb-4">
+                <input type="text" id="productUrl" class="form-control" placeholder="Paste link here...">
+                <button class="btn btn-primary" onclick="processBulkData()">Analyze Link</button>
+            </div>
         
         <div id="manual-analysis-section" class="row mb-5 pt-4">
             <div class="col-lg-8 mx-auto">
@@ -434,27 +444,28 @@ let currentAnalysisData = {};
 
 // --- Core Section Management Function ---
 function showSection(sectionId, element) {
-    // Hide all main sections
-    document.getElementById('manual-analysis-section').style.display = 'none';
-    document.getElementById('bulk-analysis-output').style.display = 'none';
-    document.getElementById('reports-section').style.display = 'none';
-    document.getElementById('comparison-section').style.display = 'none'; // Naya line
+    // 1. Sabhi sections ki list (Jo jo aapne naye banaye hain)
+    const sections = [
+        'manual-analysis-section', 
+        'bulk-analysis-output', 
+        'reports-section', 
+        'comparison-section', 
+        'visual-dashboard-section'
+    ];
 
-    // Show the requested section
-    document.getElementById(sectionId).style.display = 'block';
-
-    // Update active state in sidebar
-    document.querySelectorAll('.sidebar-link').forEach(link => {
-        link.classList.remove('active');
+    // 2. Sabko hide karo
+    sections.forEach(id => {
+        const sec = document.getElementById(id);
+        if(sec) sec.style.display = 'none';
     });
-    element.classList.add('active');
-    
-    // Update header subtitle for context
-    if (sectionId === 'manual-analysis-section') {
-        document.getElementById('header-subtitle').textContent = 'Manually Analyze Text or Upload CSV';
-    } else if (sectionId === 'bulk-analysis-output') {
-        document.getElementById('header-subtitle').textContent = 'Automated Analysis';
-    }
+
+    // 3. Sirf maange gaye section ko dikhao
+    const target = document.getElementById(sectionId);
+    if(target) target.style.display = 'block';
+
+    // 4. Sidebar ki active class update karo
+    document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+    if(element) element.classList.add('active');
 }
 
 // Ensure the correct section is visible on load (Manual Analysis)
@@ -940,41 +951,23 @@ function filterReviews(sentimentFilter = 'All') {
     updateTimeSeriesChart(data.detailed_results);
     populateDetailedList(allReviewData);
 
-    function processBulkData(data) {
-    currentAnalysisData = data;
+   function processBulkData(text) {
+    if (!text.trim()) return alert("Bhai, data toh daalo!");
+
+    const results = analyzeText(text); // Purana analysis logic
     
-    // ... aapka existing code jo charts aur table banata hai (keep it as is) ...
-// This section is now managed by showSection() but is kept for data flow
-    document.getElementById('manual-analysis-section').style.display = 'none'; 
-    document.getElementById('bulk-analysis-output').style.display = 'block'; 
-    document.getElementById('resultsContainer').style.display = 'flex'; 
+    // Naya: Dashboard section par automatic switch
+    // Hum "Analytics Dashboard" link ko find karke click simulate kar rahe hain
+    const dashLink = document.querySelector("a[onclick*='visual-dashboard-section']");
+    showSection('visual-dashboard-section', dashLink);
 
-    allReviewData = data.detailed_results;
-
-    const summary = data.summary;
-    document.getElementById('positiveCount').textContent = summary.Positive;
-    document.getElementById('negativeCount').textContent = summary.Negative;
-    document.getElementById('neutralCount').textContent = summary.Neutral;
-    document.getElementById('totalReviews').textContent = summary.total;
+    // Ye functions naye hain jo charts draw karenge (Pichle message wale)
+    renderDashboardCards(results);
+    renderDashboardChart(results);
+    renderDashboardMatrix(results);
     
-    displayRecommendation(
-        data.product_name || 'Analyzed Product', 
-        data.recommendation,
-        data.product_image_url || '' 
-    ); 
-
-    updateChart(summary);
-    updateAspectMatrixChart(data.drill_down_matrix || []);
-    updateTimeSeriesChart(data.detailed_results);
-    populateDetailedList(allReviewData);
-
-    // --- NAYA: History mein save karne ka logic ---
-    saveToHistory(data);
-    
-    document.getElementById('resultsContainer').style.display = 'block';
-    // Bulk section dikhao agar extension se data aaya hai
-    const bulkLink = document.querySelector(".sidebar-link[onclick*='bulk-analysis-output']");
-    showSection('bulk-analysis-output', bulkLink);
+    // Data save karne ka purana logic rehne dein
+    saveToHistory(results, text); 
 }
 
 // Function jo data ko localStorage mein daalega
