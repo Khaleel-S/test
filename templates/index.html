@@ -209,6 +209,11 @@
         <i class="bi bi-arrow-left-right me-2"></i> Compare Products
     </a>
 </li>
+<li class="nav-item">
+    <a class="sidebar-link" href="#" onclick="showSection('visual-dashboard-section', this)">
+        <i class="bi bi-pie-chart-fill me-2"></i> Analytics Dashboard
+    </a>
+</li>
     </ul>
   
 </div>
@@ -416,6 +421,32 @@
         </div>
         <div id="comparisonResults" class="row mt-4" style="display:none;">
             </div>
+    </div>
+</div>
+<div id="visual-dashboard-section" style="display: none;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-dark">Analytics Overview</h2>
+        <button class="btn btn-outline-primary btn-sm" onclick="window.print()">
+            <i class="bi bi-download me-1"></i> Export PDF
+        </button>
+    </div>
+
+    <div id="dashboardCards" class="row g-3 mb-4">
+        </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-3 text-secondary">Sentiment Distribution</h5>
+                <canvas id="dashboardMainChart"></canvas>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 rounded-4 p-4 h-100">
+                <h5 class="fw-bold mb-3 text-secondary">Actionable Matrix</h5>
+                <div id="dashboardMatrix" class="text-center"></div>
+            </div>
+        </div>
     </div>
 </div>
 </div>
@@ -940,67 +971,92 @@ function filterReviews(sentimentFilter = 'All') {
     updateTimeSeriesChart(data.detailed_results);
     populateDetailedList(allReviewData);
 
-    function processBulkData(data) {
-    currentAnalysisData = data;
+   // Global Chart Variable taaki hum purane charts destroy kar sakein
+let dashboardChartInstance = null;
+
+function processBulkData(text) {
+    if (!text.trim()) return alert("Bhai, data toh daalo!");
+
+    const results = analyzeText(text); // Aapka existing analysis logic
     
-    // ... aapka existing code jo charts aur table banata hai (keep it as is) ...
-// This section is now managed by showSection() but is kept for data flow
-    document.getElementById('manual-analysis-section').style.display = 'none'; 
-    document.getElementById('bulk-analysis-output').style.display = 'block'; 
-    document.getElementById('resultsContainer').style.display = 'flex'; 
+    // 1. UI Switch: Dashboard section par le jao
+    const dashLink = document.querySelector("a[onclick*='visual-dashboard-section']");
+    showSection('visual-dashboard-section', dashLink);
 
-    allReviewData = data.detailed_results;
+    // 2. Render Summary Cards
+    renderDashboardCards(results);
 
-    const summary = data.summary;
-    document.getElementById('positiveCount').textContent = summary.Positive;
-    document.getElementById('negativeCount').textContent = summary.Negative;
-    document.getElementById('neutralCount').textContent = summary.Neutral;
-    document.getElementById('totalReviews').textContent = summary.total;
-    
-    displayRecommendation(
-        data.product_name || 'Analyzed Product', 
-        data.recommendation,
-        data.product_image_url || '' 
-    ); 
+    // 3. Render Chart
+    renderDashboardChart(results);
 
-    updateChart(summary);
-    updateAspectMatrixChart(data.drill_down_matrix || []);
-    updateTimeSeriesChart(data.detailed_results);
-    populateDetailedList(allReviewData);
-
-    // --- NAYA: History mein save karne ka logic ---
-    saveToHistory(data);
-    
-    document.getElementById('resultsContainer').style.display = 'block';
-    // Bulk section dikhao agar extension se data aaya hai
-    const bulkLink = document.querySelector(".sidebar-link[onclick*='bulk-analysis-output']");
-    showSection('bulk-analysis-output', bulkLink);
+    // 4. Render Matrix
+    renderDashboardMatrix(results);
 }
 
-// Function jo data ko localStorage mein daalega
-function saveToHistory(data) {
-    let history = JSON.parse(localStorage.getItem('sentimentHistory') || '[]');
+function renderDashboardCards(res) {
+    const container = document.getElementById('dashboardCards');
+    const posPercent = ((res.Positive / res.total) * 100).toFixed(1);
     
-    // Check karein ki ye exact data pehle se toh nahi (duplicate avoid karne ke liye)
-    const isDuplicate = history.some(item => 
-        item.product_name === data.product_name && 
-        item.summary.total === data.summary.total
-    );
+    container.innerHTML = `
+        <div class="col-md-3">
+            <div class="card bg-primary text-white border-0 rounded-4 p-3 shadow-sm">
+                <small>Total Reviews</small>
+                <h3 class="fw-bold">${res.total}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white border-0 rounded-4 p-3 shadow-sm">
+                <small>Positive %</small>
+                <h3 class="fw-bold">${posPercent}%</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white border-0 rounded-4 p-3 shadow-sm">
+                <small>Negative Count</small>
+                <h3 class="fw-bold">${res.Negative}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white border-0 rounded-4 p-3 shadow-sm">
+                <small>Verdict</small>
+                <h3 class="fw-bold">${res.Positive > res.Negative ? 'BUY' : 'WAIT'}</h3>
+            </div>
+        </div>
+    `;
+}
 
-    if (!isDuplicate) {
-        const newEntry = {
-            id: Date.now(),
-            timestamp: new Date().toLocaleString(),
-            product_name: data.product_name || "Scraped Product",
-            summary: data.summary,
-            recommendation: data.recommendation,
-            fullData: data // Poora response save kar rahe hain
-        };
-        
-        history.unshift(newEntry); // Naya record sabse upar
-        localStorage.setItem('sentimentHistory', JSON.stringify(history.slice(0, 15))); // Max 15 records rakhein
-    }
+function renderDashboardChart(res) {
+    const ctx = document.getElementById('dashboardMainChart').getContext('2d');
+    
+    if (dashboardChartInstance) dashboardChartInstance.destroy();
 
+    dashboardChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Positive', 'Negative', 'Neutral'],
+            datasets: [{
+                label: 'Review Count',
+                data: [res.Positive, res.Negative, res.Neutral],
+                backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
+                borderRadius: 10
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } }
+        }
+    });
+}
+
+function renderDashboardMatrix(res) {
+    const matrix = document.getElementById('dashboardMatrix');
+    const status = res.Positive > res.Negative ? 'High Demand' : 'Improvement Needed';
+    matrix.innerHTML = `
+        <div class="p-4 rounded-circle border border-5 border-primary d-inline-block my-3">
+            <h4 class="m-0">${status}</h4>
+        </div>
+        <p class="text-muted">Strategy based on current sentiment ratio.</p>
+    `;
 }
 
 // --- Image Loading Helper for jsPDF ---
