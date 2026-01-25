@@ -974,23 +974,36 @@ function filterReviews(sentimentFilter = 'All') {
    // Global Chart Variable taaki hum purane charts destroy kar sakein
 let dashboardChartInstance = null;
 
-function processBulkData(text) {
-    if (!text.trim()) return alert("Bhai, data toh daalo!");
-
-    const results = analyzeText(text); // Aapka existing analysis logic
+function processBulkData(data) {
+    // 1. Pehle ye check karo ki humein text mil raha hai ya element
+    let text = "";
     
-    // 1. UI Switch: Dashboard section par le jao
-    const dashLink = document.querySelector("a[onclick*='visual-dashboard-section']");
+    if (typeof data === 'string') {
+        text = data;
+    } else {
+        // Agar galti se input field pass ho gayi, toh uska value nikaalo
+        text = document.getElementById('bulkData').value || "";
+    }
+
+    // 2. Ab check karo ki text khali toh nahi
+    if (!text || text.trim() === "") {
+        alert("Bhai, reviews toh daalo pehle!");
+        return;
+    }
+
+    // 3. Purana analysis logic
+    const results = analyzeText(text);
+    const productName = document.getElementById('productName').value.trim() || "Unknown Product";
+
+    // 4. Dashboard render karne ka logic
+    renderDashboard(results);
+    
+    // 5. Section switch karne ka logic
+    const dashLink = document.querySelector(".sidebar-link[onclick*='visual-dashboard-section']");
     showSection('visual-dashboard-section', dashLink);
-
-    // 2. Render Summary Cards
-    renderDashboardCards(results);
-
-    // 3. Render Chart
-    renderDashboardChart(results);
-
-    // 4. Render Matrix
-    renderDashboardMatrix(results);
+    
+    // 6. History save karo
+    saveToHistory(results, productName, text);
 }
 
 function renderDashboardCards(res) {
