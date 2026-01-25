@@ -210,7 +210,7 @@
     </a>
 </li>
 <li class="nav-item">
-    <a class="sidebar-link" href="#" onclick="showSection('visual-dashboard-section', this)">
+    <a class="sidebar-link" href="#" onclick="showSection('analytics-dashboard-section', this); renderDashboardCharts();">
         <i class="bi bi-pie-chart-fill me-2"></i> Analytics Dashboard
     </a>
 </li>
@@ -423,28 +423,32 @@
             </div>
     </div>
 </div>
-<div id="visual-dashboard-section" style="display: none;">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-dark">Analytics Overview</h2>
-        <button class="btn btn-outline-primary btn-sm" onclick="window.print()">
-            <i class="bi bi-download me-1"></i> Export PDF
-        </button>
-    </div>
 
-    <div id="dashboardCards" class="row g-3 mb-4">
-        </div>
-
+<div id="analytics-dashboard-section" style="display: none;" class="mt-4">
     <div class="row g-4">
-        <div class="col-lg-8">
-            <div class="card shadow-sm border-0 rounded-4 p-4 h-100">
-                <h5 class="fw-bold mb-3 text-secondary">Sentiment Distribution</h5>
-                <canvas id="dashboardMainChart"></canvas>
+        <div class="col-md-6">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-header bg-white fw-bold">Sentiment Overview</div>
+                <div class="card-body"><canvas id="dashSentimentChart"></canvas></div>
             </div>
         </div>
-        <div class="col-lg-4">
-            <div class="card shadow-sm border-0 rounded-4 p-4 h-100">
-                <h5 class="fw-bold mb-3 text-secondary">Actionable Matrix</h5>
-                <div id="dashboardMatrix" class="text-center"></div>
+        <div class="col-md-6">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-header bg-white fw-bold">User Intent (Buying Behavior)</div>
+                <div class="card-body"><canvas id="dashIntentChart"></canvas></div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-header bg-white fw-bold">Customer Emotions</div>
+                <div class="card-body"><canvas id="dashEmotionChart"></canvas></div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-header bg-white fw-bold">Aspect Matrix</div>
+                <div class="card-body"><canvas id="dashAspectChart"></canvas></div>
             </div>
         </div>
     </div>
@@ -854,7 +858,6 @@ function displayRecommendation(productName, recommendation, imageUrl) {
     nameDisplay.textContent = productName;
     message.textContent = recommendation.message;
 
-    // Image Logic
     if (imageUrl) {
         imageDisplay.src = imageUrl;
         imageDisplay.style.display = 'block';
@@ -873,15 +876,22 @@ function displayRecommendation(productName, recommendation, imageUrl) {
         icon = 'bi-x-octagon-fill text-danger';
         title = 'PROCEED WITH CAUTION';
         bgClass = 'border-danger';
-    } else { // Decent or Neutral
+    } else {
         icon = 'bi-info-circle-fill text-warning';
         title = 'MIXED REVIEWS';
         bgClass = 'border-warning';
     }
 
+    // --- BUTTON YAHAN ADD KIYA HAI ---
     content.innerHTML = `
         <i class="bi ${icon}" style="font-size: 3rem;"></i>
         <h2 class="card-text display-3 fw-bold">${title}</h2>
+        <div class="mt-4">
+            <button class="btn btn-lg btn-primary shadow-sm rounded-pill px-4" 
+                    onclick="showSection('analytics-dashboard-section', document.querySelector('.sidebar-link[onclick*=\\'analytics-dashboard-section\\']')); renderDashboardCharts();">
+                <i class="bi bi-graph-up-arrow me-2"></i> View Detailed Analytics Dashboard
+            </button>
+        </div>
     `;
     
     card.className = `card shadow border-3 ${bgClass}`;
@@ -971,105 +981,64 @@ function filterReviews(sentimentFilter = 'All') {
     updateTimeSeriesChart(data.detailed_results);
     populateDetailedList(allReviewData);
 
-   // Global Chart Variable taaki hum purane charts destroy kar sakein
-let dashboardChartInstance = null;
-
-function processBulkData(data) {
-    // 1. Pehle ye check karo ki humein text mil raha hai ya element
-    let text = "";
+    function processBulkData(data) {
+    currentAnalysisData = data;
     
-    if (typeof data === 'string') {
-        text = data;
-    } else {
-        // Agar galti se input field pass ho gayi, toh uska value nikaalo
-        text = document.getElementById('bulkData').value || "";
+    // ... aapka existing code jo charts aur table banata hai (keep it as is) ...
+// This section is now managed by showSection() but is kept for data flow
+    document.getElementById('manual-analysis-section').style.display = 'none'; 
+    document.getElementById('bulk-analysis-output').style.display = 'block'; 
+    document.getElementById('resultsContainer').style.display = 'flex'; 
+
+    allReviewData = data.detailed_results;
+
+    const summary = data.summary;
+    document.getElementById('positiveCount').textContent = summary.Positive;
+    document.getElementById('negativeCount').textContent = summary.Negative;
+    document.getElementById('neutralCount').textContent = summary.Neutral;
+    document.getElementById('totalReviews').textContent = summary.total;
+    
+    displayRecommendation(
+        data.product_name || 'Analyzed Product', 
+        data.recommendation,
+        data.product_image_url || '' 
+    ); 
+
+    populateDetailedList(allReviewData);
+
+    // --- NAYA: History mein save karne ka logic ---
+    saveToHistory(data);
+    
+    document.getElementById('resultsContainer').style.display = 'block';
+    // Bulk section dikhao agar extension se data aaya hai
+    const bulkLink = document.querySelector(".sidebar-link[onclick*='bulk-analysis-output']");
+    showSection('bulk-analysis-output', bulkLink);
+}
+
+// Function jo data ko localStorage mein daalega
+function saveToHistory(data) {
+    let history = JSON.parse(localStorage.getItem('sentimentHistory') || '[]');
+    
+    // Check karein ki ye exact data pehle se toh nahi (duplicate avoid karne ke liye)
+    const isDuplicate = history.some(item => 
+        item.product_name === data.product_name && 
+        item.summary.total === data.summary.total
+    );
+
+    if (!isDuplicate) {
+        const newEntry = {
+            id: Date.now(),
+            timestamp: new Date().toLocaleString(),
+            product_name: data.product_name || "Scraped Product",
+            summary: data.summary,
+            recommendation: data.recommendation,
+            fullData: data // Poora response save kar rahe hain
+        };
+        
+        history.unshift(newEntry); // Naya record sabse upar
+        localStorage.setItem('sentimentHistory', JSON.stringify(history.slice(0, 15))); // Max 15 records rakhein
     }
 
-    // 2. Ab check karo ki text khali toh nahi
-    if (!text || text.trim() === "") {
-        alert("Bhai, reviews toh daalo pehle!");
-        return;
-    }
-
-    // 3. Purana analysis logic
-    const results = analyzeText(text);
-    const productName = document.getElementById('productName').value.trim() || "Unknown Product";
-
-    // 4. Dashboard render karne ka logic
-    renderDashboard(results);
-    
-    // 5. Section switch karne ka logic
-    const dashLink = document.querySelector(".sidebar-link[onclick*='visual-dashboard-section']");
-    showSection('visual-dashboard-section', dashLink);
-    
-    // 6. History save karo
-    saveToHistory(results, productName, text);
-}
-
-function renderDashboardCards(res) {
-    const container = document.getElementById('dashboardCards');
-    const posPercent = ((res.Positive / res.total) * 100).toFixed(1);
-    
-    container.innerHTML = `
-        <div class="col-md-3">
-            <div class="card bg-primary text-white border-0 rounded-4 p-3 shadow-sm">
-                <small>Total Reviews</small>
-                <h3 class="fw-bold">${res.total}</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-success text-white border-0 rounded-4 p-3 shadow-sm">
-                <small>Positive %</small>
-                <h3 class="fw-bold">${posPercent}%</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-danger text-white border-0 rounded-4 p-3 shadow-sm">
-                <small>Negative Count</small>
-                <h3 class="fw-bold">${res.Negative}</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card bg-info text-white border-0 rounded-4 p-3 shadow-sm">
-                <small>Verdict</small>
-                <h3 class="fw-bold">${res.Positive > res.Negative ? 'BUY' : 'WAIT'}</h3>
-            </div>
-        </div>
-    `;
-}
-
-function renderDashboardChart(res) {
-    const ctx = document.getElementById('dashboardMainChart').getContext('2d');
-    
-    if (dashboardChartInstance) dashboardChartInstance.destroy();
-
-    dashboardChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Positive', 'Negative', 'Neutral'],
-            datasets: [{
-                label: 'Review Count',
-                data: [res.Positive, res.Negative, res.Neutral],
-                backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
-                borderRadius: 10
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } }
-        }
-    });
-}
-
-function renderDashboardMatrix(res) {
-    const matrix = document.getElementById('dashboardMatrix');
-    const status = res.Positive > res.Negative ? 'High Demand' : 'Improvement Needed';
-    matrix.innerHTML = `
-        <div class="p-4 rounded-circle border border-5 border-primary d-inline-block my-3">
-            <h4 class="m-0">${status}</h4>
-        </div>
-        <p class="text-muted">Strategy based on current sentiment ratio.</p>
-    `;
 }
 
 // --- Image Loading Helper for jsPDF ---
@@ -1432,6 +1401,63 @@ function startComparison() {
             </span>
         </div>
     `;
+}
+
+function renderDashboardCharts() {
+    // Check agar data hai ya nahi
+    if (!currentAnalysisData || !currentAnalysisData.detailed_results) {
+        alert("Pehle koi data analyze karein!");
+        return;
+    }
+
+    const data = currentAnalysisData;
+
+    // 1. Sentiment Chart Logic
+    new Chart(document.getElementById('dashSentimentChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Positive', 'Negative', 'Neutral'],
+            datasets: [{
+                data: [data.summary.Positive, data.summary.Negative, data.summary.Neutral],
+                backgroundColor: ['#28a745', '#dc3545', '#6c757d']
+            }]
+        }
+    });
+
+    // 2. Emotion Chart (Polar Area)
+    const emotions = data.detailed_results.reduce((acc, item) => {
+        acc[item.emotion] = (acc[item.emotion] || 0) + 1;
+        return acc;
+    }, {});
+
+    new Chart(document.getElementById('dashEmotionChart'), {
+        type: 'polarArea',
+        data: {
+            labels: Object.keys(emotions),
+            datasets: [{
+                data: Object.values(emotions),
+                backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff']
+            }]
+        }
+    });
+
+    // 3. Intent Chart (Bar)
+    const intents = data.detailed_results.reduce((acc, item) => {
+        acc[item.intent] = (acc[item.intent] || 0) + 1;
+        return acc;
+    }, {});
+
+    new Chart(document.getElementById('dashIntentChart'), {
+        type: 'bar',
+        data: {
+            labels: Object.keys(intents),
+            datasets: [{
+                label: 'Count',
+                data: Object.values(intents),
+                backgroundColor: '#145277'
+            }]
+        }
+    });
 }
 
 </script>
