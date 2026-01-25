@@ -10,6 +10,21 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <style>
+
+    canvas {
+    max-height: 300px; /* Consistency ke liye */
+}
+
+#analytics-dashboard-section .card {
+    transition: transform 0.3s ease;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important;
+}
+
+#analytics-dashboard-section .card:hover {
+    transform: translateY(-5px);
+}
+
     body {
         font-family: 'Inter', sans-serif;
         background: #f5f7fa;
@@ -279,104 +294,115 @@
 
         <hr class="mb-5 border-4 border-primary">
 
-        <div id="bulk-analysis-output">
-            <div id="resultsContainer" class="row" style="display:none;">
-                <div class="col-12 mb-4">
-                    <h2 class="text-center text-primary">Automated Bulk Sentiment Output</h2>
-                    <p class="text-center text-muted">Data loaded from web scrape</p>
-                </div>
+        <div id="bulk-analysis-output" style="display:none;">
+    <div id="resultsContainer" class="row">
+        <div class="col-12 mb-4">
+            <h2 class="text-center text-primary fw-bold">Analysis Results</h2>
+            <p class="text-center text-muted">Real-time product sentiment insights</p>
+        </div>
 
-                <div class="col-12 mb-5">
-                    <div id="recommendationCard" class="card shadow border-3 border-dark" style="display:none;">
-                        <div class="card-body p-4">
-                            <div class="row g-0 align-items-center">
-                                <div class="col-md-3 d-flex justify-content-center">
-                                    <img id="productImageDisplay" src="" alt="Product Image"
-                                        style="max-width:100%; max-height:250px; border-radius:12px; display:none;">
-                                </div>
-                                <div class="col-md-9">
-                                    <h4 class="card-title text-muted mb-3">Purchase Recommendation for:
-                                        <strong id="productNameDisplay"></strong>
-                                    </h4>
-                                    <div id="recommendationContent"></div>
-                                    <p class="mt-3 text-muted" id="recommendationMessage"></p>
-                                </div>
+        <div class="col-12 mb-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4" style="background: #e8f5e9;">
+                        <div class="card-body p-3 d-flex align-items-center">
+                            <div class="flex-shrink-0 bg-success text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <i class="bi bi-hand-thumbs-up-fill fs-5"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="text-muted small mb-0">Positive</h6>
+                                <h4 class="fw-bold mb-0 text-success" id="positiveCount">0</h4>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="col-12 mb-5 text-center">
-                    <button class="btn btn-lg btn-primary shadow-lg" onclick="generatePDFReport()">
-                        <i class="bi bi-file-earmark-arrow-down-fill me-2"></i> Download Analysis Report
-                    </button>
-                </div>
-
-                <div class="col-lg-4 mb-4">
-                    <div class="card card-sentiment h-100 border-success text-center">
-                        <div class="card-body">
-                            <h5 class="card-title text-success">Positive Reviews</h5>
-                            <p class="card-text display-4" id="positiveCount">0</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 mb-4">
-                    <div class="card card-sentiment h-100 border-danger text-center">
-                        <div class="card-body">
-                            <h5 class="card-title text-danger">Negative Reviews</h5>
-                            <p class="card-text display-4" id="negativeCount">0</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 mb-4">
-                    <div class="card card-sentiment h-100 border-secondary text-center">
-                        <div class="card-body">
-                            <h5 class="card-title text-secondary">Neutral Reviews</h5>
-                            <p class="card-text display-4" id="neutralCount">0</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header">Sentiment Distribution</div>
-                        <div class="card-body"><canvas id="sentimentChart"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header bg-warning-subtle">Aspect-Sentiment Matrix (Top 5)</div>
-                        <div class="card-body p-2"><canvas id="aspectMatrixChart"></canvas></div>
-                    </div>
-                </div>
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header bg-primary-subtle">Sentiment Trend Over Time</div>
-                        <div class="card-body"><canvas id="timeSeriesChart"></canvas></div>
-                    </div>
-                </div>
-
-                <div class="col-lg-6 mb-4">
-                    <div class="card shadow h-100 rounded-4">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            Detailed Review Breakdown (<span id="totalReviews">0</span> Total)
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="d-flex mb-3 gap-2">
-                                <button class="btn btn-outline-secondary btn-sm" onclick="filterReviews('All')">All</button>
-                                <button class="btn btn-outline-success btn-sm" onclick="filterReviews('Positive')">Positive</button>
-                                <button class="btn btn-outline-danger btn-sm" onclick="filterReviews('Negative')">Negative</button>
-                                <input type="text" id="keywordSearch" class="form-control form-control-sm ms-auto" onkeyup="filterReviews('All')" placeholder="Search keyword...">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4" style="background: #ffebee;">
+                        <div class="card-body p-3 d-flex align-items-center">
+                            <div class="flex-shrink-0 bg-danger text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <i class="bi bi-hand-thumbs-down-fill fs-5"></i>
                             </div>
-                            <div class="review-list-wrapper" style="max-height: 400px; overflow-y:auto;">
-                                <ul class="list-group list-group-flush" id="detailedResultsList"></ul>
+                            <div class="ms-3">
+                                <h6 class="text-muted small mb-0">Negative</h6>
+                                <h4 class="fw-bold mb-0 text-danger" id="negativeCount">0</h4>
                             </div>
                         </div>
                     </div>
                 </div>
-
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4" style="background: #f5f5f5;">
+                        <div class="card-body p-3 d-flex align-items-center">
+                            <div class="flex-shrink-0 bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <i class="bi bi-chat-dots-fill fs-5"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="text-muted small mb-0">Neutral</h6>
+                                <h4 class="fw-bold mb-0 text-secondary" id="neutralCount">0</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4" style="background: #e3f2fd;">
+                        <div class="card-body p-3 d-flex align-items-center">
+                            <div class="flex-shrink-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                <i class="bi bi-people-fill fs-5"></i>
+                            </div>
+                            <div class="ms-3">
+                                <h6 class="text-muted small mb-0">Total Reviews</h6>
+                                <h4 class="fw-bold mb-0 text-primary" id="totalReviews">0</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+
+        <div class="col-12 mb-4">
+            <div id="recommendationCard" class="card shadow border-0 rounded-4 overflow-hidden">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            <img id="productImageDisplay" src="" alt="Product"
+                                style="max-width:100%; max-height:220px; border-radius:15px; object-fit: contain; display:none; background: #f8f9fa; padding: 10px;">
+                        </div>
+                        <div class="col-md-9">
+                            <h5 class="text-muted mb-2 small text-uppercase fw-bold">Analysis for:</h5>
+                            <h3 id="productNameDisplay" class="fw-bold mb-3"></h3>
+                            <div id="recommendationContent" class="mb-3"></div>
+                            <p id="recommendationMessage" class="lead text-muted mb-4" style="font-size: 1.1rem;"></p>
+                            
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary px-4 rounded-pill shadow-sm" onclick="showSection('analytics-dashboard-section', document.querySelector('.sidebar-link[onclick*=\'analytics-dashboard-section\']')); renderDashboardCharts();">
+                                    <i class="bi bi-graph-up-arrow me-2"></i> View Analytics Dashboard
+                                </button>
+                                <button class="btn btn-outline-dark px-4 rounded-pill" onclick="generatePDFReport()">
+                                    <i class="bi bi-file-earmark-pdf me-2"></i> Download PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold">Customer Voices</h5>
+                    <div class="d-flex gap-2">
+                        <input type="text" id="keywordSearch" class="form-control form-control-sm rounded-pill" onkeyup="filterReviews('All')" placeholder="Search review...">
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 450px;">
+                        <ul class="list-group list-group-flush" id="detailedResultsList"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
         <div id="reports-section" style="display: none;" class="mt-4">
     <div class="card shadow-sm border-0 rounded-4 p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -435,20 +461,20 @@
         <div class="col-md-6">
             <div class="card shadow border-0 rounded-4">
                 <div class="card-header bg-white fw-bold">User Intent (Buying Behavior)</div>
-                <div class="card-body"><canvas id="dashIntentChart"></canvas></div>
+                <div class="card-body" style="height: 350px;"><canvas id="dashIntentChart"></canvas></div>
             </div>
         </div>
         
         <div class="col-md-6">
             <div class="card shadow border-0 rounded-4">
                 <div class="card-header bg-white fw-bold">Customer Emotions</div>
-                <div class="card-body"><canvas id="dashEmotionChart"></canvas></div>
+                <div class="card-body" style="height: 350px;"><canvas id="dashEmotionChart"></canvas></div>
             </div>
         </div>
         <div class="col-md-6">
             <div class="card shadow border-0 rounded-4">
                 <div class="card-header bg-white fw-bold">Aspect Matrix</div>
-                <div class="card-body"><canvas id="dashAspectChart"></canvas></div>
+                <div class="card-body" style="height: 350px;"><canvas id="dashAspectChart"></canvas></div>
             </div>
         </div>
     </div>
@@ -854,47 +880,49 @@ function displayRecommendation(productName, recommendation, imageUrl) {
     const nameDisplay = document.getElementById('productNameDisplay');
     const imageDisplay = document.getElementById('productImageDisplay');
     
+    // Card aur Name set karein
     card.style.display = 'block';
     nameDisplay.textContent = productName;
     message.textContent = recommendation.message;
 
+    // Image Handle karein
     if (imageUrl) {
         imageDisplay.src = imageUrl;
         imageDisplay.style.display = 'block';
     } else {
         imageDisplay.style.display = 'none';
-        imageDisplay.src = ''; 
     }
 
-    let icon, title, bgClass;
+    // Status ke hisaab se styling decide karein
+    let statusConfig = {
+        Good: { icon: 'bi-check-circle-fill', color: 'text-success', btnClass: 'btn-success', title: 'EXCELLENT CHOICE', border: 'border-success' },
+        Bad: { icon: 'bi-exclamation-triangle-fill', color: 'text-danger', btnClass: 'btn-danger', title: 'RISKY PURCHASE', border: 'border-danger' },
+        Neutral: { icon: 'bi-info-circle-fill', color: 'text-warning', btnClass: 'btn-warning', title: 'AVERAGE PRODUCT', border: 'border-warning' }
+    };
 
-    if (recommendation.status === 'Good') {
-        icon = 'bi-check-circle-fill text-success';
-        title = 'GO FOR IT!';
-        bgClass = 'border-success';
-    } else if (recommendation.status === 'Bad') {
-        icon = 'bi-x-octagon-fill text-danger';
-        title = 'PROCEED WITH CAUTION';
-        bgClass = 'border-danger';
-    } else {
-        icon = 'bi-info-circle-fill text-warning';
-        title = 'MIXED REVIEWS';
-        bgClass = 'border-warning';
-    }
+    const config = statusConfig[recommendation.status] || statusConfig.Neutral;
 
-    // --- BUTTON YAHAN ADD KIYA HAI ---
+    // Recommendation Card ka inner content update karein
     content.innerHTML = `
-        <i class="bi ${icon}" style="font-size: 3rem;"></i>
-        <h2 class="card-text display-3 fw-bold">${title}</h2>
-        <div class="mt-4">
-            <button class="btn btn-lg btn-primary shadow-sm rounded-pill px-4" 
-                    onclick="showSection('analytics-dashboard-section', document.querySelector('.sidebar-link[onclick*=\\'analytics-dashboard-section\\']')); renderDashboardCharts();">
-                <i class="bi bi-graph-up-arrow me-2"></i> View Detailed Analytics Dashboard
-            </button>
+        <div class="d-flex flex-column align-items-center py-3">
+            <i class="bi ${config.icon} ${config.color}" style="font-size: 4rem;"></i>
+            <h2 class="fw-bold mt-2 ${config.color}">${config.title}</h2>
+            
+            <div class="mt-4 d-flex gap-2">
+                <button class="btn btn-lg btn-primary shadow-sm rounded-pill px-4 fw-bold" 
+                        onclick="showSection('analytics-dashboard-section', document.querySelector('.sidebar-link[onclick*=\\'analytics-dashboard-section\\']')); renderDashboardCharts();">
+                    <i class="bi bi-bar-chart-fill me-2"></i> Open Analytics Dashboard
+                </button>
+                
+                <button class="btn btn-lg btn-outline-secondary shadow-sm rounded-pill px-4" onclick="generatePDFReport()">
+                    <i class="bi bi-download me-2"></i> Report
+                </button>
+            </div>
         </div>
     `;
     
-    card.className = `card shadow border-3 ${bgClass}`;
+    // Card ki border aur shadow update karein
+    card.className = `card shadow-lg border-start border-5 ${config.border} rounded-4`;
 }
 
 // --- UPDATED to display new fields (Emotion, Intent, Sarcasm, Language) ---
@@ -1402,60 +1430,122 @@ function startComparison() {
         </div>
     `;
 }
+let dashboardCharts = {}; 
 
 function renderDashboardCharts() {
-    // Check agar data hai ya nahi
-    if (!currentAnalysisData || !currentAnalysisData.detailed_results) {
-        alert("Pehle koi data analyze karein!");
+    if (!currentAnalysisData) {
+        alert("Bhai, pehle data analyze toh karlo!");
         return;
     }
 
     const data = currentAnalysisData;
+    const details = data.detailed_results || [];
 
-    // 1. Sentiment Chart Logic
-    new Chart(document.getElementById('dashSentimentChart'), {
+    // Dashboard Cards Update
+    document.getElementById('dash-total-reviews').textContent = data.summary.total || 0;
+
+    const createChart = (id, config) => {
+        if (dashboardCharts[id]) dashboardCharts[id].destroy();
+        const ctx = document.getElementById(id).getContext('2d');
+        dashboardCharts[id] = new Chart(ctx, config);
+    };
+
+    // 1. Sentiment Distribution (Premium Doughnut)
+    createChart('dashSentimentChart', {
         type: 'doughnut',
         data: {
             labels: ['Positive', 'Negative', 'Neutral'],
             datasets: [{
                 data: [data.summary.Positive, data.summary.Negative, data.summary.Neutral],
-                backgroundColor: ['#28a745', '#dc3545', '#6c757d']
+                backgroundColor: ['#2ecc71', '#e74c3c', '#95a5a6'],
+                borderWidth: 5,
+                borderColor: '#ffffff', // Space between segments
+                hoverOffset: 15
             }]
+        },
+        options: { 
+            cutout: '75%', // Thinner doughnut (Modern look)
+            plugins: { 
+                legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } 
+            } 
         }
     });
 
-    // 2. Emotion Chart (Polar Area)
-    const emotions = data.detailed_results.reduce((acc, item) => {
-        acc[item.emotion] = (acc[item.emotion] || 0) + 1;
-        return acc;
-    }, {});
+    // 2. Emotion Chart (Enhanced Polar Area)
+    const emotionCounts = {};
+    details.forEach(item => {
+        const emo = item.emotion || 'Neutral';
+        emotionCounts[emo] = (emotionCounts[emo] || 0) + 1;
+    });
 
-    new Chart(document.getElementById('dashEmotionChart'), {
+    createChart('dashEmotionChart', {
         type: 'polarArea',
         data: {
-            labels: Object.keys(emotions),
+            labels: Object.keys(emotionCounts),
             datasets: [{
-                data: Object.values(emotions),
-                backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff']
+                label: 'Reviews',
+                data: Object.values(emotionCounts),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ],
+                borderWidth: 2
             }]
+        },
+        options: {
+            scales: { r: { grid: { color: '#f0f0f0' }, ticks: { display: false } } },
+            plugins: { legend: { position: 'right' } }
         }
     });
 
-    // 3. Intent Chart (Bar)
-    const intents = data.detailed_results.reduce((acc, item) => {
-        acc[item.intent] = (acc[item.intent] || 0) + 1;
-        return acc;
-    }, {});
+    // 3. Aspect-Sentiment Matrix (Clean Stacked Horizontal Bar)
+    const aspectMap = {};
+    details.forEach(item => {
+        if (item.aspects && Array.isArray(item.aspects)) {
+            item.aspects.forEach(a => {
+                if (!aspectMap[a.aspect]) aspectMap[a.aspect] = { pos: 0, neg: 0 };
+                if (a.sentiment === 'Positive') aspectMap[a.aspect].pos++;
+                else aspectMap[a.aspect].neg++;
+            });
+        }
+    });
 
-    new Chart(document.getElementById('dashIntentChart'), {
+    const aspectLabels = Object.keys(aspectMap);
+    createChart('dashAspectChart', {
         type: 'bar',
         data: {
-            labels: Object.keys(intents),
-            datasets: [{
-                label: 'Count',
-                data: Object.values(intents),
-                backgroundColor: '#145277'
-            }]
+            labels: aspectLabels,
+            datasets: [
+                {
+                    label: 'Positive Feedback',
+                    data: aspectLabels.map(l => aspectMap[l].pos),
+                    backgroundColor: '#2ecc71',
+                    borderRadius: 5,
+                    barThickness: 20
+                },
+                {
+                    label: 'Negative Feedback',
+                    data: aspectLabels.map(l => aspectMap[l].neg),
+                    backgroundColor: '#e74c3c',
+                    borderRadius: 5,
+                    barThickness: 20
+                }
+            ]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false, // Card ke andar sahi fit hoga
+            scales: { 
+                x: { stacked: true, grid: { display: false } }, 
+                y: { stacked: true, grid: { display: false } } 
+            },
+            plugins: { 
+                legend: { position: 'top', align: 'end' } 
+            }
         }
     });
 }
