@@ -451,34 +451,46 @@
 </div>
 
 <div id="analytics-dashboard-section" style="display: none;" class="mt-4">
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 text-center p-3" style="background: #e3f2fd;">
+                <h6 class="text-muted small uppercase fw-bold">Total Reviews Analyzed</h6>
+                <h2 id="dash-total-reviews" class="fw-bold text-primary mb-0">0</h2>
+            </div>
+        </div>
+    </div>
+
     <div class="row g-4">
         <div class="col-md-6">
-            <div class="card shadow border-0 rounded-4">
-                <div class="card-header bg-white fw-bold">Sentiment Overview</div>
-                <div class="card-body"><canvas id="dashSentimentChart"></canvas></div>
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-white fw-bold border-0 pt-3">Sentiment Distribution</div>
+                <div class="card-body" style="position: relative; height:350px;">
+                    <canvas id="dashSentimentChart"></canvas>
+                </div>
             </div>
         </div>
+
         <div class="col-md-6">
-            <div class="card shadow border-0 rounded-4">
-                <div class="card-header bg-white fw-bold">User Intent (Buying Behavior)</div>
-                <div class="card-body" style="height: 350px;"><canvas id="dashIntentChart"></canvas></div>
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-white fw-bold border-0 pt-3">Customer Emotions</div>
+                <div class="card-body" style="position: relative; height:350px;">
+                    <canvas id="dashEmotionChart"></canvas>
+                </div>
             </div>
         </div>
-        
-        <div class="col-md-6">
-            <div class="card shadow border-0 rounded-4">
-                <div class="card-header bg-white fw-bold">Customer Emotions</div>
-                <div class="card-body" style="height: 350px;"><canvas id="dashEmotionChart"></canvas></div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card shadow border-0 rounded-4">
-                <div class="card-header bg-white fw-bold">Aspect Matrix</div>
-                <div class="card-body" style="height: 350px;"><canvas id="dashAspectChart"></canvas></div>
+
+        <div class="col-12">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-white fw-bold border-0 pt-3">Aspect-Sentiment Analysis</div>
+                <div class="card-body" style="position: relative; height:400px;">
+                    <canvas id="dashAspectChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -495,27 +507,32 @@ let currentAnalysisData = {};
 
 // --- Core Section Management Function ---
 function showSection(sectionId, element) {
-    // Hide all main sections
-    document.getElementById('manual-analysis-section').style.display = 'none';
-    document.getElementById('bulk-analysis-output').style.display = 'none';
-    document.getElementById('reports-section').style.display = 'none';
-    document.getElementById('comparison-section').style.display = 'none'; // Naya line
-
-    // Show the requested section
-    document.getElementById(sectionId).style.display = 'block';
-
-    // Update active state in sidebar
-    document.querySelectorAll('.sidebar-link').forEach(link => {
-        link.classList.remove('active');
-    });
-    element.classList.add('active');
+    // Saare sections ki list
+    const sections = ['manual-analysis-section', 'bulk-analysis-output', 'reports-section', 'comparison-section', 'analytics-dashboard-section'];
     
-    // Update header subtitle for context
-    if (sectionId === 'manual-analysis-section') {
-        document.getElementById('header-subtitle').textContent = 'Manually Analyze Text or Upload CSV';
-    } else if (sectionId === 'bulk-analysis-output') {
-        document.getElementById('header-subtitle').textContent = 'Automated Analysis';
+    // Sabko hide karo
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+
+    // Target section dikhao
+    const target = document.getElementById(sectionId);
+    if (target) {
+        target.style.display = 'block';
+        
+        // AGAR DASHBOARD HAI TOH CHARTS KO RE-RENDER KARO
+        if (sectionId === 'analytics-dashboard-section') {
+            // 200ms ka delay taaki CSS transition/display complete ho jaye
+            setTimeout(() => {
+                renderDashboardCharts();
+            }, 200);
+        }
     }
+
+    // Sidebar active state
+    document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+    if (element) element.classList.add('active');
 }
 
 // Ensure the correct section is visible on load (Manual Analysis)
@@ -880,12 +897,12 @@ function displayRecommendation(productName, recommendation, imageUrl) {
     const nameDisplay = document.getElementById('productNameDisplay');
     const imageDisplay = document.getElementById('productImageDisplay');
     
-    // Card aur Name set karein
+    // Section visible karo aur data bharo
     card.style.display = 'block';
     nameDisplay.textContent = productName;
     message.textContent = recommendation.message;
 
-    // Image Handle karein
+    // Product Image Logic
     if (imageUrl) {
         imageDisplay.src = imageUrl;
         imageDisplay.style.display = 'block';
@@ -893,35 +910,24 @@ function displayRecommendation(productName, recommendation, imageUrl) {
         imageDisplay.style.display = 'none';
     }
 
-    // Status ke hisaab se styling decide karein
+    // Status Styling Configuration
     let statusConfig = {
-        Good: { icon: 'bi-check-circle-fill', color: 'text-success', btnClass: 'btn-success', title: 'EXCELLENT CHOICE', border: 'border-success' },
-        Bad: { icon: 'bi-exclamation-triangle-fill', color: 'text-danger', btnClass: 'btn-danger', title: 'RISKY PURCHASE', border: 'border-danger' },
-        Neutral: { icon: 'bi-info-circle-fill', color: 'text-warning', btnClass: 'btn-warning', title: 'AVERAGE PRODUCT', border: 'border-warning' }
+        Good: { icon: 'bi-check-circle-fill', color: 'text-success', title: 'EXCELLENT CHOICE', border: 'border-success' },
+        Bad: { icon: 'bi-exclamation-triangle-fill', color: 'text-danger', title: 'RISKY PURCHASE', border: 'border-danger' },
+        Neutral: { icon: 'bi-info-circle-fill', color: 'text-warning', title: 'AVERAGE PRODUCT', border: 'border-warning' }
     };
 
     const config = statusConfig[recommendation.status] || statusConfig.Neutral;
 
-    // Recommendation Card ka inner content update karein
+    // Sirf Icon aur Title dikhao (Buttons removed)
     content.innerHTML = `
-        <div class="d-flex flex-column align-items-center py-3">
-            <i class="bi ${config.icon} ${config.color}" style="font-size: 4rem;"></i>
-            <h2 class="fw-bold mt-2 ${config.color}">${config.title}</h2>
-            
-            <div class="mt-4 d-flex gap-2">
-                <button class="btn btn-lg btn-primary shadow-sm rounded-pill px-4 fw-bold" 
-                        onclick="showSection('analytics-dashboard-section', document.querySelector('.sidebar-link[onclick*=\\'analytics-dashboard-section\\']')); renderDashboardCharts();">
-                    <i class="bi bi-bar-chart-fill me-2"></i> Open Analytics Dashboard
-                </button>
-                
-                <button class="btn btn-lg btn-outline-secondary shadow-sm rounded-pill px-4" onclick="generatePDFReport()">
-                    <i class="bi bi-download me-2"></i> Report
-                </button>
-            </div>
+        <div class="d-flex flex-column align-items-center py-2">
+            <i class="bi ${config.icon} ${config.color}" style="font-size: 4.5rem;"></i>
+            <h2 class="fw-bold mt-2 ${config.color} display-5">${config.title}</h2>
         </div>
     `;
     
-    // Card ki border aur shadow update karein
+    // Border aur Shadow update
     card.className = `card shadow-lg border-start border-5 ${config.border} rounded-4`;
 }
 
@@ -1430,27 +1436,36 @@ function startComparison() {
         </div>
     `;
 }
+
 let dashboardCharts = {}; 
 
 function renderDashboardCharts() {
-    if (!currentAnalysisData) {
-        alert("Bhai, pehle data analyze toh karlo!");
+    // 1. Data Check
+    if (!currentAnalysisData || !currentAnalysisData.summary) {
+        console.error("Data missing for dashboard");
         return;
     }
 
     const data = currentAnalysisData;
     const details = data.detailed_results || [];
 
-    // Dashboard Cards Update
-    document.getElementById('dash-total-reviews').textContent = data.summary.total || 0;
+    // 2. Stats Update
+    const totalEl = document.getElementById('dash-total-reviews');
+    if (totalEl) totalEl.textContent = data.summary.total || 0;
 
-    const createChart = (id, config) => {
-        if (dashboardCharts[id]) dashboardCharts[id].destroy();
-        const ctx = document.getElementById(id).getContext('2d');
-        dashboardCharts[id] = new Chart(ctx, config);
-    };
+    // 3. Chart Helper
+const createChart = (id, config) => {
+    const canvas = document.getElementById(id);
+    if (!canvas) {
+        console.warn(`Bhai, ${id} wala canvas HTML mein nahi mila!`);
+        return;
+    }
+    if (dashboardCharts[id]) dashboardCharts[id].destroy();
+    const ctx = canvas.getContext('2d');
+    dashboardCharts[id] = new Chart(ctx, config);
+};
 
-    // 1. Sentiment Distribution (Premium Doughnut)
+    // --- Sentiment Chart ---
     createChart('dashSentimentChart', {
         type: 'doughnut',
         data: {
@@ -1459,19 +1474,13 @@ function renderDashboardCharts() {
                 data: [data.summary.Positive, data.summary.Negative, data.summary.Neutral],
                 backgroundColor: ['#2ecc71', '#e74c3c', '#95a5a6'],
                 borderWidth: 5,
-                borderColor: '#ffffff', // Space between segments
-                hoverOffset: 15
+                borderColor: '#ffffff'
             }]
         },
-        options: { 
-            cutout: '75%', // Thinner doughnut (Modern look)
-            plugins: { 
-                legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } 
-            } 
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
     });
 
-    // 2. Emotion Chart (Enhanced Polar Area)
+    // --- Emotion Chart ---
     const emotionCounts = {};
     details.forEach(item => {
         const emo = item.emotion || 'Neutral';
@@ -1483,25 +1492,14 @@ function renderDashboardCharts() {
         data: {
             labels: Object.keys(emotionCounts),
             datasets: [{
-                label: 'Reviews',
                 data: Object.values(emotionCounts),
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.7)',
-                    'rgba(54, 162, 235, 0.7)',
-                    'rgba(255, 206, 86, 0.7)',
-                    'rgba(75, 192, 192, 0.7)',
-                    'rgba(153, 102, 255, 0.7)'
-                ],
-                borderWidth: 2
+                backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff']
             }]
         },
-        options: {
-            scales: { r: { grid: { color: '#f0f0f0' }, ticks: { display: false } } },
-            plugins: { legend: { position: 'right' } }
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
     });
 
-    // 3. Aspect-Sentiment Matrix (Clean Stacked Horizontal Bar)
+    // --- Aspect Chart ---
     const aspectMap = {};
     details.forEach(item => {
         if (item.aspects && Array.isArray(item.aspects)) {
@@ -1513,40 +1511,17 @@ function renderDashboardCharts() {
         }
     });
 
-    const aspectLabels = Object.keys(aspectMap);
+    const labels = Object.keys(aspectMap);
     createChart('dashAspectChart', {
         type: 'bar',
         data: {
-            labels: aspectLabels,
+            labels: labels,
             datasets: [
-                {
-                    label: 'Positive Feedback',
-                    data: aspectLabels.map(l => aspectMap[l].pos),
-                    backgroundColor: '#2ecc71',
-                    borderRadius: 5,
-                    barThickness: 20
-                },
-                {
-                    label: 'Negative Feedback',
-                    data: aspectLabels.map(l => aspectMap[l].neg),
-                    backgroundColor: '#e74c3c',
-                    borderRadius: 5,
-                    barThickness: 20
-                }
+                { label: 'Positive', data: labels.map(l => aspectMap[l].pos), backgroundColor: '#2ecc71', borderRadius: 5 },
+                { label: 'Negative', data: labels.map(l => aspectMap[l].neg), backgroundColor: '#e74c3c', borderRadius: 5 }
             ]
         },
-        options: {
-            indexAxis: 'y',
-            responsive: true,
-            maintainAspectRatio: false, // Card ke andar sahi fit hoga
-            scales: { 
-                x: { stacked: true, grid: { display: false } }, 
-                y: { stacked: true, grid: { display: false } } 
-            },
-            plugins: { 
-                legend: { position: 'top', align: 'end' } 
-            }
-        }
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
     });
 }
 
