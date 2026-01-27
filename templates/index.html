@@ -186,14 +186,6 @@
     #recommendationCard h2 {
         font-weight: 700;
     }
-
-    /* Setting initial states */
-    #bulk-analysis-output {
-        display: block; /* Hide Dashboard Results by default */
-    }
-    #manual-analysis-section {
-        display: none; /* Show Manual Analysis by default */
-    }
 </style>
 </head>
 <body>
@@ -297,34 +289,6 @@
                     <p class="text-center text-muted">Real-time product sentiment insights</p>
                 </div>
 
-                <!-- Charts for Bulk Analysis Section -->
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm border-0 rounded-4">
-                        <div class="card-header bg-white fw-bold border-0">Sentiment Distribution</div>
-                        <div class="card-body">
-                            <canvas id="sentimentChart" height="250"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm border-0 rounded-4">
-                        <div class="card-header bg-white fw-bold border-0">Aspect Analysis</div>
-                        <div class="card-body">
-                            <canvas id="aspectMatrixChart" height="250"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-4 mb-4">
-                    <div class="card shadow-sm border-0 rounded-4">
-                        <div class="card-header bg-white fw-bold border-0">Trend Over Time</div>
-                        <div class="card-body">
-                            <canvas id="timeSeriesChart" height="250"></canvas>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="col-12 mb-4">
                     <div class="row g-3">
                         <div class="col-md-3">
@@ -397,7 +361,7 @@
                                     <p id="recommendationMessage" class="lead text-muted mb-4" style="font-size: 1.1rem;"></p>
                                     
                                     <div class="d-flex gap-2">
-                                        <button class="btn btn-primary px-4 rounded-pill shadow-sm" onclick="showSection('analytics-dashboard-section', document.querySelector('.sidebar-link[onclick*=\\'analytics-dashboard-section\\']')); renderDashboardCharts();">
+                                        <button class="btn btn-primary px-4 rounded-pill shadow-sm" onclick="showSection('analytics-dashboard-section', document.querySelector('.sidebar-link[onclick*=\'analytics-dashboard-section\']')); renderDashboardCharts();">
                                             <i class="bi bi-graph-up-arrow me-2"></i> View Analytics Dashboard
                                         </button>
                                         <button class="btn btn-outline-dark px-4 rounded-pill" onclick="generatePDFReport()">
@@ -447,8 +411,7 @@
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody id="reportsTableBody">
-                        </tbody>
+                        <tbody id="reportsTableBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -470,8 +433,7 @@
                         <select id="compare2" class="form-select border-primary rounded-3"></select>
                     </div>
                 </div>
-                <div id="comparisonResults" class="row mt-4" style="display:none;">
-                </div>
+                <div id="comparisonResults" class="row mt-4" style="display:none;"></div>
             </div>
         </div>
 
@@ -524,12 +486,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script> 
 
 <script>
-// --- Existing Global Variables ---
+// --- Global Variables ---
 let sentimentChart, aspectMatrixChart, timeSeriesChart;
 let allReviewData = []; 
 let currentAnalysisData = {}; 
+let dashboardCharts = {};
 
-// --- Core Section Management Function ---
+// --- Section Management ---
 function showSection(sectionId, element) {
     const sections = [
         'manual-analysis-section', 
@@ -563,60 +526,35 @@ function showSection(sectionId, element) {
         subtitle.textContent = 'Automated Analysis Results';
     } else if (sectionId === 'analytics-dashboard-section') {
         subtitle.textContent = 'Visual Analytics & Product Insights';
-        
         setTimeout(() => {
             renderDashboardCharts();
-        }, 300); // Increase timeout for better rendering
+        }, 100);
     }
 }
 
-// --- INITIALIZATION ---
+// --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session_id');
 
-    const manualLink = document.querySelector(".sidebar-link[onclick*='manual-analysis-section']");
-    const bulkLink = document.querySelector(".sidebar-link[onclick*='bulk-analysis-output']");
-
-    document.getElementById('manual-analysis-section').style.display = 'block';
-    document.getElementById('bulk-analysis-output').style.display = 'none';
-    
-    if (manualLink) {
-        manualLink.classList.add('active');
-    }
-    if (bulkLink) {
-        bulkLink.classList.remove('active');
-    }
+    // Set default section
+    showSection('manual-analysis-section', document.querySelector(".sidebar-link[onclick*='manual-analysis-section']"));
 
     if (sessionId) {
         document.title = "Analysis Results - Loading...";
-        
-        if (bulkLink) {
-            showSection('bulk-analysis-output', bulkLink);
-        }
-        
+        const bulkLink = document.querySelector(".sidebar-link[onclick*='bulk-analysis-output']");
+        showSection('bulk-analysis-output', bulkLink);
         loadDataFromSession(sessionId);
-    } else {
-        document.getElementById('resultsContainer').style.display = 'none';
-        
-        if (manualLink) {
-            manualLink.classList.add('active');
-        }
     }
 });
 
-// --- MANUAL ANALYSIS ---
+// ----------------------------------------
+// --- MANUAL ANALYSIS FUNCTIONS ---
+// ----------------------------------------
 function analyzeSingleReview() {
     const reviewText = document.getElementById('reviewInput').value.trim();
     const outputDiv = document.getElementById('singleReviewOutput');
     
-    const sentimentSpan = document.getElementById('singleSentiment');
-    const emotionSpan = document.getElementById('singleEmotion');
-    const intentSpan = document.getElementById('singleIntent');
-    const aspectsSpan = document.getElementById('singleAspects');
-    const sarcasmSpan = document.getElementById('singleSarcasm');
-    const languageSpan = document.getElementById('singleLanguage');
-
     if (!reviewText) {
         alert("Please enter a review to analyze.");
         outputDiv.style.display = 'none';
@@ -625,6 +563,7 @@ function analyzeSingleReview() {
 
     const textLower = reviewText.toLowerCase();
 
+    // Mock analysis logic
     let mockSentiment = 'Neutral';
     let mockEmotion = 'N/A';
     let mockIntent = 'N/A';
@@ -677,20 +616,26 @@ function analyzeSingleReview() {
         mockEmotion = 'Anger';
     }
     
+    // Update UI
+    const sentimentSpan = document.getElementById('singleSentiment');
     sentimentSpan.textContent = mockSentiment;
     sentimentSpan.className = 'badge ' + getSentimentClass(mockSentiment);
     
+    const emotionSpan = document.getElementById('singleEmotion');
     emotionSpan.textContent = mockEmotion;
     emotionSpan.className = 'badge ' + getSentimentClass(mockEmotion.toLowerCase());
     
+    const intentSpan = document.getElementById('singleIntent');
     intentSpan.textContent = mockIntent;
     intentSpan.className = 'badge bg-primary'; 
     
-    aspectsSpan.innerHTML = formatAspects(mockAspects);
+    document.getElementById('singleAspects').innerHTML = formatAspects(mockAspects);
     
+    const sarcasmSpan = document.getElementById('singleSarcasm');
     sarcasmSpan.textContent = mockSarcasm ? '⚠️ Sarcasm Detected' : 'No Sarcasm';
     sarcasmSpan.className = 'badge ' + (mockSarcasm ? 'badge-sarcasm' : 'bg-success');
     
+    const languageSpan = document.getElementById('singleLanguage');
     languageSpan.textContent = `Lang: ${mockLanguage}`;
     
     outputDiv.style.display = 'block';
@@ -699,6 +644,9 @@ function analyzeSingleReview() {
     alert(`Single Review Analyzed! Sentiment: ${mockSentiment}, Emotion: ${mockEmotion}`);
 }
 
+// ----------------------------------------
+// --- CSV PROCESSING FUNCTION ---
+// ----------------------------------------
 function processCSVFile() {
     const fileInput = document.getElementById('csvFileInput');
     const file = fileInput.files[0];
@@ -719,6 +667,7 @@ function processCSVFile() {
                 return;
             }
 
+            // Mock data generation
             const newFields = {
                 emotion: ['Joy', 'Anger', 'Sadness', 'Neutral'],
                 intent: ['Purchase', 'Churn', 'Inquiry', 'Compliment'],
@@ -728,17 +677,9 @@ function processCSVFile() {
 
             const mockBulkResults = csvData.map((row, index) => {
                 const reviewText = row.review || 'No review text provided.';
-
                 const sentiment = index % 3 === 0 ? 'Positive' : (index % 3 === 1 ? 'Negative' : 'Neutral');
-                const aspects = {};
+                const aspects = sentiment === 'Positive' ? {'quality': 'Positive', 'delivery': 'Positive'} : {'size': 'Negative', 'price': 'Neutral'};
                 
-                // Generate aspects based on review content
-                if (reviewText.toLowerCase().includes('quality')) aspects['Quality'] = sentiment;
-                if (reviewText.toLowerCase().includes('price')) aspects['Price'] = 'Negative';
-                if (reviewText.toLowerCase().includes('delivery')) aspects['Delivery'] = 'Positive';
-                if (reviewText.toLowerCase().includes('size')) aspects['Size'] = 'Negative';
-                
-                // Advanced fields simulation
                 const emotion = newFields.emotion[Math.floor(Math.random() * newFields.emotion.length)];
                 const intent = newFields.intent[Math.floor(Math.random() * newFields.intent.length)];
                 const is_sarcastic = newFields.is_sarcastic[Math.floor(Math.random() * newFields.is_sarcastic.length)];
@@ -763,11 +704,12 @@ function processCSVFile() {
             const neutralCount = mockBulkResults.length - positiveCount - negativeCount;
             const total = mockBulkResults.length;
 
-            const recommendationStatus = positiveCount > (negativeCount + neutralCount) ? 'Good' : (negativeCount > positiveCount ? 'Bad' : 'Decent');
+            const recommendationStatus = positiveCount > (negativeCount + neutralCount) ? 'Good' : 
+                                       (negativeCount > positiveCount ? 'Bad' : 'Neutral');
             
             const mockAnalysisResult = {
-                product_name: 'CSV Uploaded Reviews',
-                product_image_url: '', 
+                product_name: 'CSV Uploaded Product',
+                product_image_url: 'https://via.placeholder.com/300x200?text=CSV+Product',
                 summary: {
                     Positive: positiveCount,
                     Negative: negativeCount,
@@ -788,14 +730,153 @@ function processCSVFile() {
             };
 
             processBulkData(mockAnalysisResult);
-            showSection('bulk-analysis-output', document.querySelector('[onclick="showSection(\'bulk-analysis-output\', this)"]'));
-
-            alert(`Successfully analyzed ${total} reviews from CSV! Displaying results in Dashboard.`);
+            alert(`Successfully analyzed ${total} reviews from CSV!`);
+        },
+        error: function(error) {
+            console.error("CSV parsing error:", error);
+            alert("Error reading CSV file.");
         }
     });
 }
 
+// ----------------------------------------
+// --- MAIN BULK DATA PROCESSING FUNCTION ---
+// ----------------------------------------
+function processBulkData(data) {
+    console.log("Processing bulk data:", data);
+    
+    // Store global data
+    currentAnalysisData = data;
+    allReviewData = data.detailed_results || [];
+    
+    // Update summary stats
+    const summary = data.summary || { Positive: 0, Negative: 0, Neutral: 0, total: 0 };
+    document.getElementById('positiveCount').textContent = summary.Positive;
+    document.getElementById('negativeCount').textContent = summary.Negative;
+    document.getElementById('neutralCount').textContent = summary.Neutral;
+    document.getElementById('totalReviews').textContent = summary.total;
+    
+    // Update product details
+    const productName = data.product_name || 'Analyzed Product';
+    const productImageUrl = data.product_image_url || '';
+    const recommendation = data.recommendation || { status: 'Neutral', message: 'No recommendation available' };
+    
+    document.getElementById('productNameDisplay').textContent = productName;
+    
+    // Update product image
+    const imageDisplay = document.getElementById('productImageDisplay');
+    if (productImageUrl && productImageUrl.trim() !== '') {
+        imageDisplay.src = productImageUrl;
+        imageDisplay.style.display = 'block';
+        imageDisplay.onerror = function() {
+            console.log("Image failed to load:", productImageUrl);
+            imageDisplay.style.display = 'none';
+        };
+    } else {
+        imageDisplay.style.display = 'none';
+    }
+    
+    // Update recommendation card
+    const card = document.getElementById('recommendationCard');
+    const content = document.getElementById('recommendationContent');
+    const message = document.getElementById('recommendationMessage');
+    
+    message.textContent = recommendation.message;
+    
+    // Status styling
+    let statusConfig = {
+        'Good': { icon: 'bi-check-circle-fill', color: 'text-success', title: 'EXCELLENT CHOICE', border: 'border-success', bgColor: '#d4edda' },
+        'Bad': { icon: 'bi-exclamation-triangle-fill', color: 'text-danger', title: 'RISKY PURCHASE', border: 'border-danger', bgColor: '#f8d7da' },
+        'Neutral': { icon: 'bi-info-circle-fill', color: 'text-warning', title: 'AVERAGE PRODUCT', border: 'border-warning', bgColor: '#fff3cd' },
+        'Highly Recommended': { icon: 'bi-star-fill', color: 'text-success', title: 'HIGHLY RECOMMENDED', border: 'border-success', bgColor: '#d4edda' },
+        'Cautious': { icon: 'bi-shield-exclamation', color: 'text-warning', title: 'EXERCISE CAUTION', border: 'border-warning', bgColor: '#fff3cd' },
+        'Not Recommended': { icon: 'bi-x-circle-fill', color: 'text-danger', title: 'NOT RECOMMENDED', border: 'border-danger', bgColor: '#f8d7da' }
+    };
+
+    const status = recommendation.status || 'Neutral';
+    const config = statusConfig[status] || statusConfig.Neutral;
+    
+    card.style.background = config.bgColor;
+    card.className = `card shadow border-0 rounded-4 overflow-hidden border-start border-5 ${config.border}`;
+    
+    content.innerHTML = `
+        <div class="d-flex flex-column align-items-center py-3">
+            <i class="bi ${config.icon} ${config.color}" style="font-size: 4rem;"></i>
+            <h2 class="fw-bold mt-2 ${config.color}">${config.title}</h2>
+            
+            <div class="mt-4 d-flex gap-2">
+                <button class="btn btn-lg btn-primary shadow-sm rounded-pill px-4 fw-bold" 
+                        onclick="showSection('analytics-dashboard-section', document.querySelector('.sidebar-link[onclick*=\\'analytics-dashboard-section\\']')); renderDashboardCharts();">
+                    <i class="bi bi-bar-chart-fill me-2"></i> Open Analytics Dashboard
+                </button>
+                
+                <button class="btn btn-lg btn-outline-secondary shadow-sm rounded-pill px-4" onclick="generatePDFReport()">
+                    <i class="bi bi-download me-2"></i> Generate Report
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Populate detailed reviews
+    populateDetailedList(allReviewData);
+    
+    // Save to history
+    saveToHistory(data);
+    
+    // Show results section
+    document.getElementById('manual-analysis-section').style.display = 'none';
+    document.getElementById('bulk-analysis-output').style.display = 'block';
+    document.getElementById('resultsContainer').style.display = 'block';
+    
+    // Update sidebar
+    const bulkLink = document.querySelector(".sidebar-link[onclick*='bulk-analysis-output']");
+    if (bulkLink) {
+        document.querySelectorAll('.sidebar-link').forEach(link => link.classList.remove('active'));
+        bulkLink.classList.add('active');
+    }
+    
+    // Update header
+    document.getElementById('header-subtitle').textContent = 'Automated Analysis Results';
+}
+
+// ----------------------------------------
+// --- SESSION LOADING ---
+// ----------------------------------------
+async function loadDataFromSession(sessionId) {
+    const endpoint = `/api/get_session_data/${sessionId}`;
+    
+    try {
+        const response = await fetch(endpoint);
+        if (!response.ok) {
+            throw new Error(`Could not load session data. Status: ${response.status}`);
+        }
+        const data = await response.json();
+        
+        // Process the data
+        processBulkData(data);
+        
+        // Force show results section
+        const bulkLink = document.querySelector(".sidebar-link[onclick*='bulk-analysis-output']");
+        if (bulkLink) {
+            showSection('bulk-analysis-output', bulkLink);
+        }
+        
+    } catch (error) {
+        console.error("Session load failed:", error);
+        alert(`Error loading results: ${error.message}. Session may have expired.`);
+        
+        // Fallback to manual section
+        document.getElementById('resultsContainer').style.display = 'none';
+        const manualLink = document.querySelector(".sidebar-link[onclick*='manual-analysis-section']");
+        if (manualLink) {
+            showSection('manual-analysis-section', manualLink);
+        }
+    }
+}
+
+// ----------------------------------------
 // --- UTILITY FUNCTIONS ---
+// ----------------------------------------
 function getSentimentClass(sentiment) {
     if (sentiment === 'Positive') return 'badge-positive';
     if (sentiment === 'Negative') return 'badge-negative';
@@ -814,221 +895,24 @@ function getStarRating(rating) {
 
 function formatAspects(aspects) {
     let html = '';
-    for (const aspect in aspects) {
-        const sentiment = aspects[aspect];
-        const sentimentClass = getSentimentClass(sentiment);
-        html += `<span class="badge rounded-pill aspect-tag ${sentimentClass}">${aspect}</span>`;
+    if (typeof aspects === 'object') {
+        for (const aspect in aspects) {
+            const sentiment = aspects[aspect];
+            const sentimentClass = getSentimentClass(sentiment);
+            html += `<span class="badge rounded-pill aspect-tag ${sentimentClass}">${aspect}</span>`;
+        }
     }
     return html;
-}
-
-// --- Chart Display Functions ---
-function updateChart(summary) {
-    const data = [summary.Positive, summary.Negative, summary.Neutral];
-    const labels = ['Positive', 'Negative', 'Neutral'];
-    const colors = ['#28a745', '#dc3545', '#6c757d'];
-
-    if (sentimentChart) { sentimentChart.destroy(); }
-
-    const ctx = document.getElementById('sentimentChart').getContext('2d');
-    sentimentChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: data,
-                backgroundColor: colors,
-                hoverOffset: 4
-            }]
-        },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            plugins: { 
-                legend: { 
-                    position: 'top' 
-                } 
-            } 
-        }
-    });
-}
-
-function updateAspectMatrixChart(matrixData) {
-    if (!matrixData || matrixData.length === 0) {
-        console.error("No matrix data available for chart");
-        return;
-    }
-    
-    const topAspects = matrixData.slice(0, 5);
-    const labels = topAspects.map(item => item.aspect);
-    
-    const data = {
-        labels: labels,
-        datasets: [
-            { 
-                label: 'Positive', 
-                data: topAspects.map(item => item.Positive), 
-                backgroundColor: '#28a745' 
-            },
-            { 
-                label: 'Negative', 
-                data: topAspects.map(item => item.Negative), 
-                backgroundColor: '#dc3545' 
-            },
-            { 
-                label: 'Neutral', 
-                data: topAspects.map(item => item.Neutral), 
-                backgroundColor: '#6c757d' 
-            }
-        ]
-    };
-
-    if (aspectMatrixChart) { aspectMatrixChart.destroy(); }
-
-    const ctx = document.getElementById('aspectMatrixChart').getContext('2d');
-    aspectMatrixChart = new Chart(ctx, {
-        type: 'bar',
-        data: data,
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            scales: { 
-                x: { 
-                    stacked: true 
-                }, 
-                y: { 
-                    stacked: true, 
-                    beginAtZero: true,
-                    title: { 
-                        display: true, 
-                        text: 'Review Count' 
-                    } 
-                } 
-            } 
-        }
-    });
-}
-
-function updateTimeSeriesChart(detailedResults) {
-    const dailyData = detailedResults.reduce((acc, item) => {
-        const date = item.date || new Date().toISOString().slice(0, 10);
-        if (!acc[date]) { acc[date] = { total: 0, positive: 0, negative: 0 }; }
-        acc[date].total += 1;
-        if (item.sentiment === 'Positive') acc[date].positive += 1;
-        if (item.sentiment === 'Negative') acc[date].negative += 1;
-        return acc;
-    }, {});
-
-    const sortedDates = Object.keys(dailyData).sort();
-    const positivePercentages = sortedDates.map(date => (dailyData[date].positive / dailyData[date].total) * 100);
-    const negativePercentages = sortedDates.map(date => (dailyData[date].negative / dailyData[date].total) * 100);
-
-    const data = {
-        labels: sortedDates,
-        datasets: [
-            { 
-                label: 'Positive Trend (%)', 
-                data: positivePercentages, 
-                borderColor: '#28a745', 
-                backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                tension: 0.1, 
-                fill: true 
-            },
-            { 
-                label: 'Negative Trend (%)', 
-                data: negativePercentages, 
-                borderColor: '#dc3545', 
-                backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                tension: 0.1, 
-                fill: true 
-            }
-        ]
-    };
-    
-    if (timeSeriesChart) { timeSeriesChart.destroy(); }
-    
-    const ctx = document.getElementById('timeSeriesChart').getContext('2d');
-    timeSeriesChart = new Chart(ctx, {
-        type: 'line',
-        data: data,
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false,
-            scales: { 
-                y: { 
-                    min: 0, 
-                    max: 100, 
-                    title: { 
-                        display: true, 
-                        text: 'Percentage (%)' 
-                    } 
-                }, 
-                x: { 
-                    title: { 
-                        display: true, 
-                        text: 'Date' 
-                    } 
-                } 
-            } 
-        }
-    });
-}
-
-function displayRecommendation(productName, recommendation, imageUrl) {
-    const card = document.getElementById('recommendationCard');
-    const content = document.getElementById('recommendationContent');
-    const message = document.getElementById('recommendationMessage');
-    const nameDisplay = document.getElementById('productNameDisplay');
-    const imageDisplay = document.getElementById('productImageDisplay');
-    
-    card.style.display = 'block';
-    nameDisplay.textContent = productName;
-    message.textContent = recommendation.message;
-
-    if (imageUrl) {
-        imageDisplay.src = imageUrl;
-        imageDisplay.style.display = 'block';
-    } else {
-        imageDisplay.style.display = 'none';
-    }
-
-    let statusConfig = {
-        Good: { icon: 'bi-check-circle-fill', color: 'text-success', btnClass: 'btn-success', title: 'EXCELLENT CHOICE', border: 'border-success' },
-        Bad: { icon: 'bi-exclamation-triangle-fill', color: 'text-danger', btnClass: 'btn-danger', title: 'RISKY PURCHASE', border: 'border-danger' },
-        Neutral: { icon: 'bi-info-circle-fill', color: 'text-warning', btnClass: 'btn-warning', title: 'AVERAGE PRODUCT', border: 'border-warning' }
-    };
-
-    const config = statusConfig[recommendation.status] || statusConfig.Neutral;
-
-    content.innerHTML = `
-        <div class="d-flex flex-column align-items-center py-3">
-            <i class="bi ${config.icon} ${config.color}" style="font-size: 4rem;"></i>
-            <h2 class="fw-bold mt-2 ${config.color}">${config.title}</h2>
-            
-            <div class="mt-4 d-flex gap-2">
-                <button class="btn btn-lg btn-primary shadow-sm rounded-pill px-4 fw-bold" 
-                        onclick="showSection('analytics-dashboard-section', document.querySelector('.sidebar-link[onclick*=\\'analytics-dashboard-section\\']')); renderDashboardCharts();">
-                    <i class="bi bi-bar-chart-fill me-2"></i> Open Analytics Dashboard
-                </button>
-                
-                <button class="btn btn-lg btn-outline-secondary shadow-sm rounded-pill px-4" onclick="generatePDFReport()">
-                    <i class="bi bi-download me-2"></i> Report
-                </button>
-            </div>
-        </div>
-    `;
-    
-    card.className = `card shadow-lg border-start border-5 ${config.border} rounded-4`;
 }
 
 function populateDetailedList(data) {
     const list = document.getElementById('detailedResultsList');
     list.innerHTML = '';
-    const keyword = document.getElementById('keywordSearch').value.toLowerCase();
+    const keyword = document.getElementById('keywordSearch')?.value.toLowerCase() || '';
 
     data.forEach(item => {
         if (keyword && !item.review.toLowerCase().includes(keyword)) {
-            return; 
+            return;
         }
 
         const sentimentClass = getSentimentClass(item.sentiment);
@@ -1072,41 +956,9 @@ function filterReviews(sentimentFilter = 'All') {
     populateDetailedList(filteredData);
 }
 
-// --- Main Data Processing Function ---
-function processBulkData(data) {
-    currentAnalysisData = data;
-    
-    // Hide manual, show bulk section
-    document.getElementById('manual-analysis-section').style.display = 'none'; 
-    document.getElementById('bulk-analysis-output').style.display = 'block'; 
-    
-    allReviewData = data.detailed_results;
-
-    const summary = data.summary;
-    document.getElementById('positiveCount').textContent = summary.Positive;
-    document.getElementById('negativeCount').textContent = summary.Negative;
-    document.getElementById('neutralCount').textContent = summary.Neutral;
-    document.getElementById('totalReviews').textContent = summary.total;
-    
-    displayRecommendation(
-        data.product_name || 'Analyzed Product', 
-        data.recommendation,
-        data.product_image_url || '' 
-    ); 
-
-    // Update all charts
-    updateChart(summary);
-    updateAspectMatrixChart(data.drill_down_matrix || []);
-    updateTimeSeriesChart(data.detailed_results);
-    populateDetailedList(allReviewData);
-
-    // Save to history
-    saveToHistory(data);
-    
-    document.getElementById('resultsContainer').style.display = 'block';
-}
-
-// --- History Management ---
+// ----------------------------------------
+// --- HISTORY FUNCTIONS ---
+// ----------------------------------------
 function saveToHistory(data) {
     let history = JSON.parse(localStorage.getItem('sentimentHistory') || '[]');
     
@@ -1177,6 +1029,9 @@ function clearAllHistory() {
     }
 }
 
+// ----------------------------------------
+// --- COMPARISON FUNCTIONS ---
+// ----------------------------------------
 function populateComparisonDropdowns() {
     const history = JSON.parse(localStorage.getItem('sentimentHistory') || '[]');
     const select1 = document.getElementById('compare1');
@@ -1198,21 +1053,17 @@ function populateComparisonDropdowns() {
 
 function startComparison() {
     const history = JSON.parse(localStorage.getItem('sentimentHistory') || '[]');
-    const index1 = document.getElementById('compare1').value;
-    const index2 = document.getElementById('compare2').value;
+    const p1 = history[document.getElementById('compare1').value];
+    const p2 = history[document.getElementById('compare2').value];
     
-    if (!index1 || !index2 || index1 === index2) {
-        alert("Please select two different products for comparison.");
+    if (!p1 || !p2) {
+        alert("Please select two products to compare.");
         return;
     }
     
-    const p1 = history[index1];
-    const p2 = history[index2];
-    
     const resultsDiv = document.getElementById('comparisonResults');
     resultsDiv.style.display = 'flex';
-    resultsDiv.style.flexWrap = 'wrap';
-
+    
     resultsDiv.innerHTML = `
         <div class="col-md-6 border-end text-center">
             <h4 class="fw-bold">${p1.product_name}</h4>
@@ -1233,12 +1084,12 @@ function startComparison() {
     `;
 }
 
-// --- Dashboard Charts ---
-let dashboardCharts = {};
-
+// ----------------------------------------
+// --- DASHBOARD CHARTS ---
+// ----------------------------------------
 function renderDashboardCharts() {
     if (!currentAnalysisData || !currentAnalysisData.summary) {
-        console.warn("No data available for dashboard charts");
+        console.error("Data missing for dashboard");
         return;
     }
 
@@ -1249,24 +1100,21 @@ function renderDashboardCharts() {
     const totalEl = document.getElementById('dash-total-reviews');
     if (totalEl) totalEl.textContent = data.summary.total || 0;
 
-    // Chart helper function
+    // Chart helper
     const createChart = (id, config) => {
         const canvas = document.getElementById(id);
         if (!canvas) {
             console.error(`Canvas ID ${id} not found!`);
             return;
         }
-        
-        // Clear previous chart if exists
         if (dashboardCharts[id]) {
             dashboardCharts[id].destroy();
         }
-        
         const ctx = canvas.getContext('2d');
         dashboardCharts[id] = new Chart(ctx, config);
     };
 
-    // --- Sentiment Chart ---
+    // Sentiment Chart
     createChart('dashSentimentChart', {
         type: 'doughnut',
         data: {
@@ -1274,26 +1122,14 @@ function renderDashboardCharts() {
             datasets: [{
                 data: [data.summary.Positive, data.summary.Negative, data.summary.Neutral],
                 backgroundColor: ['#2ecc71', '#e74c3c', '#95a5a6'],
-                borderWidth: 3,
+                borderWidth: 5,
                 borderColor: '#ffffff'
             }]
         },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            plugins: { 
-                legend: { 
-                    position: 'bottom',
-                    labels: {
-                        padding: 20,
-                        usePointStyle: true
-                    }
-                } 
-            } 
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
     });
 
-    // --- Emotion Chart ---
+    // Emotion Chart
     const emotionCounts = {};
     details.forEach(item => {
         const emo = item.emotion || 'Neutral';
@@ -1306,101 +1142,42 @@ function renderDashboardCharts() {
             labels: Object.keys(emotionCounts),
             datasets: [{
                 data: Object.values(emotionCounts),
-                backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40']
+                backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff']
             }]
         },
-        options: { 
-            responsive: true, 
-            maintainAspectRatio: false, 
-            plugins: { 
-                legend: { 
-                    position: 'right' 
-                } 
-            } 
-        }
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
     });
 
-    // --- Aspect Chart ---
-    // First, convert aspects from object to array if needed
-    const aspectArray = [];
+    // Aspect Chart
+    const aspectMap = {};
     details.forEach(item => {
         if (item.aspects && typeof item.aspects === 'object') {
-            Object.keys(item.aspects).forEach(aspectName => {
-                aspectArray.push({
-                    aspect: aspectName,
-                    sentiment: item.aspects[aspectName]
-                });
-            });
-        }
-    });
-
-    const aspectMap = {};
-    aspectArray.forEach(item => {
-        if (!aspectMap[item.aspect]) {
-            aspectMap[item.aspect] = { pos: 0, neg: 0, neutral: 0 };
-        }
-        if (item.sentiment === 'Positive') aspectMap[item.aspect].pos++;
-        else if (item.sentiment === 'Negative') aspectMap[item.aspect].neg++;
-        else aspectMap[item.aspect].neutral++;
-    });
-
-    const labels = Object.keys(aspectMap).slice(0, 10); // Top 10 aspects
-    
-    if (labels.length > 0) {
-        createChart('dashAspectChart', {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    { 
-                        label: 'Positive', 
-                        data: labels.map(l => aspectMap[l].pos || 0), 
-                        backgroundColor: '#2ecc71', 
-                        borderRadius: 5 
-                    },
-                    { 
-                        label: 'Negative', 
-                        data: labels.map(l => aspectMap[l].neg || 0), 
-                        backgroundColor: '#e74c3c', 
-                        borderRadius: 5 
-                    },
-                    { 
-                        label: 'Neutral', 
-                        data: labels.map(l => aspectMap[l].neutral || 0), 
-                        backgroundColor: '#95a5a6', 
-                        borderRadius: 5 
-                    }
-                ]
-            },
-            options: { 
-                indexAxis: 'y', 
-                responsive: true, 
-                maintainAspectRatio: false, 
-                scales: { 
-                    x: { 
-                        stacked: true,
-                        beginAtZero: true
-                    }, 
-                    y: { 
-                        stacked: true 
-                    } 
-                },
-                plugins: {
-                    legend: {
-                        position: 'top'
-                    }
-                }
+            for (const aspect in item.aspects) {
+                if (!aspectMap[aspect]) aspectMap[aspect] = { pos: 0, neg: 0 };
+                if (item.aspects[aspect] === 'Positive') aspectMap[aspect].pos++;
+                else if (item.aspects[aspect] === 'Negative') aspectMap[aspect].neg++;
             }
-        });
-    } else {
-        // If no aspect data, show message
-        document.getElementById('dashAspectChart').parentElement.innerHTML = 
-            '<div class="text-center text-muted py-5">No aspect data available for chart</div>';
-    }
+        }
+    });
+
+    const labels = Object.keys(aspectMap);
+    createChart('dashAspectChart', {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Positive', data: labels.map(l => aspectMap[l].pos), backgroundColor: '#2ecc71', borderRadius: 5 },
+                { label: 'Negative', data: labels.map(l => aspectMap[l].neg), backgroundColor: '#e74c3c', borderRadius: 5 }
+            ]
+        },
+        options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { stacked: true }, y: { stacked: true } } }
+    });
 }
 
-// --- Image Loading Helper for jsPDF ---
-function getBase64Image(url) {
+// ----------------------------------------
+// --- PDF GENERATION ---
+// ----------------------------------------
+async function getBase64Image(url) {
     return new Promise((resolve, reject) => {
         if (!url) return resolve(null);
 
@@ -1421,13 +1198,12 @@ function getBase64Image(url) {
         };
         img.onerror = function (error) {
             console.error("Image loading failed:", error);
-            resolve(null); 
+            resolve(null);
         };
         img.src = url;
     });
 }
 
-// --- PDF Generation Function ---
 async function generatePDFReport() {
     if (Object.keys(currentAnalysisData).length === 0) {
         alert("Please analyze a product first to generate a report.");
@@ -1438,7 +1214,6 @@ async function generatePDFReport() {
     const doc = new jsPDF();
     let y = 20;
     const padding = 15;
-    const reviewLineHeight = 5;
 
     const data = currentAnalysisData;
     const productName = data.product_name || "Product Analysis Report";
@@ -1452,7 +1227,7 @@ async function generatePDFReport() {
         imageBase64 = await getBase64Image(productImageUrl);
     }
 
-    // --- Header Banner ---
+    // Header
     doc.setFillColor(0, 82, 163);
     doc.rect(0, 0, 210, 20, "F");
     doc.setFontSize(18);
@@ -1461,43 +1236,36 @@ async function generatePDFReport() {
     doc.text("Sentiment Analysis Report", 105, 13, { align: "center" });
     y = 30;
 
-    // --- Product Overview Box ---
+    // Product Overview
     const boxHeight = 45;
     doc.setFillColor(245, 245, 245);
     doc.roundedRect(padding, y, 180, boxHeight, 3, 3, "F");
     doc.setDrawColor(200, 200, 200);
     doc.roundedRect(padding, y, 180, boxHeight, 3, 3);
 
-    // Product Name
     doc.setFont("helvetica", "bold");
     doc.setFontSize(13);
     doc.setTextColor(20, 20, 20);
     const productText = doc.splitTextToSize(`Product: ${productName}`, 120);
     doc.text(productText, padding + 5, y + 10);
 
-    // Status
     doc.setFont("helvetica", "normal");
     doc.setFontSize(11);
     doc.setTextColor(60, 60, 60);
     doc.text(`Status: ${recommendation.status}`, padding + 5, y + 25);
 
-    // Executive Summary
     doc.setFont("helvetica", "italic");
     doc.setFontSize(10);
-    const summaryText = doc.splitTextToSize(
-        `Executive Summary: ${recommendation.message}`,
-        120
-    );
+    const summaryText = doc.splitTextToSize(`Executive Summary: ${recommendation.message}`, 120);
     doc.text(summaryText, padding + 5, y + 33);
 
-    // Product Image
     if (imageBase64) {
         doc.addImage(imageBase64, "JPEG", 160, y + 5, 35, 30);
     }
 
     y += boxHeight + 20;
 
-    // --- Sentiment Distribution Section ---
+    // Sentiment Distribution
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.setTextColor(30, 30, 30);
@@ -1519,52 +1287,25 @@ async function generatePDFReport() {
         doc.text(value, x + cardWidth / 2, y + cardYOffset, { align: "center" });
     }
 
-    drawCard(
-        padding,
-        "Positive",
-        `${((summary.Positive / summary.total) * 100).toFixed(1)}% (${summary.Positive})`,
-        [39, 174, 96]
-    );
-    drawCard(
-        padding + cardWidth + gap,
-        "Negative",
-        `${((summary.Negative / summary.total) * 100).toFixed(1)}% (${summary.Negative})`,
-        [192, 57, 43]
-    );
-    drawCard(
-        padding + (cardWidth + gap) * 2,
-        "Neutral",
-        `${((summary.Neutral / summary.total) * 100).toFixed(1)}% (${summary.Neutral})`,
-        [127, 140, 141]
-    );
+    drawCard(padding, "Positive", `${((summary.Positive / summary.total) * 100).toFixed(1)}% (${summary.Positive})`, [39, 174, 96]);
+    drawCard(padding + cardWidth + gap, "Negative", `${((summary.Negative / summary.total) * 100).toFixed(1)}% (${summary.Negative})`, [192, 57, 43]);
+    drawCard(padding + (cardWidth + gap) * 2, "Neutral", `${((summary.Neutral / summary.total) * 100).toFixed(1)}% (${summary.Neutral})`, [127, 140, 141]);
 
     y += cardHeight + 20;
 
-    // --- Key Reviews Section ---
+    // Key Reviews
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
     doc.setTextColor(30, 30, 30);
     doc.text("Critical Review Insights", padding, y);
     y += 10;
 
-    const positiveReviews = data.detailed_results
-        .filter((r) => r.sentiment === "Positive")
-        .slice(0, 1);
-    const negativeReviews = data.detailed_results
-        .filter((r) => r.sentiment === "Negative")
-        .slice(0, 1);
+    const positiveReviews = data.detailed_results.filter((r) => r.sentiment === "Positive").slice(0, 1);
+    const negativeReviews = data.detailed_results.filter((r) => r.sentiment === "Negative").slice(0, 1);
 
     const keyReviews = [
-        ...positiveReviews.map((r) => ({
-            ...r,
-            title: "Top Positive Insight",
-            color: [39, 174, 96],
-        })),
-        ...negativeReviews.map((r) => ({
-            ...r,
-            title: "Key Negative Concern",
-            color: [192, 57, 43],
-        })),
+        ...positiveReviews.map((r) => ({ ...r, title: "Top Positive Insight", color: [39, 174, 96] })),
+        ...negativeReviews.map((r) => ({ ...r, title: "Key Negative Concern", color: [192, 57, 43] })),
     ];
 
     keyReviews.forEach((review, index) => {
@@ -1573,13 +1314,11 @@ async function generatePDFReport() {
             y = 20;
         }
 
-        // Title
         doc.setTextColor(...review.color);
         doc.setFont("helvetica", "bold");
         doc.setFontSize(12);
         doc.text(review.title, padding, y);
 
-        // User
         doc.setTextColor(100, 100, 100);
         doc.setFont("helvetica", "normal");
         doc.setFontSize(9);
@@ -1587,13 +1326,12 @@ async function generatePDFReport() {
         doc.text(`User: ${userName}`, 200 - padding, y, { align: "right" });
         y += 6;
 
-        // Review Content
         doc.setTextColor(50, 50, 50);
         doc.setFontSize(10);
         const reviewText = `[Intent: ${review.intent || "N/A"}] ${review.review}`;
         const splitText = doc.splitTextToSize(reviewText, 180);
         doc.text(splitText, padding + 2, y);
-        y += splitText.length * reviewLineHeight + 6;
+        y += splitText.length * 5 + 6;
 
         if (index < keyReviews.length - 1) {
             doc.setDrawColor(220, 220, 220);
@@ -1602,51 +1340,18 @@ async function generatePDFReport() {
         }
     });
 
-    // --- Footer ---
+    // Footer
     const pageCount = doc.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i);
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);
-        doc.text(
-            `Generated by Sentiment Analyzer | Page ${i} of ${pageCount}`,
-            105,
-            290,
-            { align: "center" }
-        );
+        doc.text(`Generated by Sentiment Analyzer | Page ${i} of ${pageCount}`, 105, 290, { align: "center" });
     }
 
-    // --- Save PDF ---
     doc.save(`${productName.replace(/ /g, "_")}_Sentiment_Report.pdf`);
     alert("Report generated successfully. Downloading PDF...");
 }
-
-async function loadDataFromSession(sessionId) {
-    const endpoint = `/api/get_session_data/${sessionId}`;
-    
-    try {
-        const response = await fetch(endpoint);
-        if (!response.ok) {
-            throw new Error(`Could not load session data. Status: ${response.status}`);
-        }
-        const data = await response.json();
-        processBulkData(data);
-    } catch (error) {
-        console.error("Session load failed:", error);
-        alert(`Error loading results: ${error.message}. Session may have expired.`); 
-        document.getElementById('resultsContainer').style.display = 'none';
-    }
-}
-
-// Initialize the dashboard
-document.addEventListener('DOMContentLoaded', () => {
-    // Check for any existing data to pre-load charts
-    if (currentAnalysisData && Object.keys(currentAnalysisData).length > 0) {
-        setTimeout(() => {
-            renderDashboardCharts();
-        }, 500);
-    }
-});
 </script>
 </body>
 </html>
