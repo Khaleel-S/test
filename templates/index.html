@@ -11,6 +11,135 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
 <style>
+
+/* Product Image Container Improvements */
+.product-image-container {
+    width: 220px;
+    height: 220px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px solid var(--dark-border);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.product-image-container:hover {
+    transform: scale(1.02);
+    border-color: var(--neon-blue);
+    box-shadow: 0 15px 40px rgba(0, 243, 255, 0.2);
+}
+
+.product-image-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    padding: 10px;
+}
+
+/* Recommendation Banner Improvements */
+.recommendation-banner {
+    background: linear-gradient(135deg, rgba(18, 18, 30, 0.95), rgba(10, 10, 15, 0.8));
+    border: 1px solid var(--dark-border);
+    border-radius: 24px;
+    padding: 30px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.recommendation-banner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink), var(--neon-blue));
+    background-size: 200% 100%;
+    animation: gradient-shift 3s infinite linear;
+}
+
+@keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Product Name Styling */
+.product-name {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 15px;
+    background: linear-gradient(45deg, #fff, var(--neon-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Stats Display */
+.stats-display {
+    display: flex;
+    gap: 15px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
+    border-radius: 15px;
+    min-width: 100px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .product-image-container {
+        width: 180px;
+        height: 180px;
+        margin-bottom: 20px;
+    }
+    
+    .product-name {
+        font-size: 1.4rem;
+    }
+    
+    .stats-display {
+        justify-content: center;
+    }
+    
+    .stat-item {
+        min-width: 80px;
+        padding: 10px;
+    }
+    
+    .stat-value {
+        font-size: 1.4rem;
+    }
+}
+
 :root {
     --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
@@ -885,35 +1014,53 @@ body {
         <!-- Product Recommendation Banner -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="recommendation-banner" id="recommendationCard" style="display: none;">
-                    <div class="row align-items-center">
-                        <div class="col-md-3 text-center">
-                            <div class="product-image-container mx-auto">
-                                <img id="productImageDisplay" src="" alt="Product">
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-9">
-                            <div id="recommendationContent"></div>
-                            
-                            <h2 id="productNameDisplay" class="fw-bold mb-3"></h2>
-                            
-                            <div class="d-flex align-items-center mb-4">
-                                <p id="recommendationMessage" class="lead text-muted mb-0 me-4"></p>
-                                <div class="ms-auto">
-                                    <div class="action-buttons">
-                                        <button class="btn-neon" onclick="showSection('analytics-dashboard-section'); renderDashboardCharts();">
-                                            <i class="bi bi-graph-up-arrow me-2"></i> View Analytics
-                                        </button>
-                                        <button class="btn-outline-neon" onclick="generatePDFReport()">
-                                            <i class="bi bi-file-earmark-pdf me-2"></i> Download Report
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <!-- Recommendation Banner Section -->
+<div class="recommendation-banner" id="recommendationCard" style="display: none;">
+    <div class="row align-items-center">
+        <div class="col-md-3 text-center">
+            <div class="product-image-container mx-auto">
+                <img id="productImageDisplay" src="" alt="Product" onerror="this.src='https://via.placeholder.com/300x300/667eea/ffffff?text=Product'">
+            </div>
+        </div>
+        
+        <div class="col-md-9">
+            <div id="recommendationContent"></div>
+            
+            <h2 class="product-name" id="productNameDisplay"></h2>
+            
+            <!-- Stats Display -->
+            <div class="stats-display">
+                <div class="stat-item" style="border-color: rgba(46, 204, 113, 0.3);">
+                    <div class="stat-value text-success" id="displayPositive">0</div>
+                    <div class="stat-label">Positive</div>
                 </div>
+                <div class="stat-item" style="border-color: rgba(231, 76, 60, 0.3);">
+                    <div class="stat-value text-danger" id="displayNegative">0</div>
+                    <div class="stat-label">Negative</div>
+                </div>
+                <div class="stat-item" style="border-color: rgba(149, 165, 166, 0.3);">
+                    <div class="stat-value text-muted" id="displayNeutral">0</div>
+                    <div class="stat-label">Neutral</div>
+                </div>
+                <div class="stat-item" style="border-color: rgba(52, 152, 219, 0.3);">
+                    <div class="stat-value text-primary" id="displayTotal">0</div>
+                    <div class="stat-label">Total</div>
+                </div>
+            </div>
+            
+            <p id="recommendationMessage" class="lead mt-3 mb-4"></p>
+            
+            <div class="action-buttons">
+                <button class="btn-neon" onclick="showSection('analytics-dashboard-section'); renderDashboardCharts();">
+                    <i class="bi bi-graph-up-arrow me-2"></i> View Analytics Dashboard
+                </button>
+                <button class="btn-outline-neon" onclick="generatePDFReport()">
+                    <i class="bi bi-file-earmark-pdf me-2"></i> Download Detailed Report
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
             </div>
         </div>
 
@@ -1234,9 +1381,12 @@ function processCSVFile() {
 }
 
 // ===== Process Bulk Data =====
+// ===== Process Bulk Data =====
 function processBulkData(data) {
     currentAnalysisData = data;
     allReviewData = data.detailed_results || [];
+
+    console.log("Processing data:", data); // Debugging
 
     // Update stats
     document.getElementById('positiveCount').textContent = data.summary.Positive || 0;
@@ -1261,31 +1411,50 @@ function displayRecommendation(data) {
     const imageDisplay = document.getElementById('productImageDisplay');
     const contentDisplay = document.getElementById('recommendationContent');
 
-    card.style.display = 'block';
-    nameDisplay.textContent = data.product_name || 'Analyzed Product';
-    messageDisplay.textContent = data.recommendation.message || 'Analysis complete.';
+    // Update stats displays
+    document.getElementById('displayPositive').textContent = data.summary?.Positive || 0;
+    document.getElementById('displayNegative').textContent = data.summary?.Negative || 0;
+    document.getElementById('displayNeutral').textContent = data.summary?.Neutral || 0;
+    document.getElementById('displayTotal').textContent = data.summary?.total || 0;
 
-    if (data.product_image_url) {
+    card.style.display = 'block';
+    
+    // Product Name (handle long names)
+    const productName = data.product_name || 'Analyzed Product';
+    nameDisplay.textContent = productName;
+    
+    // Recommendation Message
+    messageDisplay.textContent = data.recommendation?.message || 
+                                `Analysis of ${data.summary?.total || 0} reviews complete. Overall sentiment is ${data.recommendation?.status || 'Neutral'}.`;
+
+    // Product Image
+    if (data.product_image_url && data.product_image_url.trim() !== '') {
+        console.log("Loading product image:", data.product_image_url);
         imageDisplay.src = data.product_image_url;
         imageDisplay.style.display = 'block';
     } else {
-        imageDisplay.style.display = 'none';
+        // Show placeholder if no image URL
+        imageDisplay.src = 'https://via.placeholder.com/300x300/667eea/ffffff?text=Product+Image';
+        imageDisplay.style.display = 'block';
     }
 
     // Set recommendation status
-    const status = data.recommendation.status || 'Neutral';
+    const status = data.recommendation?.status || 'Neutral';
     let statusClass = 'status-neutral';
     let statusText = 'AVERAGE PRODUCT';
     let icon = 'bi-info-circle';
+    let statusColor = '#f1c40f';
 
-    if (status === 'Good') {
+    if (status === 'Good' || status === 'Highly Recommended') {
         statusClass = 'status-good';
         statusText = 'RECOMMENDED';
         icon = 'bi-check-circle';
-    } else if (status === 'Bad') {
+        statusColor = '#2ecc71';
+    } else if (status === 'Bad' || status === 'Not Recommended') {
         statusClass = 'status-bad';
         statusText = 'NOT RECOMMENDED';
         icon = 'bi-exclamation-triangle';
+        statusColor = '#e74c3c';
     }
 
     contentDisplay.innerHTML = `
@@ -1294,6 +1463,105 @@ function displayRecommendation(data) {
         </div>
     `;
 }
+
+// ===== Initialize with proper data =====
+document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    
+    const manualLink = document.querySelector(".nav-link[onclick*='manual-analysis-section']");
+    
+    // Set default section
+    document.getElementById('manual-analysis-section').style.display = 'block';
+    document.getElementById('bulk-analysis-output').style.display = 'none';
+    
+    if (manualLink) manualLink.classList.add('active');
+    
+    // Load session data if available
+    if (sessionId) {
+        // Mock session loading with PROPER DATA STRUCTURE
+        setTimeout(() => {
+            const mockData = {
+                product_name: "RK ROYAL KLUDGE HG101 Gaming Headset with Microphone, Wireless/Bluetooth 5.3/Wired Gaming Headphones for Xbox Series X|S, PS5/4, Switch, PC, 40mm Dynamic Drivers. 7.1 Surround Sound. Platinum Grey",
+                product_image_url: "https://m.media-amazon.com/images/I/71vqNfCehGL._AC_SL1500_.jpg",
+                summary: {
+                    Positive: 8,
+                    Negative: 2,
+                    Neutral: 5,
+                    total: 15
+                },
+                recommendation: {
+                    status: "Good",
+                    message: "Product shows strong positive sentiment with 8 positive reviews out of 15. Key positive aspects: Sound Quality, Comfort. Key negative aspect: Microphone."
+                },
+                drill_down_matrix: [
+                    { aspect: 'Sound Quality', Positive: 7, Negative: 1, Neutral: 1 },
+                    { aspect: 'Comfort', Positive: 6, Negative: 2, Neutral: 2 },
+                    { aspect: 'Microphone', Positive: 2, Negative: 5, Neutral: 3 },
+                    { aspect: 'Battery', Positive: 4, Negative: 3, Neutral: 3 }
+                ],
+                detailed_results: []
+            };
+            
+            // Create realistic reviews
+            const reviewTemplates = [
+                "Excellent sound quality! The 7.1 surround sound is amazing for gaming.",
+                "Very comfortable for long gaming sessions. No ear fatigue.",
+                "Microphone quality could be better. Friends say it sounds muffled.",
+                "Battery life is decent, lasts about 8 hours on wireless mode.",
+                "Great value for money. Better than more expensive brands.",
+                "The wireless connection drops sometimes during intense gaming.",
+        "Setup was easy and it works with all my devices - PS5, PC, and phone.",
+                "Build quality feels premium. No creaking or loose parts.",
+                "Sound isolation is good but could be better for noisy environments.",
+                "The ear cushions are replaceable which is a nice feature.",
+                "Volume controls are easy to access while gaming.",
+                "The microphone boom is flexible but picks up background noise.",
+                "Charging time is a bit long - about 3 hours for full charge.",
+                "Comfortable even with glasses. No pressure points.",
+                "The RGB lighting is subtle and looks great."
+            ];
+            
+            const emotions = ['Joy', 'Satisfaction', 'Disappointment', 'Neutral', 'Excitement'];
+            const intents = ['Purchase', 'Recommendation', 'Complaint', 'Feedback', 'Review'];
+            
+            for (let i = 0; i < 15; i++) {
+                const sentiment = i < 8 ? 'Positive' : (i < 10 ? 'Negative' : 'Neutral');
+                const aspects = {};
+                
+                if (i < 7) aspects['Sound Quality'] = 'Positive';
+                if (i < 6) aspects['Comfort'] = 'Positive';
+                if (i >= 2 && i < 7) aspects['Microphone'] = 'Negative';
+                if (i >= 4 && i < 7) aspects['Battery'] = 'Neutral';
+                
+                mockData.detailed_results.push({
+                    review: reviewTemplates[i] || `Review ${i + 1}: Good product overall.`,
+                    sentiment: sentiment,
+                    confidence: (0.7 + Math.random() * 0.3).toFixed(2),
+                    rating: sentiment === 'Positive' ? 4 + Math.floor(Math.random() * 2) : 
+                           sentiment === 'Negative' ? 1 + Math.floor(Math.random() * 2) : 3,
+                    date: `2024-01-${String(20 + i).padStart(2, '0')}`,
+                    aspects: aspects,
+                    emotion: emotions[Math.floor(Math.random() * emotions.length)],
+                    intent: intents[Math.floor(Math.random() * intents.length)]
+                });
+            }
+            
+            processBulkData(mockData);
+            
+            // Switch to dashboard view
+            const bulkLink = document.querySelector(".nav-link[onclick*='bulk-analysis-output']");
+            if (bulkLink) {
+                showSection('bulk-analysis-output', bulkLink);
+            } else {
+                showSection('bulk-analysis-output');
+            }
+            
+            console.log("Mock data loaded successfully");
+            
+        }, 1000);
+    }
+});
 
 function populateDetailedList(data) {
     const list = document.getElementById('detailedResultsList');
@@ -1647,32 +1915,443 @@ function startComparison() {
 }
 
 // ===== PDF Generation =====
+// ===== PDF Generation with Product Details and Reviews =====
 async function generatePDFReport() {
     if (Object.keys(currentAnalysisData).length === 0) {
         alert("Please analyze a product first to generate a report.");
         return;
     }
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Simple PDF generation
-    doc.setFontSize(20);
-    doc.text("Sentiment Analysis Report", 20, 20);
-    
-    doc.setFontSize(12);
-    doc.text(`Product: ${currentAnalysisData.product_name || "Unknown Product"}`, 20, 40);
-    doc.text(`Analysis Date: ${new Date().toLocaleDateString()}`, 20, 50);
-    doc.text(`Total Reviews: ${currentAnalysisData.summary.total}`, 20, 60);
-    doc.text(`Positive: ${currentAnalysisData.summary.Positive}`, 20, 70);
-    doc.text(`Negative: ${currentAnalysisData.summary.Negative}`, 20, 80);
-    doc.text(`Neutral: ${currentAnalysisData.summary.Neutral}`, 20, 90);
-    
-    doc.text("Recommendation:", 20, 110);
-    doc.text(currentAnalysisData.recommendation.message || "No recommendation available", 20, 120);
-    
-    doc.save(`Sentiment_Report_${Date.now()}.pdf`);
-    alert("Report downloaded successfully!");
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('p', 'mm', 'a4');
+        let y = 20;
+        const margin = 20;
+        const pageWidth = 210;
+        const contentWidth = pageWidth - 2 * margin;
+        
+        const data = currentAnalysisData;
+        const productName = data.product_name || "Product Analysis";
+        const productImageUrl = data.product_image_url || '';
+        const summary = data.summary || { Positive: 0, Negative: 0, Neutral: 0, total: 0 };
+        const recommendation = data.recommendation || { status: 'Neutral', message: 'No recommendation available' };
+        const reviews = data.detailed_results || [];
+        
+        // ===== HEADER =====
+        doc.setFillColor(0, 82, 163);
+        doc.rect(0, 0, pageWidth, 25, "F");
+        
+        doc.setFontSize(24);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.text("Sentiment Analysis Report", pageWidth / 2, 15, { align: "center" });
+        
+        doc.setFontSize(10);
+        doc.text(new Date().toLocaleDateString(), pageWidth - margin, 12, { align: "right" });
+        
+        y = 35;
+        
+        // ===== PRODUCT INFORMATION SECTION =====
+        doc.setFontSize(16);
+        doc.setTextColor(0, 0, 0);
+        doc.setFont("helvetica", "bold");
+        doc.text("Product Information", margin, y);
+        y += 10;
+        
+        doc.setDrawColor(200, 200, 200);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 5;
+        
+        // Product Name
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Product Name:", margin, y);
+        
+        doc.setFont("helvetica", "normal");
+        const productNameLines = doc.splitTextToSize(productName, contentWidth - 50);
+        doc.text(productNameLines, margin + 40, y);
+        y += productNameLines.length * 6;
+        
+        // Try to add product image if available
+        if (productImageUrl && productImageUrl.trim() !== '') {
+            try {
+                const imageData = await getBase64Image(productImageUrl);
+                if (imageData) {
+                    // Add image with proper dimensions
+                    doc.addImage(imageData, 'JPEG', margin + 40, y, 60, 60);
+                    y += 65;
+                }
+            } catch (error) {
+                console.log("Could not load product image:", error);
+            }
+        }
+        
+        // Analysis Date
+        doc.setFont("helvetica", "bold");
+        doc.text("Analysis Date:", margin, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(new Date().toLocaleDateString(), margin + 40, y);
+        y += 8;
+        
+        // Total Reviews
+        doc.setFont("helvetica", "bold");
+        doc.text("Total Reviews Analyzed:", margin, y);
+        doc.setFont("helvetica", "normal");
+        doc.text(summary.total.toString(), margin + 60, y);
+        y += 8;
+        
+        // Status
+        doc.setFont("helvetica", "bold");
+        doc.text("Overall Status:", margin, y);
+        doc.setFont("helvetica", "normal");
+        
+        let statusColor;
+        if (recommendation.status === 'Good') {
+            statusColor = [46, 204, 113]; // Green
+        } else if (recommendation.status === 'Bad') {
+            statusColor = [231, 76, 60]; // Red
+        } else {
+            statusColor = [241, 196, 15]; // Yellow
+        }
+        
+        doc.setTextColor(...statusColor);
+        doc.text(recommendation.status.toUpperCase(), margin + 40, y);
+        doc.setTextColor(0, 0, 0);
+        y += 15;
+        
+        // ===== SENTIMENT DISTRIBUTION =====
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+        doc.text("Sentiment Distribution", margin, y);
+        y += 10;
+        
+        doc.setDrawColor(200, 200, 200);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 10;
+        
+        // Sentiment Stats in boxes
+        const boxWidth = 40;
+        const boxHeight = 25;
+        const gap = 15;
+        const startX = margin + 10;
+        
+        // Positive Box
+        doc.setFillColor(46, 204, 113);
+        doc.roundedRect(startX, y, boxWidth, boxHeight, 3, 3, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(14);
+        doc.text("POSITIVE", startX + boxWidth/2, y + 8, { align: "center" });
+        doc.setFontSize(18);
+        doc.text(summary.Positive.toString(), startX + boxWidth/2, y + 18, { align: "center" });
+        
+        // Negative Box
+        doc.setFillColor(231, 76, 60);
+        doc.roundedRect(startX + boxWidth + gap, y, boxWidth, boxHeight, 3, 3, "F");
+        doc.text("NEGATIVE", startX + boxWidth + gap + boxWidth/2, y + 8, { align: "center" });
+        doc.text(summary.Negative.toString(), startX + boxWidth + gap + boxWidth/2, y + 18, { align: "center" });
+        
+        // Neutral Box
+        doc.setFillColor(149, 165, 166);
+        doc.roundedRect(startX + (boxWidth + gap) * 2, y, boxWidth, boxHeight, 3, 3, "F");
+        doc.text("NEUTRAL", startX + (boxWidth + gap) * 2 + boxWidth/2, y + 8, { align: "center" });
+        doc.text(summary.Neutral.toString(), startX + (boxWidth + gap) * 2 + boxWidth/2, y + 18, { align: "center" });
+        
+        y += boxHeight + 15;
+        
+        // ===== RECOMMENDATION =====
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+        doc.text("AI Recommendation", margin, y);
+        y += 10;
+        
+        doc.setDrawColor(200, 200, 200);
+        doc.line(margin, y, pageWidth - margin, y);
+        y += 5;
+        
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        const recommendationLines = doc.splitTextToSize(recommendation.message || "No recommendation available.", contentWidth);
+        doc.text(recommendationLines, margin, y);
+        y += recommendationLines.length * 5 + 10;
+        
+        // ===== KEY INSIGHTS =====
+        if (reviews.length > 0) {
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "bold");
+            doc.text("Key Customer Insights", margin, y);
+            y += 10;
+            
+            doc.setDrawColor(200, 200, 200);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 10;
+            
+            // Get top positive and negative reviews
+            const positiveReviews = reviews.filter(r => r.sentiment === 'Positive').slice(0, 2);
+            const negativeReviews = reviews.filter(r => r.sentiment === 'Negative').slice(0, 2);
+            
+            // Positive Insights
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(46, 204, 113);
+            doc.text("Top Positive Feedback", margin, y);
+            doc.setTextColor(0, 0, 0);
+            y += 8;
+            
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            
+            positiveReviews.forEach((review, index) => {
+                if (y > 250) {
+                    doc.addPage();
+                    y = 20;
+                }
+                
+                doc.setFillColor(240, 255, 240);
+                doc.roundedRect(margin, y, contentWidth, 25, 3, 3, "F");
+                doc.setDrawColor(46, 204, 113);
+                doc.roundedRect(margin, y, contentWidth, 25, 3, 3);
+                
+                const reviewText = `"${review.review}"`;
+                const reviewLines = doc.splitTextToSize(reviewText, contentWidth - 10);
+                doc.text(reviewLines, margin + 5, y + 8);
+                
+                y += 30;
+            });
+            
+            y += 5;
+            
+            // Negative Insights
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(231, 76, 60);
+            doc.text("Key Negative Concerns", margin, y);
+            doc.setTextColor(0, 0, 0);
+            y += 8;
+            
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(10);
+            
+            negativeReviews.forEach((review, index) => {
+                if (y > 250) {
+                    doc.addPage();
+                    y = 20;
+                }
+                
+                doc.setFillColor(255, 240, 240);
+                doc.roundedRect(margin, y, contentWidth, 25, 3, 3, "F");
+                doc.setDrawColor(231, 76, 60);
+                doc.roundedRect(margin, y, contentWidth, 25, 3, 3);
+                
+                const reviewText = `"${review.review}"`;
+                const reviewLines = doc.splitTextToSize(reviewText, contentWidth - 10);
+                doc.text(reviewLines, margin + 5, y + 8);
+                
+                y += 30;
+            });
+            
+            y += 10;
+            
+            // ===== DETAILED REVIEWS TABLE =====
+            if (reviews.length > 0) {
+                doc.setFontSize(16);
+                doc.setFont("helvetica", "bold");
+                doc.text("Detailed Reviews Analysis", margin, y);
+                y += 10;
+                
+                doc.setDrawColor(200, 200, 200);
+                doc.line(margin, y, pageWidth - margin, y);
+                y += 10;
+                
+                // Table Header
+                doc.setFillColor(240, 240, 240);
+                doc.rect(margin, y, contentWidth, 10, "F");
+                doc.setDrawColor(200, 200, 200);
+                doc.rect(margin, y, contentWidth, 10);
+                
+                doc.setFontSize(9);
+                doc.setFont("helvetica", "bold");
+                doc.text("Review", margin + 5, y + 7);
+                doc.text("Sentiment", margin + contentWidth - 40, y + 7);
+                doc.text("Rating", margin + contentWidth - 20, y + 7);
+                
+                y += 10;
+                
+                // Table Rows (first 10 reviews)
+                doc.setFont("helvetica", "normal");
+                doc.setFontSize(8);
+                
+                reviews.slice(0, 10).forEach((review, index) => {
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 20;
+                        // Draw header again on new page
+                        doc.setFillColor(240, 240, 240);
+                        doc.rect(margin, y, contentWidth, 10, "F");
+                        doc.setDrawColor(200, 200, 200);
+                        doc.rect(margin, y, contentWidth, 10);
+                        
+                        doc.setFontSize(9);
+                        doc.setFont("helvetica", "bold");
+                        doc.text("Review", margin + 5, y + 7);
+                        doc.text("Sentiment", margin + contentWidth - 40, y + 7);
+                        doc.text("Rating", margin + contentWidth - 20, y + 7);
+                        
+                        y += 10;
+                    }
+                    
+                    // Alternate row colors
+                    if (index % 2 === 0) {
+                        doc.setFillColor(250, 250, 250);
+                        doc.rect(margin, y, contentWidth, 15, "F");
+                    }
+                    
+                    doc.setDrawColor(220, 220, 220);
+                    doc.rect(margin, y, contentWidth, 15);
+                    
+                    // Review text (truncated)
+                    const reviewText = review.review.length > 80 ? review.review.substring(0, 80) + '...' : review.review;
+                    doc.text(reviewText, margin + 5, y + 7);
+                    
+                    // Sentiment with color
+                    if (review.sentiment === 'Positive') {
+                        doc.setTextColor(46, 204, 113);
+                    } else if (review.sentiment === 'Negative') {
+                        doc.setTextColor(231, 76, 60);
+                    } else {
+                        doc.setTextColor(149, 165, 166);
+                    }
+                    doc.text(review.sentiment, margin + contentWidth - 40, y + 7);
+                    doc.setTextColor(0, 0, 0);
+                    
+                    // Rating stars
+                    const stars = '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0));
+                    doc.text(stars, margin + contentWidth - 20, y + 7);
+                    
+                    y += 15;
+                });
+                
+                // Show more indicator if there are more reviews
+                if (reviews.length > 10) {
+                    y += 5;
+                    doc.setFontSize(9);
+                    doc.setTextColor(100, 100, 100);
+                    doc.text(`... and ${reviews.length - 10} more reviews`, margin, y);
+                    doc.setTextColor(0, 0, 0);
+                }
+            }
+        }
+        
+        // ===== ASPECT ANALYSIS =====
+        if (data.drill_down_matrix && data.drill_down_matrix.length > 0) {
+            if (y > 220) {
+                doc.addPage();
+                y = 20;
+            }
+            
+            doc.setFontSize(16);
+            doc.setFont("helvetica", "bold");
+            doc.text("Aspect Analysis", margin, y);
+            y += 10;
+            
+            doc.setDrawColor(200, 200, 200);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 10;
+            
+            doc.setFontSize(10);
+            doc.setFont("helvetica", "normal");
+            
+            // Aspect table
+            data.drill_down_matrix.slice(0, 5).forEach((aspect, index) => {
+                if (y > 250) {
+                    doc.addPage();
+                    y = 20;
+                }
+                
+                doc.text(`${index + 1}. ${aspect.aspect}`, margin, y);
+                
+                // Positive bar
+                const positiveWidth = (aspect.Positive / summary.total) * 80;
+                if (positiveWidth > 0) {
+                    doc.setFillColor(46, 204, 113);
+                    doc.rect(margin + 60, y - 3, positiveWidth, 5, "F");
+                    doc.setTextColor(46, 204, 113);
+                    doc.text(`${aspect.Positive}`, margin + 60 + positiveWidth + 5, y);
+                }
+                
+                // Negative bar
+                const negativeWidth = (aspect.Negative / summary.total) * 80;
+                if (negativeWidth > 0) {
+                    doc.setFillColor(231, 76, 60);
+                    doc.rect(margin + 60, y + 2, negativeWidth, 5, "F");
+                    doc.setTextColor(231, 76, 60);
+                    doc.text(`${aspect.Negative}`, margin + 60 + negativeWidth + 5, y + 5);
+                }
+                
+                doc.setTextColor(0, 0, 0);
+                y += 15;
+            });
+        }
+        
+        // ===== FOOTER =====
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text(`Page ${i} of ${totalPages}`, pageWidth / 2, 290, { align: "center" });
+            doc.text("Generated by SentimentPro AI", pageWidth / 2, 295, { align: "center" });
+        }
+        
+        // ===== SAVE PDF =====
+        const fileName = productName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30) + '_Analysis.pdf';
+        doc.save(fileName);
+        
+        alert("PDF report generated successfully! Check your downloads.");
+        
+    } catch (error) {
+        console.error("Error generating PDF:", error);
+        alert("Error generating PDF report. Please try again.");
+    }
+}
+
+// Helper function to convert image to base64
+function getBase64Image(url) {
+    return new Promise((resolve, reject) => {
+        if (!url) return resolve(null);
+        
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Limit image size for PDF
+            const maxWidth = 200;
+            const ratio = this.width / this.height;
+            canvas.width = Math.min(this.width, maxWidth);
+            canvas.height = canvas.width / ratio;
+            
+            ctx.drawImage(this, 0, 0, canvas.width, canvas.height);
+            
+            try {
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                resolve(dataUrl);
+            } catch (error) {
+                console.log("Canvas error:", error);
+                resolve(null);
+            }
+        };
+        
+        img.onerror = function() {
+            console.log("Image load failed:", url);
+            resolve(null);
+        };
+        
+        img.src = url;
+    });
 }
 
 // ===== Initialization =====
