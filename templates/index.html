@@ -1844,33 +1844,7 @@ function renderEmptyCharts() {
     });
 }
 
-// Also update the showSection function to prevent issues
-function showSection(sectionId, element) {
-    const sections = ['manual-analysis-section', 'bulk-analysis-output', 'reports-section', 'comparison-section', 'analytics-dashboard-section'];
-    
-    sections.forEach(id => {
-        const sec = document.getElementById(id);
-        if (sec) {
-            sec.style.display = 'none';
-            sec.classList.remove('fade-in');
-        }
-    });
-    
-    const targetSection = document.getElementById(sectionId);
-    if (targetSection) {
-        targetSection.style.display = 'block';
-        setTimeout(() => targetSection.classList.add('fade-in'), 10);
-        
-        // Render charts only if analytics section is shown
-        if (sectionId === 'analytics-dashboard-section') {
-            setTimeout(() => {
-                renderDashboardCharts();
-            }, 300); // Give time for DOM to update
-        }
-    }
-    
-    // ... rest of your existing code ...
-}
+
 
 // --- PDF Generation ---
 
