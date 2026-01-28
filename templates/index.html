@@ -10,6 +10,49 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
 <style>
+
+/* Recommendation Card */
+.recommendation-card {
+    /* ... existing styles ... */
+}
+
+/* Product image styling ko update karo */
+#productImageDisplay {
+    max-height: 250px !important; /* Height increase karo */
+    width: auto !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
+    border: 3px solid rgba(255, 255, 255, 0.2) !important;
+    background: white !important;
+    padding: 10px !important;
+}
+
+/* Recommendation card ka layout thora adjust karo */
+.recommendation-card .row {
+    align-items: center !important;
+}
+
+.recommendation-card .col-lg-3 {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+/* Responsive image handling */
+@media (max-width: 992px) {
+    #productImageDisplay {
+        max-height: 200px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #productImageDisplay {
+        max-height: 150px !important;
+    }
+}
+
     :root {
         --primary: #4361ee;
         --primary-dark: #3a56d4;
@@ -1597,109 +1640,236 @@ function startComparison() {
 }
 
 // --- Dashboard Charts ---
+// --- Dashboard Charts ---
 function renderDashboardCharts() {
-    if (!currentAnalysisData.summary) {
-        setTimeout(renderDashboardCharts, 100);
+    // Check if analytics section is visible
+    const analyticsSection = document.getElementById('analytics-dashboard-section');
+    if (!analyticsSection || analyticsSection.style.display === 'none') {
+        return; // Don't render if section is not visible
+    }
+    
+    // Check if all canvas elements exist
+    const requiredCanvases = ['dashSentimentChart', 'dashEmotionChart', 'dashAspectChart'];
+    const missingCanvases = requiredCanvases.filter(id => !document.getElementById(id));
+    
+    if (missingCanvases.length > 0) {
+        console.log("Charts not ready: missing canvas elements");
         return;
     }
-
-    const createChart = (id, config) => {
-        const canvas = document.getElementById(id);
-        if (!canvas) return;
-        
-        if (dashboardCharts[id]) {
-            dashboardCharts[id].destroy();
+    
+    if (!currentAnalysisData.summary) {
+        // Show empty state or default charts
+        renderEmptyCharts();
+        return;
+    }
+    
+    // Clear existing charts
+    Object.keys(dashboardCharts).forEach(chartId => {
+        try {
+            if (dashboardCharts[chartId] && typeof dashboardCharts[chartId].destroy === 'function') {
+                dashboardCharts[chartId].destroy();
+            }
+        } catch (error) {
+            console.warn(`Error destroying chart ${chartId}:`, error);
         }
+    });
+    dashboardCharts = {};
+    
+    // Render Sentiment Chart
+    try {
+        const sentimentCtx = document.getElementById('dashSentimentChart').getContext('2d');
+        const sentimentData = [
+            currentAnalysisData.summary.Positive || 0,
+            currentAnalysisData.summary.Negative || 0,
+            currentAnalysisData.summary.Neutral || 0
+        ];
         
-        dashboardCharts[id] = new Chart(canvas.getContext('2d'), {
-            ...config,
+        dashboardCharts.sentiment = new Chart(sentimentCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Positive', 'Negative', 'Neutral'],
+                datasets: [{
+                    data: sentimentData,
+                    backgroundColor: ['#06d6a0', '#ef476f', '#ffd166'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
             options: {
-                ...config.options,
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { 
+                    legend: {
                         position: 'bottom',
                         labels: {
                             padding: 20,
                             usePointStyle: true,
+                            font: { size: 12 }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    } catch (error) {
+        console.error("Error creating sentiment chart:", error);
+    }
+    
+    // Render Emotion Chart
+    try {
+        const emotions = {};
+        if (allReviewData && allReviewData.length > 0) {
+            allReviewData.forEach(item => {
+                const emotion = item.emotion || 'Unknown';
+                emotions[emotion] = (emotions[emotion] || 0) + 1;
+            });
+        }
+        
+        const emotionLabels = Object.keys(emotions).length > 0 ? 
+            Object.keys(emotions) : ['No Data'];
+        const emotionData = Object.values(emotions).length > 0 ? 
+            Object.values(emotions) : [1];
+        
+        const emotionCtx = document.getElementById('dashEmotionChart').getContext('2d');
+        dashboardCharts.emotion = new Chart(emotionCtx, {
+            type: 'pie',
+            data: {
+                labels: emotionLabels,
+                datasets: [{
+                    data: emotionData,
+                    backgroundColor: ['#4361ee', '#7209b7', '#06d6a0', '#ffd166', '#ef476f', '#3a56d4']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            usePointStyle: true
                         }
                     }
                 }
             }
         });
-    };
-
-    // Sentiment Chart
-    createChart('dashSentimentChart', {
-        type: 'doughnut',
-        data: {
-            labels: ['Positive', 'Negative', 'Neutral'],
-            datasets: [{
-                data: [currentAnalysisData.summary.Positive, currentAnalysisData.summary.Negative, currentAnalysisData.summary.Neutral],
-                backgroundColor: ['#06d6a0', '#ef476f', '#ffd166'],
-                borderWidth: 0,
-            }]
+    } catch (error) {
+        console.error("Error creating emotion chart:", error);
+    }
+    
+    // Render Aspect Chart
+    try {
+        const aspects = {};
+        if (allReviewData && allReviewData.length > 0) {
+            allReviewData.forEach(item => {
+                if (item.aspects && typeof item.aspects === 'object') {
+                    Object.keys(item.aspects).forEach(aspect => {
+                        aspects[aspect] = (aspects[aspect] || 0) + 1;
+                    });
+                }
+            });
         }
-    });
-
-    // Emotion Chart
-    const emotions = {};
-    allReviewData.forEach(item => {
-        emotions[item.emotion] = (emotions[item.emotion] || 0) + 1;
-    });
-    
-    createChart('dashEmotionChart', {
-        type: 'pie',
-        data: {
-            labels: Object.keys(emotions),
-            datasets: [{
-                data: Object.values(emotions),
-                backgroundColor: ['#4361ee', '#7209b7', '#06d6a0', '#ffd166', '#ef476f']
-            }]
-        }
-    });
-
-    // Aspect Chart
-    const aspects = {};
-    allReviewData.forEach(item => {
-        Object.keys(item.aspects || {}).forEach(aspect => {
-            aspects[aspect] = (aspects[aspect] || 0) + 1;
-        });
-    });
-    
-    const sortedAspects = Object.entries(aspects)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
-    
-    createChart('dashAspectChart', {
-        type: 'bar',
-        data: {
-            labels: sortedAspects.map(([aspect]) => aspect),
-            datasets: [{
-                label: 'Mentions',
-                data: sortedAspects.map(([, count]) => count),
-                backgroundColor: '#4361ee',
-                borderRadius: 6
-            }]
-        },
-        options: {
-            indexAxis: 'y',
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    grid: {
-                        display: false
+        
+        const sortedAspects = Object.entries(aspects)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 5);
+        
+        const aspectLabels = sortedAspects.length > 0 ? 
+            sortedAspects.map(([aspect]) => aspect) : ['No Aspects'];
+        const aspectData = sortedAspects.length > 0 ? 
+            sortedAspects.map(([, count]) => count) : [0];
+        
+        const aspectCtx = document.getElementById('dashAspectChart').getContext('2d');
+        dashboardCharts.aspect = new Chart(aspectCtx, {
+            type: 'bar',
+            data: {
+                labels: aspectLabels,
+                datasets: [{
+                    label: 'Mentions',
+                    data: aspectData,
+                    backgroundColor: '#4361ee',
+                    borderRadius: 6,
+                    borderWidth: 1,
+                    borderColor: '#3a56d4'
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: { display: false }
+                    },
+                    y: {
+                        grid: { display: false }
                     }
                 },
-                y: {
-                    grid: {
-                        display: false
-                    }
+                plugins: {
+                    legend: { display: false }
                 }
             }
+        });
+    } catch (error) {
+        console.error("Error creating aspect chart:", error);
+    }
+}
+
+// Helper function for empty charts
+function renderEmptyCharts() {
+    Object.keys(dashboardCharts).forEach(chartId => {
+        try {
+            if (dashboardCharts[chartId]) {
+                dashboardCharts[chartId].destroy();
+            }
+        } catch (error) {
+            console.warn(`Error destroying chart ${chartId}:`, error);
         }
     });
+    dashboardCharts = {};
+    
+    const emptyMessage = "No data available. Please analyze a product first.";
+    
+    // Create empty charts with message
+    const chartContainers = document.querySelectorAll('.chart-container canvas');
+    chartContainers.forEach(canvas => {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#666';
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(emptyMessage, canvas.width / 2, canvas.height / 2);
+    });
+}
+
+// Also update the showSection function to prevent issues
+function showSection(sectionId, element) {
+    const sections = ['manual-analysis-section', 'bulk-analysis-output', 'reports-section', 'comparison-section', 'analytics-dashboard-section'];
+    
+    sections.forEach(id => {
+        const sec = document.getElementById(id);
+        if (sec) {
+            sec.style.display = 'none';
+            sec.classList.remove('fade-in');
+        }
+    });
+    
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.style.display = 'block';
+        setTimeout(() => targetSection.classList.add('fade-in'), 10);
+        
+        // Render charts only if analytics section is shown
+        if (sectionId === 'analytics-dashboard-section') {
+            setTimeout(() => {
+                renderDashboardCharts();
+            }, 300); // Give time for DOM to update
+        }
+    }
+    
+    // ... rest of your existing code ...
 }
 
 // --- PDF Generation ---
@@ -1713,6 +1883,19 @@ async function generatePDFReport() {
     try {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF('p', 'mm', 'a4');
+        
+        // Color Scheme
+        const colors = {
+            primary: [67, 97, 238],     // Blue
+            secondary: [114, 9, 183],   // Purple
+            success: [6, 214, 160],     // Green
+            warning: [255, 209, 102],   // Yellow
+            danger: [239, 71, 111],     // Red
+            light: [248, 249, 250],     // Light gray
+            dark: [26, 26, 46],         // Dark
+            gray: [100, 116, 139]       // Gray
+        };
+        
         let y = 20;
         const margin = 20;
         const pageWidth = 210;
@@ -1725,170 +1908,296 @@ async function generatePDFReport() {
         const recommendation = data.recommendation || { status: 'Neutral', message: 'No recommendation available' };
         const reviews = data.detailed_results || [];
         
-        // ===== HEADER =====
-        doc.setFillColor(0, 82, 163);
-        doc.rect(0, 0, pageWidth, 25, "F");
+        // ===== COVER PAGE =====
+        // Gradient background
+        doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+        doc.rect(0, 0, pageWidth, 297, "F");
         
-        doc.setFontSize(24);
+        // Secondary gradient overlay
+        for(let i = 0; i < pageWidth; i += 5) {
+            const alpha = 0.1 * (i / pageWidth);
+            doc.setFillColor(colors.secondary[0], colors.secondary[1], colors.secondary[2], alpha);
+            doc.rect(i, 0, 5, 297, "F");
+        }
+        
+        // Logo/Title
+        doc.setFontSize(36);
         doc.setTextColor(255, 255, 255);
         doc.setFont("helvetica", "bold");
-        doc.text("Sentiment Analysis Report", pageWidth / 2, 15, { align: "center" });
+        doc.text("Sentinel AI", pageWidth / 2, 60, { align: "center" });
         
-        doc.setFontSize(10);
-        doc.text(new Date().toLocaleDateString(), pageWidth - margin, 12, { align: "right" });
-        
-        y = 35;
-        
-        // ===== PRODUCT INFORMATION SECTION =====
         doc.setFontSize(16);
-        doc.setTextColor(0, 0, 0);
-        doc.setFont("helvetica", "bold");
-        doc.text("Product Information", margin, y);
-        y += 10;
-        
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, y, pageWidth - margin, y);
-        y += 5;
-        
-        // Product Name
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        doc.text("Product Name:", margin, y);
-        
         doc.setFont("helvetica", "normal");
-        const productNameLines = doc.splitTextToSize(productName, contentWidth - 50);
-        doc.text(productNameLines, margin + 40, y);
-        y += productNameLines.length * 6;
+        doc.text("Sentiment Analysis Report", pageWidth / 2, 75, { align: "center" });
         
-        // Try to add product image if available
+        // Product name with white background box
+        doc.setFillColor(255, 255, 255, 0.9);
+        doc.roundedRect(margin, 100, contentWidth, 40, 10, 10, "F");
+        
+        doc.setFontSize(20);
+        doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+        doc.setFont("helvetica", "bold");
+        const productLines = doc.splitTextToSize(productName, contentWidth - 20);
+        doc.text(productLines, pageWidth / 2, 115, { align: "center" });
+        
+        // Add product image on cover (bigger size)
         if (productImageUrl && productImageUrl.trim() !== '') {
             try {
                 const imageData = await getBase64Image(productImageUrl);
                 if (imageData) {
-                    // Add image with proper dimensions
-                    doc.addImage(imageData, 'JPEG', margin + 40, y, 60, 60);
-                    y += 65;
+                    // Add image on cover with white border
+                    const imgWidth = 80;
+                    const imgHeight = 80;
+                    const imgX = (pageWidth - imgWidth) / 2;
+                    const imgY = 140;
+                    
+                    // White background for image
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(imgX - 5, imgY - 5, imgWidth + 10, imgHeight + 10, 15, 15, "F");
+                    
+                    // Add image
+                    doc.addImage(imageData, 'JPEG', imgX, imgY, imgWidth, imgHeight);
+                    y = 230;
                 }
             } catch (error) {
-                console.log("Could not load product image:", error);
+                console.log("Could not load product image for cover:", error);
+                y = 150;
+            }
+        } else {
+            y = 150;
+        }
+        
+        // Report details on cover
+        doc.setFontSize(12);
+        doc.setTextColor(255, 255, 255, 0.8);
+        doc.text("Generated on: " + new Date().toLocaleDateString(), pageWidth / 2, y, { align: "center" });
+        
+        doc.text("Total Reviews: " + summary.total, pageWidth / 2, y + 10, { align: "center" });
+        
+        // Add page indicator
+        doc.setFontSize(10);
+        doc.text("Page 1 of 1", pageWidth / 2, 290, { align: "center" });
+        
+        // Add new page for content
+        doc.addPage();
+        y = 20;
+        
+        // ===== EXECUTIVE SUMMARY PAGE =====
+        // Header with gradient
+        doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+        doc.rect(0, 0, pageWidth, 15, "F");
+        
+        doc.setFontSize(16);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.text("EXECUTIVE SUMMARY", margin, 12);
+        
+        y = 25;
+        
+        // Product Information in modern card style
+        doc.setFillColor(colors.light[0], colors.light[1], colors.light[2]);
+        doc.roundedRect(margin, y, contentWidth, 80, 8, 8, "F");
+        doc.setDrawColor(colors.gray[0], colors.gray[1], colors.gray[2], 0.3);
+        doc.roundedRect(margin, y, contentWidth, 80, 8, 8);
+        
+        // Product image inside card (bigger)
+        if (productImageUrl && productImageUrl.trim() !== '') {
+            try {
+                const imageData = await getBase64Image(productImageUrl);
+                if (imageData) {
+                    // Image on left (bigger size)
+                    const imgX = margin + 10;
+                    const imgY = y + 10;
+                    const imgSize = 60;
+                    
+                    // Image with rounded corners and shadow effect
+                    doc.setFillColor(255, 255, 255);
+                    doc.roundedRect(imgX, imgY, imgSize, imgSize, 6, 6, "F");
+                    
+                    doc.addImage(imageData, 'JPEG', imgX + 2, imgY + 2, imgSize - 4, imgSize - 4);
+                    
+                    // Draw border around image
+                    doc.setDrawColor(colors.primary[0], colors.primary[1], colors.primary[2], 0.5);
+                    doc.setLineWidth(0.5);
+                    doc.roundedRect(imgX, imgY, imgSize, imgSize, 6, 6);
+                    
+                    // Product info starts after image
+                    const infoStartX = margin + 80;
+                    const infoWidth = contentWidth - 90;
+                    
+                    doc.setFontSize(14);
+                    doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Product Analysis Report", infoStartX, y + 15);
+                    
+                    doc.setFontSize(11);
+                    doc.setFont("helvetica", "normal");
+                    doc.setTextColor(colors.gray[0], colors.gray[1], colors.gray[2]);
+                    
+                    doc.text(`Product: ${productName}`, infoStartX, y + 25);
+                    doc.text(`Analysis Date: ${new Date().toLocaleDateString()}`, infoStartX, y + 32);
+                    doc.text(`Total Reviews Analyzed: ${summary.total}`, infoStartX, y + 39);
+                    doc.text(`Overall Status: ${recommendation.status}`, infoStartX, y + 46);
+                    
+                    // Status indicator with color
+                    doc.setFillColor(
+                        recommendation.status === 'Good' ? colors.success[0] : 
+                        recommendation.status === 'Bad' ? colors.danger[0] : colors.warning[0],
+                        recommendation.status === 'Good' ? colors.success[1] : 
+                        recommendation.status === 'Bad' ? colors.danger[1] : colors.warning[1],
+                        recommendation.status === 'Good' ? colors.success[2] : 
+                        recommendation.status === 'Bad' ? colors.danger[2] : colors.warning[2]
+                    );
+                    doc.circle(infoStartX + 65, y + 43, 3, "F");
+                    
+                    y += 85;
+                }
+            } catch (error) {
+                console.log("Could not load product image for content:", error);
+                y += 20;
             }
         }
         
-        // Analysis Date
-        doc.setFont("helvetica", "bold");
-        doc.text("Analysis Date:", margin, y);
-        doc.setFont("helvetica", "normal");
-        doc.text(new Date().toLocaleDateString(), margin + 40, y);
-        y += 8;
-        
-        // Total Reviews
-        doc.setFont("helvetica", "bold");
-        doc.text("Total Reviews Analyzed:", margin, y);
-        doc.setFont("helvetica", "normal");
-        doc.text(summary.total.toString(), margin + 60, y);
-        y += 8;
-        
-        // Status
-        doc.setFont("helvetica", "bold");
-        doc.text("Overall Status:", margin, y);
-        doc.setFont("helvetica", "normal");
-        
-        let statusColor;
-        if (recommendation.status === 'Good') {
-            statusColor = [46, 204, 113]; // Green
-        } else if (recommendation.status === 'Bad') {
-            statusColor = [231, 76, 60]; // Red
-        } else {
-            statusColor = [241, 196, 15]; // Yellow
-        }
-        
-        doc.setTextColor(...statusColor);
-        doc.text(recommendation.status.toUpperCase(), margin + 40, y);
-        doc.setTextColor(0, 0, 0);
-        y += 15;
-        
-        // ===== SENTIMENT DISTRIBUTION =====
-        doc.setFontSize(16);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(0, 0, 0);
-        doc.text("Sentiment Distribution", margin, y);
-        y += 10;
-        
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, y, pageWidth - margin, y);
-        y += 10;
-        
-        // Sentiment Stats in boxes
-        const boxWidth = 40;
-        const boxHeight = 25;
-        const gap = 15;
-        const startX = margin + 10;
-        
-        // Positive Box
-        doc.setFillColor(46, 204, 113);
-        doc.roundedRect(startX, y, boxWidth, boxHeight, 3, 3, "F");
-        doc.setTextColor(255, 255, 255);
+        // ===== SENTIMENT OVERVIEW =====
         doc.setFontSize(14);
-        doc.text("POSITIVE", startX + boxWidth/2, y + 8, { align: "center" });
-        doc.setFontSize(18);
-        doc.text(summary.Positive.toString(), startX + boxWidth/2, y + 18, { align: "center" });
-        
-        // Negative Box
-        doc.setFillColor(231, 76, 60);
-        doc.roundedRect(startX + boxWidth + gap, y, boxWidth, boxHeight, 3, 3, "F");
-        doc.text("NEGATIVE", startX + boxWidth + gap + boxWidth/2, y + 8, { align: "center" });
-        doc.text(summary.Negative.toString(), startX + boxWidth + gap + boxWidth/2, y + 18, { align: "center" });
-        
-        // Neutral Box
-        doc.setFillColor(149, 165, 166);
-        doc.roundedRect(startX + (boxWidth + gap) * 2, y, boxWidth, boxHeight, 3, 3, "F");
-        doc.text("NEUTRAL", startX + (boxWidth + gap) * 2 + boxWidth/2, y + 8, { align: "center" });
-        doc.text(summary.Neutral.toString(), startX + (boxWidth + gap) * 2 + boxWidth/2, y + 18, { align: "center" });
-        
-        y += boxHeight + 15;
-        
-        // ===== RECOMMENDATION =====
-        doc.setFontSize(16);
+        doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
         doc.setFont("helvetica", "bold");
-        doc.setTextColor(0, 0, 0);
-        doc.text("AI Recommendation", margin, y);
+        doc.text("Sentiment Overview", margin, y);
+        y += 8;
+        
+        // Divider
+        doc.setDrawColor(colors.primary[0], colors.primary[1], colors.primary[2], 0.3);
+        doc.setLineWidth(0.5);
+        doc.line(margin, y, margin + 60, y);
         y += 10;
         
-        doc.setDrawColor(200, 200, 200);
-        doc.line(margin, y, pageWidth - margin, y);
-        y += 5;
+        // Sentiment cards in a row
+        const cardWidth = 50;
+        const cardHeight = 40;
+        const cardGap = 12;
+        const cardsStartX = margin;
         
-        doc.setFontSize(11);
+        // Positive Card
+        doc.setFillColor(colors.success[0], colors.success[1], colors.success[2]);
+        doc.roundedRect(cardsStartX, y, cardWidth, cardHeight, 6, 6, "F");
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("POSITIVE", cardsStartX + cardWidth/2, y + 12, { align: "center" });
+        doc.setFontSize(16);
+        doc.text(summary.Positive.toString(), cardsStartX + cardWidth/2, y + 28, { align: "center" });
+        
+        // Negative Card
+        doc.setFillColor(colors.danger[0], colors.danger[1], colors.danger[2]);
+        doc.roundedRect(cardsStartX + cardWidth + cardGap, y, cardWidth, cardHeight, 6, 6, "F");
+        doc.text("NEGATIVE", cardsStartX + cardWidth + cardGap + cardWidth/2, y + 12, { align: "center" });
+        doc.text(summary.Negative.toString(), cardsStartX + cardWidth + cardGap + cardWidth/2, y + 28, { align: "center" });
+        
+        // Neutral Card
+        doc.setFillColor(colors.warning[0], colors.warning[1], colors.warning[2]);
+        doc.roundedRect(cardsStartX + (cardWidth + cardGap) * 2, y, cardWidth, cardHeight, 6, 6, "F");
+        doc.text("NEUTRAL", cardsStartX + (cardWidth + cardGap) * 2 + cardWidth/2, y + 12, { align: "center" });
+        doc.text(summary.Neutral.toString(), cardsStartX + (cardWidth + cardGap) * 2 + cardWidth/2, y + 28, { align: "center" });
+        
+        // Total Card
+        doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+        doc.roundedRect(cardsStartX + (cardWidth + cardGap) * 3, y, cardWidth, cardHeight, 6, 6, "F");
+        doc.text("TOTAL", cardsStartX + (cardWidth + cardGap) * 3 + cardWidth/2, y + 12, { align: "center" });
+        doc.text(summary.total.toString(), cardsStartX + (cardWidth + cardGap) * 3 + cardWidth/2, y + 28, { align: "center" });
+        
+        y += cardHeight + 20;
+        
+        // ===== AI RECOMMENDATION =====
+        doc.setFontSize(14);
+        doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+        doc.setFont("helvetica", "bold");
+        doc.text("AI Recommendation", margin, y);
+        y += 8;
+        
+        // Divider
+        doc.setDrawColor(colors.secondary[0], colors.secondary[1], colors.secondary[2], 0.3);
+        doc.line(margin, y, margin + 60, y);
+        y += 10;
+        
+        // Recommendation card with icon
+        const statusConfig = {
+            'Good': { 
+                icon: '✓', 
+                color: colors.success, 
+                title: 'HIGHLY RECOMMENDED',
+                bgColor: [240, 255, 240]
+            },
+            'Bad': { 
+                icon: '⚠', 
+                color: colors.danger, 
+                title: 'NEEDS IMPROVEMENT',
+                bgColor: [255, 240, 240]
+            },
+            'Neutral': { 
+                icon: 'ⓘ', 
+                color: colors.warning, 
+                title: 'AVERAGE PERFORMANCE',
+                bgColor: [255, 250, 240]
+            }
+        };
+        
+        const config = statusConfig[recommendation.status] || statusConfig.Neutral;
+        
+        doc.setFillColor(config.bgColor[0], config.bgColor[1], config.bgColor[2]);
+        doc.roundedRect(margin, y, contentWidth, 50, 8, 8, "F");
+        doc.setDrawColor(config.color[0], config.color[1], config.color[2], 0.5);
+        doc.roundedRect(margin, y, contentWidth, 50, 8, 8);
+        
+        // Status icon
+        doc.setFontSize(24);
+        doc.setTextColor(config.color[0], config.color[1], config.color[2]);
+        doc.text(config.icon, margin + 15, y + 20);
+        
+        // Status text
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text(config.title, margin + 35, y + 15);
+        
+        // Recommendation message
+        doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
-        const recommendationLines = doc.splitTextToSize(recommendation.message || "No recommendation available.", contentWidth);
-        doc.text(recommendationLines, margin, y);
-        y += recommendationLines.length * 5 + 10;
+        doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+        const messageLines = doc.splitTextToSize(recommendation.message, contentWidth - 45);
+        doc.text(messageLines, margin + 35, y + 22);
         
-        // ===== KEY INSIGHTS =====
+        y += 60;
+        
+        // ===== DETAILED ANALYSIS =====
+        doc.setFontSize(14);
+        doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+        doc.setFont("helvetica", "bold");
+        doc.text("Customer Feedback Analysis", margin, y);
+        y += 8;
+        
+        doc.setDrawColor(colors.primary[0], colors.primary[1], colors.primary[2], 0.3);
+        doc.line(margin, y, margin + 100, y);
+        y += 10;
+        
         if (reviews.length > 0) {
-            doc.setFontSize(16);
+            // ===== KEY INSIGHTS =====
+            doc.setFontSize(12);
             doc.setFont("helvetica", "bold");
             doc.text("Key Customer Insights", margin, y);
-            y += 10;
+            y += 8;
             
-            doc.setDrawColor(200, 200, 200);
-            doc.line(margin, y, pageWidth - margin, y);
-            y += 10;
-            
-            // Get top positive and negative reviews
+            // Get top reviews
             const positiveReviews = reviews.filter(r => r.sentiment === 'Positive').slice(0, 2);
             const negativeReviews = reviews.filter(r => r.sentiment === 'Negative').slice(0, 2);
             
             // Positive Insights
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(46, 204, 113);
-            doc.text("Top Positive Feedback", margin, y);
-            doc.setTextColor(0, 0, 0);
-            y += 8;
+            doc.setFontSize(11);
+            doc.setTextColor(colors.success[0], colors.success[1], colors.success[2]);
+            doc.text("What Customers Love", margin, y);
+            doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+            y += 6;
             
             doc.setFont("helvetica", "normal");
-            doc.setFontSize(10);
+            doc.setFontSize(9);
             
             positiveReviews.forEach((review, index) => {
                 if (y > 250) {
@@ -1896,14 +2205,21 @@ async function generatePDFReport() {
                     y = 20;
                 }
                 
-                doc.setFillColor(240, 255, 240);
-                doc.roundedRect(margin, y, contentWidth, 25, 3, 3, "F");
-                doc.setDrawColor(46, 204, 113);
-                doc.roundedRect(margin, y, contentWidth, 25, 3, 3);
+                // Green highlight box
+                doc.setFillColor(colors.success[0], colors.success[1], colors.success[2], 0.1);
+                doc.roundedRect(margin, y, contentWidth, 25, 4, 4, "F");
+                doc.setDrawColor(colors.success[0], colors.success[1], colors.success[2], 0.3);
+                doc.roundedRect(margin, y, contentWidth, 25, 4, 4);
                 
                 const reviewText = `"${review.review}"`;
-                const reviewLines = doc.splitTextToSize(reviewText, contentWidth - 10);
-                doc.text(reviewLines, margin + 5, y + 8);
+                const reviewLines = doc.splitTextToSize(reviewText, contentWidth - 15);
+                doc.text(reviewLines, margin + 8, y + 8);
+                
+                // Rating stars
+                const stars = '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0));
+                doc.setTextColor(colors.warning[0], colors.warning[1], colors.warning[2]);
+                doc.text(stars, margin + 8, y + 20);
+                doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
                 
                 y += 30;
             });
@@ -1911,15 +2227,15 @@ async function generatePDFReport() {
             y += 5;
             
             // Negative Insights
-            doc.setFontSize(12);
+            doc.setFontSize(11);
             doc.setFont("helvetica", "bold");
-            doc.setTextColor(231, 76, 60);
-            doc.text("Key Negative Concerns", margin, y);
-            doc.setTextColor(0, 0, 0);
-            y += 8;
+            doc.setTextColor(colors.danger[0], colors.danger[1], colors.danger[2]);
+            doc.text("Areas for Improvement", margin, y);
+            doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+            y += 6;
             
             doc.setFont("helvetica", "normal");
-            doc.setFontSize(10);
+            doc.setFontSize(9);
             
             negativeReviews.forEach((review, index) => {
                 if (y > 250) {
@@ -1927,181 +2243,272 @@ async function generatePDFReport() {
                     y = 20;
                 }
                 
-                doc.setFillColor(255, 240, 240);
-                doc.roundedRect(margin, y, contentWidth, 25, 3, 3, "F");
-                doc.setDrawColor(231, 76, 60);
-                doc.roundedRect(margin, y, contentWidth, 25, 3, 3);
+                // Red highlight box
+                doc.setFillColor(colors.danger[0], colors.danger[1], colors.danger[2], 0.1);
+                doc.roundedRect(margin, y, contentWidth, 25, 4, 4, "F");
+                doc.setDrawColor(colors.danger[0], colors.danger[1], colors.danger[2], 0.3);
+                doc.roundedRect(margin, y, contentWidth, 25, 4, 4);
                 
                 const reviewText = `"${review.review}"`;
-                const reviewLines = doc.splitTextToSize(reviewText, contentWidth - 10);
-                doc.text(reviewLines, margin + 5, y + 8);
+                const reviewLines = doc.splitTextToSize(reviewText, contentWidth - 15);
+                doc.text(reviewLines, margin + 8, y + 8);
+                
+                // Rating stars
+                const stars = '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0));
+                doc.setTextColor(colors.warning[0], colors.warning[1], colors.warning[2]);
+                doc.text(stars, margin + 8, y + 20);
+                doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
                 
                 y += 30;
             });
             
             y += 10;
             
-            // ===== DETAILED REVIEWS TABLE =====
-            if (reviews.length > 0) {
-                doc.setFontSize(16);
-                doc.setFont("helvetica", "bold");
-                doc.text("Detailed Reviews Analysis", margin, y);
-                y += 10;
-                
-                doc.setDrawColor(200, 200, 200);
-                doc.line(margin, y, pageWidth - margin, y);
-                y += 10;
-                
-                // Table Header
-                doc.setFillColor(240, 240, 240);
-                doc.rect(margin, y, contentWidth, 10, "F");
-                doc.setDrawColor(200, 200, 200);
-                doc.rect(margin, y, contentWidth, 10);
-                
-                doc.setFontSize(9);
-                doc.setFont("helvetica", "bold");
-                doc.text("Review", margin + 5, y + 7);
-                doc.text("Sentiment", margin + contentWidth - 40, y + 7);
-                doc.text("Rating", margin + contentWidth - 20, y + 7);
-                
-                y += 10;
-                
-                // Table Rows (first 10 reviews)
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(8);
-                
-                reviews.slice(0, 10).forEach((review, index) => {
-                    if (y > 270) {
-                        doc.addPage();
-                        y = 20;
-                        // Draw header again on new page
-                        doc.setFillColor(240, 240, 240);
-                        doc.rect(margin, y, contentWidth, 10, "F");
-                        doc.setDrawColor(200, 200, 200);
-                        doc.rect(margin, y, contentWidth, 10);
-                        
-                        doc.setFontSize(9);
-                        doc.setFont("helvetica", "bold");
-                        doc.text("Review", margin + 5, y + 7);
-                        doc.text("Sentiment", margin + contentWidth - 40, y + 7);
-                        doc.text("Rating", margin + contentWidth - 20, y + 7);
-                        
-                        y += 10;
-                    }
+            // ===== REVIEWS SUMMARY TABLE =====
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text("Reviews Summary", margin, y);
+            y += 8;
+            
+            // Table header
+            doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2], 0.1);
+            doc.rect(margin, y, contentWidth, 10, "F");
+            doc.setDrawColor(colors.primary[0], colors.primary[1], colors.primary[2], 0.3);
+            doc.rect(margin, y, contentWidth, 10);
+            
+            doc.setFontSize(9);
+            doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+            doc.text("Review", margin + 5, y + 7);
+            doc.text("Sentiment", margin + contentWidth - 45, y + 7);
+            doc.text("Rating", margin + contentWidth - 20, y + 7);
+            
+            y += 10;
+            
+            // Table rows (first 8 reviews)
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(8);
+            
+            reviews.slice(0, 8).forEach((review, index) => {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 20;
+                    // Draw header again on new page
+                    doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2], 0.1);
+                    doc.rect(margin, y, contentWidth, 10, "F");
+                    doc.setDrawColor(colors.primary[0], colors.primary[1], colors.primary[2], 0.3);
+                    doc.rect(margin, y, contentWidth, 10);
                     
-                    // Alternate row colors
-                    if (index % 2 === 0) {
-                        doc.setFillColor(250, 250, 250);
-                        doc.rect(margin, y, contentWidth, 15, "F");
-                    }
-                    
-                    doc.setDrawColor(220, 220, 220);
-                    doc.rect(margin, y, contentWidth, 15);
-                    
-                    // Review text (truncated)
-                    const reviewText = review.review.length > 80 ? review.review.substring(0, 80) + '...' : review.review;
-                    doc.text(reviewText, margin + 5, y + 7);
-                    
-                    // Sentiment with color
-                    if (review.sentiment === 'Positive') {
-                        doc.setTextColor(46, 204, 113);
-                    } else if (review.sentiment === 'Negative') {
-                        doc.setTextColor(231, 76, 60);
-                    } else {
-                        doc.setTextColor(149, 165, 166);
-                    }
-                    doc.text(review.sentiment, margin + contentWidth - 40, y + 7);
-                    doc.setTextColor(0, 0, 0);
-                    
-                    // Rating stars
-                    const stars = '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0));
-                    doc.text(stars, margin + contentWidth - 20, y + 7);
-                    
-                    y += 15;
-                });
-                
-                // Show more indicator if there are more reviews
-                if (reviews.length > 10) {
-                    y += 5;
                     doc.setFontSize(9);
-                    doc.setTextColor(100, 100, 100);
-                    doc.text(`... and ${reviews.length - 10} more reviews`, margin, y);
-                    doc.setTextColor(0, 0, 0);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Review", margin + 5, y + 7);
+                    doc.text("Sentiment", margin + contentWidth - 45, y + 7);
+                    doc.text("Rating", margin + contentWidth - 20, y + 7);
+                    
+                    y += 10;
                 }
+                
+                // Alternate row colors
+                if (index % 2 === 0) {
+                    doc.setFillColor(colors.light[0], colors.light[1], colors.light[2]);
+                    doc.rect(margin, y, contentWidth, 12, "F");
+                }
+                
+                doc.setDrawColor(colors.gray[0], colors.gray[1], colors.gray[2], 0.2);
+                doc.rect(margin, y, contentWidth, 12);
+                
+                // Review text (truncated)
+                const reviewText = review.review.length > 70 ? 
+                    review.review.substring(0, 70) + '...' : review.review;
+                doc.text(reviewText, margin + 5, y + 8);
+                
+                // Sentiment with colored dot
+                if (review.sentiment === 'Positive') {
+                    doc.setFillColor(colors.success[0], colors.success[1], colors.success[2]);
+                    doc.circle(margin + contentWidth - 43, y + 6, 2, "F");
+                    doc.setTextColor(colors.success[0], colors.success[1], colors.success[2]);
+                } else if (review.sentiment === 'Negative') {
+                    doc.setFillColor(colors.danger[0], colors.danger[1], colors.danger[2]);
+                    doc.circle(margin + contentWidth - 43, y + 6, 2, "F");
+                    doc.setTextColor(colors.danger[0], colors.danger[1], colors.danger[2]);
+                } else {
+                    doc.setFillColor(colors.warning[0], colors.warning[1], colors.warning[2]);
+                    doc.circle(margin + contentWidth - 43, y + 6, 2, "F");
+                    doc.setTextColor(colors.warning[0], colors.warning[1], colors.warning[2]);
+                }
+                doc.text(review.sentiment, margin + contentWidth - 38, y + 8);
+                doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+                
+                // Rating stars
+                const stars = '★'.repeat(review.rating || 0) + '☆'.repeat(5 - (review.rating || 0));
+                doc.text(stars, margin + contentWidth - 20, y + 8);
+                
+                y += 12;
+            });
+            
+            // Show more indicator
+            if (reviews.length > 8) {
+                y += 5;
+                doc.setFontSize(9);
+                doc.setTextColor(colors.gray[0], colors.gray[1], colors.gray[2]);
+                doc.text(`... and ${reviews.length - 8} more reviews`, margin, y);
+                y += 8;
             }
         }
         
         // ===== ASPECT ANALYSIS =====
         if (data.drill_down_matrix && data.drill_down_matrix.length > 0) {
-            if (y > 220) {
+            if (y > 200) {
                 doc.addPage();
                 y = 20;
             }
             
-            doc.setFontSize(16);
+            doc.setFontSize(14);
             doc.setFont("helvetica", "bold");
+            doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
             doc.text("Aspect Analysis", margin, y);
-            y += 10;
+            y += 8;
             
-            doc.setDrawColor(200, 200, 200);
-            doc.line(margin, y, pageWidth - margin, y);
+            doc.setDrawColor(colors.secondary[0], colors.secondary[1], colors.secondary[2], 0.3);
+            doc.line(margin, y, margin + 60, y);
             y += 10;
             
             doc.setFontSize(10);
             doc.setFont("helvetica", "normal");
             
-            // Aspect table
-            data.drill_down_matrix.slice(0, 5).forEach((aspect, index) => {
+            // Aspect table with bars
+            data.drill_down_matrix.slice(0, 6).forEach((aspect, index) => {
                 if (y > 250) {
                     doc.addPage();
                     y = 20;
                 }
                 
+                // Aspect name
+                doc.setFont("helvetica", "bold");
                 doc.text(`${index + 1}. ${aspect.aspect}`, margin, y);
                 
+                // Total mentions
+                const totalMentions = (aspect.Positive || 0) + (aspect.Negative || 0);
+                doc.setFont("helvetica", "normal");
+                doc.setTextColor(colors.gray[0], colors.gray[1], colors.gray[2]);
+                doc.text(`(${totalMentions} mentions)`, margin + 45, y);
+                
                 // Positive bar
-                const positiveWidth = (aspect.Positive / summary.total) * 80;
+                const positivePercent = aspect.Positive / summary.total;
+                const positiveWidth = positivePercent * 80;
                 if (positiveWidth > 0) {
-                    doc.setFillColor(46, 204, 113);
-                    doc.rect(margin + 60, y - 3, positiveWidth, 5, "F");
-                    doc.setTextColor(46, 204, 113);
-                    doc.text(`${aspect.Positive}`, margin + 60 + positiveWidth + 5, y);
+                    doc.setFillColor(colors.success[0], colors.success[1], colors.success[2]);
+                    doc.roundedRect(margin + 70, y - 3, positiveWidth, 6, 3, 3, "F");
                 }
                 
                 // Negative bar
-                const negativeWidth = (aspect.Negative / summary.total) * 80;
+                const negativePercent = aspect.Negative / summary.total;
+                const negativeWidth = negativePercent * 80;
                 if (negativeWidth > 0) {
-                    doc.setFillColor(231, 76, 60);
-                    doc.rect(margin + 60, y + 2, negativeWidth, 5, "F");
-                    doc.setTextColor(231, 76, 60);
-                    doc.text(`${aspect.Negative}`, margin + 60 + negativeWidth + 5, y + 5);
+                    doc.setFillColor(colors.danger[0], colors.danger[1], colors.danger[2]);
+                    doc.roundedRect(margin + 70 + positiveWidth, y - 3, negativeWidth, 6, 3, 3, "F");
                 }
                 
-                doc.setTextColor(0, 0, 0);
-                y += 15;
+                // Values
+                doc.setFontSize(8);
+                doc.setTextColor(colors.dark[0], colors.dark[1], colors.dark[2]);
+                doc.text(`${aspect.Positive || 0}+`, margin + 70 + positiveWidth + negativeWidth + 5, y);
+                
+                y += 12;
             });
+            
+            y += 5;
+            
+            // Legend
+            doc.setFontSize(8);
+            doc.setTextColor(colors.gray[0], colors.gray[1], colors.gray[2]);
+            
+            // Positive legend
+            doc.setFillColor(colors.success[0], colors.success[1], colors.success[2]);
+            doc.rect(margin, y, 6, 6, "F");
+            doc.text("Positive mentions", margin + 10, y + 4);
+            
+            // Negative legend
+            doc.setFillColor(colors.danger[0], colors.danger[1], colors.danger[2]);
+            doc.rect(margin + 50, y, 6, 6, "F");
+            doc.text("Negative mentions", margin + 60, y + 4);
         }
         
-        // ===== FOOTER =====
+        // ===== FOOTER ON ALL PAGES =====
         const totalPages = doc.internal.getNumberOfPages();
         for (let i = 1; i <= totalPages; i++) {
             doc.setPage(i);
-            doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
+            
+            // Page number
+            doc.setFontSize(9);
+            doc.setTextColor(colors.gray[0], colors.gray[1], colors.gray[2]);
             doc.text(`Page ${i} of ${totalPages}`, pageWidth / 2, 290, { align: "center" });
-            doc.text("Generated by SentimentPro AI", pageWidth / 2, 295, { align: "center" });
+            
+            // Footer line
+            doc.setDrawColor(colors.primary[0], colors.primary[1], colors.primary[2], 0.2);
+            doc.line(margin, 285, pageWidth - margin, 285);
+            
+            // Copyright
+            doc.setFontSize(8);
+            doc.text("Generated by Sentinel AI • Sentiment Analytics Platform", pageWidth / 2, 295, { align: "center" });
+            
+            // Confidential notice on non-cover pages
+            if (i > 1) {
+                doc.setTextColor(colors.gray[0], colors.gray[1], colors.gray[2], 0.5);
+                doc.text("CONFIDENTIAL", margin, 295);
+                doc.text(new Date().toLocaleDateString(), pageWidth - margin, 295, { align: "right" });
+            }
         }
         
         // ===== SAVE PDF =====
-        const fileName = productName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30) + '_Analysis.pdf';
+        const fileName = `SentinelAI_${productName.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 25)}_${new Date().getTime()}.pdf`;
         doc.save(fileName);
         
-        alert("PDF report generated successfully! Check your downloads.");
+        showNotification('PDF report generated successfully!', 'success');
         
     } catch (error) {
         console.error("Error generating PDF:", error);
-        alert("Error generating PDF report. Please try again.");
+        showNotification('Error generating PDF report. Please try again.', 'error');
     }
+}
+
+// Helper function to get base64 image (this should be defined elsewhere)
+async function getBase64Image(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = this.naturalWidth;
+            canvas.height = this.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(this, 0, 0);
+            const dataURL = canvas.toDataURL('image/jpeg');
+            resolve(dataURL);
+        };
+        img.onerror = reject;
+        img.src = url;
+    });
+}
+
+function getBase64Image(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = this.naturalWidth;
+            canvas.height = this.naturalHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(this, 0, 0);
+            const dataURL = canvas.toDataURL('image/jpeg');
+            resolve(dataURL);
+        };
+        img.onerror = () => {
+            console.log("Could not load image for PDF");
+            resolve(null);
+        };
+        img.src = url;
+    });
 }
 
 
