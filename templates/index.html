@@ -11,6 +11,48 @@
 
 <style>
 
+/* Chart containers ko fix karo */
+.chart-container {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    border: 1px solid var(--gray-200);
+    height: 350px !important; /* Fixed height set karo */
+    min-height: 350px;
+    overflow: hidden;
+    position: relative;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 250px;
+}
+
+/* Analytics dashboard section ko fix karo */
+#analytics-dashboard-section {
+    padding-bottom: 30px;
+}
+
+/* Row spacing fix karo */
+#analytics-dashboard-section .row {
+    margin-bottom: 24px;
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+    .chart-container {
+        height: 300px !important;
+        min-height: 300px;
+        margin-bottom: 20px;
+    }
+    
+    #analytics-dashboard-section .row > div {
+        margin-bottom: 20px;
+    }
+}
+
+
 /* Recommendation Card */
 .recommendation-card {
     /* ... existing styles ... */
@@ -657,13 +699,7 @@
     }
 
     /* Charts */
-    .chart-container {
-        background: white;
-        border-radius: var(--radius-lg);
-        padding: 24px;
-        border: 1px solid var(--gray-200);
-        height: 100%;
-    }
+   
 
     .chart-header {
         display: flex;
@@ -1147,39 +1183,47 @@
         </div>
 
         <!-- Analytics Dashboard -->
-        <div id="analytics-dashboard-section" style="display: none;" class="fade-in">
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <h4>Sentiment Distribution</h4>
-                            <div class="badge-elegant badge-info">Live</div>
-                        </div>
-                        <canvas id="dashSentimentChart" height="250"></canvas>
-                    </div>
+         <!-- Analytics Dashboard -->
+<div id="analytics-dashboard-section" style="display: none;" class="fade-in">
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div class="chart-header d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">Sentiment Distribution</h4>
+                    <div class="badge-elegant badge-info">Live</div>
                 </div>
-
-                <div class="col-md-6">
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <h4>Customer Emotions</h4>
-                            <div class="badge-elegant badge-info">Live</div>
-                        </div>
-                        <canvas id="dashEmotionChart" height="250"></canvas>
-                    </div>
-                </div>
-
-                <div class="col-12">
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <h4>Aspect Analysis</h4>
-                            <div class="badge-elegant badge-info">Top 5 Aspects</div>
-                        </div>
-                        <canvas id="dashAspectChart" height="150"></canvas>
-                    </div>
+                <div style="height: 250px; width: 100%; position: relative;">
+                    <canvas id="dashSentimentChart"></canvas>
                 </div>
             </div>
         </div>
+
+        <div class="col-md-6">
+            <div class="chart-container">
+                <div class="chart-header d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">Customer Emotions</h4>
+                    <div class="badge-elegant badge-info">Live</div>
+                </div>
+                <div style="height: 250px; width: 100%; position: relative;">
+                    <canvas id="dashEmotionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="chart-container">
+                <div class="chart-header d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">Top Aspects Mentioned</h4>
+                    <div class="badge-elegant badge-info">Top 5</div>
+                </div>
+                <div style="height: 200px; width: 100%; position: relative;">
+                    <canvas id="dashAspectChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        
     </div>
 </div>
 
@@ -1348,6 +1392,7 @@ function generateMockData(csvData) {
 }
 
 // --- Main Data Processing ---
+// --- Main Data Processing ---
 function processBulkData(data) {
     currentAnalysisData = data;
     allReviewData = data.detailed_results || [];
@@ -1367,6 +1412,9 @@ function processBulkData(data) {
     if (data.product_image_url) {
         imageDisplay.src = data.product_image_url;
         imageDisplay.style.display = 'block';
+        
+        // Image size increase
+        imageDisplay.classList.add('product-image-large');
     } else {
         imageDisplay.style.display = 'none';
     }
@@ -1399,6 +1447,24 @@ function processBulkData(data) {
     
     // Show results
     showSection('bulk-analysis-output', document.querySelector(".nav-item:nth-child(2) .nav-link"));
+    
+    // Pre-render charts for analytics section
+    setTimeout(() => {
+        if (dashboardCharts.sentiment) {
+            dashboardCharts.sentiment.destroy();
+        }
+        if (dashboardCharts.emotion) {
+            dashboardCharts.emotion.destroy();
+        }
+        if (dashboardCharts.aspect) {
+            dashboardCharts.aspect.destroy();
+        }
+        dashboardCharts = {};
+        
+        // Force re-render on next analytics click
+        const analyticsLink = document.querySelector('.nav-link[onclick*="analytics-dashboard-section"]');
+        analyticsLink.setAttribute('onclick', `showSection('analytics-dashboard-section', this); setTimeout(() => { renderDashboardCharts(); }, 100);`);
+    }, 500);
 }
 
 // --- Session Loading ---
@@ -1641,11 +1707,17 @@ function startComparison() {
 
 // --- Dashboard Charts ---
 // --- Dashboard Charts ---
+// --- Dashboard Charts ---
 function renderDashboardCharts() {
-    // Check if analytics section is visible
+    // First, show the analytics section if it's hidden
     const analyticsSection = document.getElementById('analytics-dashboard-section');
-    if (!analyticsSection || analyticsSection.style.display === 'none') {
-        return; // Don't render if section is not visible
+    
+    // Make sure the section is visible
+    if (analyticsSection.style.display === 'none') {
+        analyticsSection.style.display = 'block';
+        setTimeout(() => {
+            analyticsSection.classList.add('fade-in');
+        }, 10);
     }
     
     // Check if all canvas elements exist
@@ -1653,17 +1725,18 @@ function renderDashboardCharts() {
     const missingCanvases = requiredCanvases.filter(id => !document.getElementById(id));
     
     if (missingCanvases.length > 0) {
-        console.log("Charts not ready: missing canvas elements");
+        console.log("Waiting for canvas elements...");
+        // Try again after a short delay
+        setTimeout(renderDashboardCharts, 100);
         return;
     }
     
     if (!currentAnalysisData.summary) {
-        // Show empty state or default charts
         renderEmptyCharts();
         return;
     }
     
-    // Clear existing charts
+    // Clear existing charts safely
     Object.keys(dashboardCharts).forEach(chartId => {
         try {
             if (dashboardCharts[chartId] && typeof dashboardCharts[chartId].destroy === 'function') {
@@ -1675,145 +1748,154 @@ function renderDashboardCharts() {
     });
     dashboardCharts = {};
     
-    // Render Sentiment Chart
+    // Render charts with a small delay to ensure DOM is ready
+    setTimeout(() => {
+        renderAllCharts();
+    }, 50);
+}
+
+function renderAllCharts() {
     try {
-        const sentimentCtx = document.getElementById('dashSentimentChart').getContext('2d');
-        const sentimentData = [
-            currentAnalysisData.summary.Positive || 0,
-            currentAnalysisData.summary.Negative || 0,
-            currentAnalysisData.summary.Neutral || 0
-        ];
-        
-        dashboardCharts.sentiment = new Chart(sentimentCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Positive', 'Negative', 'Neutral'],
-                datasets: [{
-                    data: sentimentData,
-                    backgroundColor: ['#06d6a0', '#ef476f', '#ffd166'],
-                    borderWidth: 2,
-                    borderColor: '#ffffff'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            usePointStyle: true,
-                            font: { size: 12 }
-                        }
-                    }
+        // 1. Sentiment Chart
+        const sentimentCtx = document.getElementById('dashSentimentChart');
+        if (sentimentCtx) {
+            const sentimentChart = new Chart(sentimentCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive', 'Negative', 'Neutral'],
+                    datasets: [{
+                        data: [
+                            currentAnalysisData.summary.Positive || 0,
+                            currentAnalysisData.summary.Negative || 0,
+                            currentAnalysisData.summary.Neutral || 0
+                        ],
+                        backgroundColor: ['#06d6a0', '#ef476f', '#ffd166'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
                 },
-                cutout: '60%'
-            }
-        });
-    } catch (error) {
-        console.error("Error creating sentiment chart:", error);
-    }
-    
-    // Render Emotion Chart
-    try {
-        const emotions = {};
-        if (allReviewData && allReviewData.length > 0) {
-            allReviewData.forEach(item => {
-                const emotion = item.emotion || 'Unknown';
-                emotions[emotion] = (emotions[emotion] || 0) + 1;
-            });
-        }
-        
-        const emotionLabels = Object.keys(emotions).length > 0 ? 
-            Object.keys(emotions) : ['No Data'];
-        const emotionData = Object.values(emotions).length > 0 ? 
-            Object.values(emotions) : [1];
-        
-        const emotionCtx = document.getElementById('dashEmotionChart').getContext('2d');
-        dashboardCharts.emotion = new Chart(emotionCtx, {
-            type: 'pie',
-            data: {
-                labels: emotionLabels,
-                datasets: [{
-                    data: emotionData,
-                    backgroundColor: ['#4361ee', '#7209b7', '#06d6a0', '#ffd166', '#ef476f', '#3a56d4']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            usePointStyle: true
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                font: { size: 12 }
+                            }
                         }
-                    }
-                }
-            }
-        });
-    } catch (error) {
-        console.error("Error creating emotion chart:", error);
-    }
-    
-    // Render Aspect Chart
-    try {
-        const aspects = {};
-        if (allReviewData && allReviewData.length > 0) {
-            allReviewData.forEach(item => {
-                if (item.aspects && typeof item.aspects === 'object') {
-                    Object.keys(item.aspects).forEach(aspect => {
-                        aspects[aspect] = (aspects[aspect] || 0) + 1;
-                    });
-                }
-            });
-        }
-        
-        const sortedAspects = Object.entries(aspects)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 5);
-        
-        const aspectLabels = sortedAspects.length > 0 ? 
-            sortedAspects.map(([aspect]) => aspect) : ['No Aspects'];
-        const aspectData = sortedAspects.length > 0 ? 
-            sortedAspects.map(([, count]) => count) : [0];
-        
-        const aspectCtx = document.getElementById('dashAspectChart').getContext('2d');
-        dashboardCharts.aspect = new Chart(aspectCtx, {
-            type: 'bar',
-            data: {
-                labels: aspectLabels,
-                datasets: [{
-                    label: 'Mentions',
-                    data: aspectData,
-                    backgroundColor: '#4361ee',
-                    borderRadius: 6,
-                    borderWidth: 1,
-                    borderColor: '#3a56d4'
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    x: {
-                        beginAtZero: true,
-                        grid: { display: false }
                     },
-                    y: {
-                        grid: { display: false }
-                    }
-                },
-                plugins: {
-                    legend: { display: false }
+                    cutout: '60%'
                 }
+            });
+            dashboardCharts.sentiment = sentimentChart;
+        }
+        
+        // 2. Emotion Chart
+        const emotionCtx = document.getElementById('dashEmotionChart');
+        if (emotionCtx) {
+            const emotions = {};
+            if (allReviewData && allReviewData.length > 0) {
+                allReviewData.forEach(item => {
+                    const emotion = item.emotion || 'Unknown';
+                    emotions[emotion] = (emotions[emotion] || 0) + 1;
+                });
             }
-        });
+            
+            const emotionChart = new Chart(emotionCtx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(emotions).length > 0 ? 
+                        Object.keys(emotions) : ['No Data'],
+                    datasets: [{
+                        data: Object.values(emotions).length > 0 ? 
+                            Object.values(emotions) : [1],
+                        backgroundColor: ['#4361ee', '#7209b7', '#06d6a0', '#ffd166', '#ef476f', '#3a56d4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                usePointStyle: true
+                            }
+                        }
+                    }
+                }
+            });
+            dashboardCharts.emotion = emotionChart;
+        }
+        
+        // 3. Aspect Chart
+        const aspectCtx = document.getElementById('dashAspectChart');
+        if (aspectCtx) {
+            const aspects = {};
+            if (allReviewData && allReviewData.length > 0) {
+                allReviewData.forEach(item => {
+                    if (item.aspects && typeof item.aspects === 'object') {
+                        Object.keys(item.aspects).forEach(aspect => {
+                            aspects[aspect] = (aspects[aspect] || 0) + 1;
+                        });
+                    }
+                });
+            }
+            
+            const sortedAspects = Object.entries(aspects)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+            
+            const aspectChart = new Chart(aspectCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: sortedAspects.length > 0 ? 
+                        sortedAspects.map(([aspect]) => aspect) : ['No Aspects'],
+                    datasets: [{
+                        label: 'Mentions',
+                        data: sortedAspects.length > 0 ? 
+                            sortedAspects.map(([, count]) => count) : [0],
+                        backgroundColor: '#4361ee',
+                        borderRadius: 6,
+                        borderWidth: 1,
+                        borderColor: '#3a56d4'
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { display: false },
+                            ticks: {
+                                font: { size: 10 }
+                            }
+                        },
+                        y: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { size: 11 }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+            dashboardCharts.aspect = aspectChart;
+        }
+        
+        console.log("All charts rendered successfully!");
+        
     } catch (error) {
-        console.error("Error creating aspect chart:", error);
+        console.error("Error rendering charts:", error);
     }
 }
 
@@ -1844,6 +1926,7 @@ function renderEmptyCharts() {
     });
 }
 
+// Also update the showSection function to prevent issues
 
 
 // --- PDF Generation ---
